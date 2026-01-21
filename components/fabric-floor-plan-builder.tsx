@@ -17,7 +17,8 @@ import {
     Grid3X3,
     Loader2,
     Save,
-    FolderOpen
+    FolderOpen,
+    AppWindow
 } from "lucide-react"
 import * as fabric from "fabric"
 
@@ -29,11 +30,11 @@ interface SavedFloorPlan {
 }
 
 interface FabricFloorPlanBuilderProps {
-    onExport: (pngBlob: Blob) => void
+    onExport: (pngBlob: Blob, grid?: number[][]) => void
     processing?: boolean
 }
 
-type Tool = "select" | "wall" | "door"
+type Tool = "select" | "wall" | "door" | "window"
 
 export function FabricFloorPlanBuilder({ onExport, processing = false }: FabricFloorPlanBuilderProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -43,7 +44,7 @@ export function FabricFloorPlanBuilder({ onExport, processing = false }: FabricF
     const [activeTool, setActiveTool] = useState<Tool>("wall")
     const [showGrid, setShowGrid] = useState(true)
     const [wallThickness, setWallThickness] = useState(8)
-    const [objectCount, setObjectCount] = useState({ walls: 0, doors: 0 })
+    const [objectCount, setObjectCount] = useState({ walls: 0, doors: 0, windows: 0 })
 
     // Save/Load state
     const [savedPlans, setSavedPlans] = useState<SavedFloorPlan[]>([])
@@ -58,6 +59,7 @@ export function FabricFloorPlanBuilder({ onExport, processing = false }: FabricF
     // Colors
     const WALL_COLOR = "#1a1a1a"
     const DOOR_COLOR = "#8B4513"
+    const WINDOW_COLOR = "#3b82f6"
     const GRID_COLOR = "#e0e0e0"
     const BACKGROUND_COLOR = "#ffffff"
 
@@ -188,15 +190,17 @@ export function FabricFloorPlanBuilder({ onExport, processing = false }: FabricF
 
         let walls = 0
         let doors = 0
+        let windows = 0
 
         canvas.getObjects().forEach(obj => {
             if (obj instanceof fabric.Rect) {
                 if ((obj as any).objectType === "wall") walls++
                 if ((obj as any).objectType === "door") doors++
+                if ((obj as any).objectType === "window") windows++
             }
         })
 
-        setObjectCount({ walls, doors })
+        setObjectCount({ walls, doors, windows })
     }, [])
 
     // Handle mouse down for adding objects
@@ -269,6 +273,28 @@ export function FabricFloorPlanBuilder({ onExport, processing = false }: FabricF
                 ; (door as any).objectType = "door"
             canvas.add(door)
             canvas.setActiveObject(door)
+        } else if (activeTool === "window") {
+            const window = new fabric.Rect({
+                left: x,
+                top: y,
+                width: CELL_SIZE * 2,
+                height: 6, // Thinner than door/wall? Or usually within wall. Let's make it distinct.
+                fill: WINDOW_COLOR,
+                stroke: "#1e3a8a",
+                strokeWidth: 1,
+                originX: "left",
+                originY: "top",
+                rx: 0,
+                ry: 0,
+            })
+            // Disable corner controls
+            window.setControlsVisibility({
+                tl: false, tr: false, bl: false, br: false, mtr: true, // Allow rotation for windows!
+                mt: true, mb: true, ml: true, mr: true,
+            })
+                ; (window as any).objectType = "window"
+            canvas.add(window)
+            canvas.setActiveObject(window)
         }
 
         canvas.renderAll()
@@ -414,13 +440,66 @@ export function FabricFloorPlanBuilder({ onExport, processing = false }: FabricF
         const response = await fetch(dataUrl)
         const blob = await response.blob()
 
-        onExport(blob)
+        // Generate Direct Grid for Simulation (Bypass U-Net)
+        const grid = generateGrid()
+        onExport(blob, grid)
+    }
+
+    // Generate 256x256 grid from canvas objects
+    const generateGrid = (): number[][] => {
+        const size = 256
+        const grid = Array(size).fill(0).map(() => Array(size).fill(0))
+        const scale = size / CANVAS_SIZE // 0.5
+
+        const objects = fabricRef.current?.getObjects() || []
+
+        // Helper to fill rect in grid
+        const fillObject = (obj: any, val: number) => {
+            if (!(obj instanceof fabric.Rect)) return
+
+            // Get coords and dimensions considering rotation would be hard, 
+            // but for now simplistic bounding box mapping or specialized logic
+            // Since we allow rotation for windows, getting exact cells is complex without rasterizer.
+            // Simplified: Use center point and width/height? 
+            // Better: Iterate grid cells and check `obj.containsPoint()`.
+
+            // Optimization: Only check cells within bounding box
+            const br = obj.getBoundingRect()
+            const startX = Math.max(0, Math.floor(br.left * scale))
+            const startY = Math.max(0, Math.floor(br.top * scale))
+            const endX = Math.min(size, Math.ceil((br.left + br.width) * scale))
+            const endY = Math.min(size, Math.ceil((br.top + br.height) * scale))
+
+            for (let y = startY; y < endY; y++) {
+                for (let x = startX; x < endX; x++) {
+                    // Check center of the cell
+                    // Canvas coord = (x / scale) + (0.5 / scale) ?
+                    // Just check (x / scale, y / scale)
+                    const point = new fabric.Point(x / scale + 1, y / scale + 1) // +1 for slight offset inside
+                    if (obj.containsPoint(point)) {
+                        grid[y][x] = val
+                    }
+                }
+            }
+        }
+
+        // Layer 1: Walls (1)
+        objects.filter(o => (o as any).objectType === "wall").forEach(o => fillObject(o, 1))
+
+        // Layer 2: Doors (2) - overwrite walls
+        objects.filter(o => (o as any).objectType === "door").forEach(o => fillObject(o, 2))
+
+        // Layer 3: Windows (3) - overwrite walls
+        objects.filter(o => (o as any).objectType === "window").forEach(o => fillObject(o, 3))
+
+        return grid
     }
 
     const tools = [
         { id: "select" as Tool, icon: MousePointer2, label: "Select" },
         { id: "wall" as Tool, icon: Square, label: "Wall" },
         { id: "door" as Tool, icon: DoorOpen, label: "Door" },
+        { id: "window" as Tool, icon: AppWindow, label: "Window" },
     ]
 
     return (
@@ -439,6 +518,7 @@ export function FabricFloorPlanBuilder({ onExport, processing = false }: FabricF
                     <div className="flex items-center gap-2">
                         <Badge variant="secondary">{objectCount.walls} Walls</Badge>
                         <Badge variant="secondary">{objectCount.doors} Doors</Badge>
+                        <Badge variant="secondary">{objectCount.windows} Windows</Badge>
                     </div>
                 </div>
             </CardHeader>

@@ -23,6 +23,7 @@ interface SimulationSetupProps {
     firePosition: [number, number] | null
     agentPositions: [number, number][]
     exits: [number, number][]
+    materialType: "concrete" | "wood"
   }
   onConfigUpdate: (config: Partial<SimulationSetupProps["config"]>) => void
   onRunSimulation: () => void
@@ -165,7 +166,32 @@ export function SimulationSetup({
           </AlertDescription>
         </Alert>
 
+        {/* Material Selection */}
+        <div className="space-y-3 p-4 border rounded-lg bg-secondary/10">
+          <Label className="text-base font-semibold">Building Material</Label>
+          <p className="text-sm text-muted-foreground mb-2">
+            Select the primary material of the building structure. This affects how fast the fire spreads.
+          </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div
+              className={`cursor-pointer border rounded-lg p-4 flex flex-col items-center gap-2 transition-all ${config.materialType === 'concrete' ? 'bg-primary/10 border-primary ring-2 ring-primary/20' : 'hover:bg-secondary/50 border-input'}`}
+              onClick={() => onConfigUpdate({ materialType: 'concrete' })}
+            >
+              <div className="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center text-xl">🏢</div>
+              <div className="font-semibold">Concrete / Stone</div>
+              <div className="text-xs text-center text-muted-foreground">Standard fire spread. Fire spreads normally through openings.</div>
+            </div>
 
+            <div
+              className={`cursor-pointer border rounded-lg p-4 flex flex-col items-center gap-2 transition-all ${config.materialType === 'wood' ? 'bg-orange-500/10 border-orange-500 ring-2 ring-orange-500/20' : 'hover:bg-secondary/50 border-input'}`}
+              onClick={() => onConfigUpdate({ materialType: 'wood' })}
+            >
+              <div className="h-10 w-10 rounded-full bg-amber-200 flex items-center justify-center text-xl">🪵</div>
+              <div className="font-semibold text-orange-700 dark:text-orange-400">Wood / Light</div>
+              <div className="text-xs text-center text-muted-foreground">Faster fire spread! Structure burns more easily.</div>
+            </div>
+          </div>
+        </div>
 
         <Tabs defaultValue={autoMode ? "auto" : "manual"} onValueChange={(v) => setAutoMode(v === "auto")}>
           <TabsList className="grid w-full grid-cols-2">

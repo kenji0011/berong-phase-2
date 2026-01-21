@@ -57,6 +57,49 @@ function determineRedirectPath(user: User | null): string {
   return '/'
 }
 
+// Helper function to determine permissions
+function determinePermissions(role: UserRole) {
+  if (role === 'admin') {
+    return {
+      accessKids: true,
+      accessAdult: true,
+      accessProfessional: true,
+      isAdmin: true,
+    }
+  }
+
+  switch (role) {
+    case "professional":
+      return {
+        accessKids: true,
+        accessAdult: true,
+        accessProfessional: true,
+        isAdmin: false,
+      }
+    case "adult":
+      return {
+        accessKids: false,
+        accessAdult: true,
+        accessProfessional: false,
+        isAdmin: false,
+      }
+    case "kid":
+      return {
+        accessKids: true,
+        accessAdult: false,
+        accessProfessional: false,
+        isAdmin: false,
+      }
+    default:
+      return {
+        accessKids: false,
+        accessAdult: false,
+        accessProfessional: false,
+        isAdmin: false,
+      }
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -71,7 +114,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const storedUser = localStorage.getItem('user')
       if (storedUser) {
         try {
-          setUser(JSON.parse(storedUser))
+          const parsedUser = JSON.parse(storedUser)
+          // Ensure permissions exist
+          if (!parsedUser.permissions) {
+            parsedUser.permissions = determinePermissions(parsedUser.role)
+          }
+          setUser(parsedUser)
           setIsLoading(false)
           return
         } catch (error) {
@@ -90,8 +138,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (response.ok) {
           const data = await response.json()
           if (data.user) {
-            setUser(data.user)
-            localStorage.setItem('user', JSON.stringify(data.user))
+            const userWithPermissions = {
+              ...data.user,
+              permissions: determinePermissions(data.user.role)
+            }
+            setUser(userWithPermissions)
+            localStorage.setItem('user', JSON.stringify(userWithPermissions))
           }
         }
       } catch (error) {
@@ -103,48 +155,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     checkAuth()
   }, [])
-
-  const determinePermissions = (role: UserRole, isAdmin = false) => {
-    if (isAdmin) {
-      return {
-        accessKids: true,
-        accessAdult: true,
-        accessProfessional: true,
-        isAdmin: true,
-      }
-    }
-
-    switch (role) {
-      case "professional":
-        return {
-          accessKids: true,
-          accessAdult: true,
-          accessProfessional: true,
-          isAdmin: false,
-        }
-      case "adult":
-        return {
-          accessKids: false,
-          accessAdult: true,
-          accessProfessional: false,
-          isAdmin: false,
-        }
-      case "kid":
-        return {
-          accessKids: true,
-          accessAdult: false,
-          accessProfessional: false,
-          isAdmin: false,
-        }
-      default:
-        return {
-          accessKids: false,
-          accessAdult: false,
-          accessProfessional: false,
-          isAdmin: false,
-        }
-    }
-  }
 
   const register = async (username: string, password: string, name: string, age: number): Promise<{ success: boolean; error?: string }> => {
     setIsAuthenticating(true)
@@ -163,11 +173,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: false, error: data.error || 'Registration failed' }
       }
 
-      setUser(data.user)
-      localStorage.setItem('user', JSON.stringify(data.user))
+      const userWithPermissions = {
+        ...data.user,
+        permissions: determinePermissions(data.user.role)
+      }
+
+      setUser(userWithPermissions)
+      localStorage.setItem('user', JSON.stringify(userWithPermissions))
 
       // Set cookie for middleware
-      document.cookie = `bfp_user=${encodeURIComponent(JSON.stringify(data.user))}; path=/; max-age=${60 * 60 * 24 * 7}` // 7 days
+      document.cookie = `bfp_user=${encodeURIComponent(JSON.stringify(userWithPermissions))}; path=/; max-age=${60 * 60 * 24 * 7}` // 7 days
 
       return { success: true }
     } catch (error: any) {
@@ -195,11 +210,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: false, error: data.error || 'Login failed' }
       }
 
-      setUser(data.user)
-      localStorage.setItem('user', JSON.stringify(data.user))
+      const userWithPermissions = {
+        ...data.user,
+        permissions: determinePermissions(data.user.role)
+      }
+
+      setUser(userWithPermissions)
+      localStorage.setItem('user', JSON.stringify(userWithPermissions))
 
       // Set cookie for middleware
-      document.cookie = `bfp_user=${encodeURIComponent(JSON.stringify(data.user))}; path=/; max-age=${60 * 60 * 24 * 7}` // 7 days
+      document.cookie = `bfp_user=${encodeURIComponent(JSON.stringify(userWithPermissions))}; path=/; max-age=${60 * 60 * 24 * 7}` // 7 days
 
       return { success: true }
     } catch (error: any) {

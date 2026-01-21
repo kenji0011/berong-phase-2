@@ -40,6 +40,7 @@ interface SimulationData {
     firePosition: [number, number] | null
     agentPositions: [number, number][]
     burnUntilComplete: boolean // Continue fire until entire space is burned
+    materialType: "concrete" | "wood"
   }
   jobId: string | null
   results: any | null
@@ -60,7 +61,8 @@ export function SimulationWizard() {
       numAgents: 5,
       firePosition: null,
       agentPositions: [],
-      burnUntilComplete: true // Default to true for extended fire demo
+      burnUntilComplete: true, // Default to true for extended fire demo
+      materialType: "concrete"
     },
     jobId: null,
     results: null
@@ -93,7 +95,11 @@ export function SimulationWizard() {
             setData(prev => ({
               ...prev,
               ...parsed.data,
-              imageFile: null
+              imageFile: null,
+              config: {
+                ...parsed.data.config,
+                materialType: parsed.data.config.materialType || "concrete"
+              }
             }))
             // Don't auto-restore stage to prevent confusion
           }
@@ -116,10 +122,48 @@ export function SimulationWizard() {
   const currentStageIndex = stages.findIndex(s => s.id === stage || (stage === "running" && s.id === "results"))
   const progress = ((currentStageIndex + 1) / stages.length) * 100
 
-  const handleImageUpload = async (file: File) => {
+  const handleImageUpload = async (file: File, directGrid?: number[][]) => {
     setProcessing(true)
     setError(null)
 
+    // Manual Drawing Mode Bypass (Skip Backend U-Net)
+    if (directGrid) {
+      try {
+        console.log("[SimulationWizard] Using direct grid from builder")
+
+        // Convert blob/file to base64 for display
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          const base64data = reader.result as string
+
+          // Add Padding locally (mimic inference.py)
+          const PADDING = 20
+          const paddedGrid = addPadding(directGrid, PADDING)
+
+          console.log(`[SimulationWizard] Added local padding: ${directGrid.length} -> ${paddedGrid.length}`)
+
+          setData(prev => ({
+            ...prev,
+            imageFile: file,
+            grid: paddedGrid,
+            originalImage: base64data,
+            gridSize: { width: paddedGrid.length, height: paddedGrid.length }
+          }))
+          setStage("exits")
+          setExitMode('add-exit')
+          setProcessing(false)
+        }
+        reader.readAsDataURL(file)
+        return
+      } catch (err) {
+        console.error("Direct grid error:", err)
+        setError("Failed to process drawn floor plan")
+        setProcessing(false)
+        return
+      }
+    }
+
+    // Standard Upload Mode (Backend U-Net)
     try {
       const formData = new FormData()
       formData.append("file", file)
@@ -196,7 +240,8 @@ export function SimulationWizard() {
 
       console.log('Starting simulation with:', {
         userExits: exitsForBackend.length,
-        agents: data.config.agentPositions.length
+        agents: data.config.agentPositions.length,
+        material: data.config.materialType
       })
 
       // Convert assembly point to [row, col] format
@@ -214,7 +259,8 @@ export function SimulationWizard() {
           fire_position: data.config.firePosition,
           agent_positions: data.config.agentPositions,
           assembly_point: assemblyForBackend,
-          extended_fire_steps: data.config.burnUntilComplete ? -1 : 0 // -1 = burn until complete
+          extended_fire_steps: data.config.burnUntilComplete ? -1 : 0, // -1 = burn until complete
+          material_type: data.config.materialType || "concrete"
         })
       })
 
@@ -305,7 +351,8 @@ export function SimulationWizard() {
         numAgents: 5,
         firePosition: null,
         agentPositions: [],
-        burnUntilComplete: true
+        burnUntilComplete: true,
+        materialType: "concrete"
       },
       jobId: null,
       results: null
@@ -371,9 +418,9 @@ export function SimulationWizard() {
               </TabsContent>
               <TabsContent value="draw" className="mt-0">
                 <FabricFloorPlanBuilder
-                  onExport={(blob) => {
+                  onExport={(blob, grid) => {
                     const file = new File([blob], 'drawn-floorplan.png', { type: 'image/png' })
-                    handleImageUpload(file)
+                    handleImageUpload(file, grid)
                   }}
                   processing={processing}
                 />
@@ -472,4 +519,24 @@ export function SimulationWizard() {
       )}
     </div>
   )
+}
+
+// Helper: Add exterior padding (Zone 4) around grid
+function addPadding(grid: number[][], paddingSize = 20): number[][] {
+  const originalSize = grid.length
+  const newSize = originalSize + (paddingSize * 2)
+
+  // Create expanded grid filled with 4 (Exterior)
+  // Use map to create distinct arrays for rows
+  const expanded = Array(newSize).fill(0).map(() => Array(newSize).fill(4))
+
+  // Copy original grid into center
+  for (let i = 0; i < originalSize; i++) {
+    for (let j = 0; j < originalSize; j++) {
+      // Offset by paddingSize
+      expanded[i + paddingSize][j + paddingSize] = grid[i][j]
+    }
+  }
+
+  return expanded
 }

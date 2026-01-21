@@ -221,10 +221,22 @@ def a_star_exterior_only(grid, start, goal):
 
 # Fire Simulator Class with Material-Aware Spread
 class FireSimulator:
-    def __init__(self, grid, spread_probability=0.25, firewall_spread_factor=0.1):
+    def __init__(self, grid, spread_probability=0.25, firewall_spread_factor=0.1, material_type="concrete"):
         self.base_grid = grid
         self.spread_probability = spread_probability
         self.firewall_spread_factor = firewall_spread_factor
+        self.material_type = material_type
+        
+        # Adjust probabilities based on material type
+        self.current_spread_probs = FIRE_SPREAD_PROBS.copy()
+        if self.material_type == "wood":
+            print("[FIRE SIM] Using WOOD material settings (Faster Spread)", flush=True)
+            self.current_spread_probs[CELL_FREE] = 0.50  # Much faster spread in free space (was 0.25)
+            self.current_spread_probs[CELL_DOOR] = 0.85  # Doors burn faster (was 0.6)
+            self.current_spread_probs[CELL_WINDOW] = 0.95 # Windows almost immediate (was 0.8)
+        else:
+            print("[FIRE SIM] Using CONCRETE material settings (Standard Spread)", flush=True)
+
         self.fire_map = np.zeros_like(self.base_grid, dtype=float)
         self.directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
 
@@ -246,11 +258,9 @@ class FireSimulator:
 
                 if 0 <= nr < rows and 0 <= nc < cols:
                     if self.fire_map[nr, nc] == 0:
-                        # Get cell type for material-aware spread
-                        cell_type = int(self.base_grid[nr, nc])
-                        
                         # Use material-specific spread probability
-                        current_spread_prob = FIRE_SPREAD_PROBS.get(cell_type, self.spread_probability)
+                        cell_type = int(self.base_grid[nr, nc])
+                        current_spread_prob = self.current_spread_probs.get(cell_type, self.spread_probability)
                         
                         if np.random.rand() < current_spread_prob:
                             new_fire_map[nr, nc] = 1
@@ -602,7 +612,7 @@ class EvacuationEnv(gym.Env):
 
 # Heuristic (Non-RL) Simulation Function
 def run_heuristic_simulation(grid, agent_positions, fire_position, exits=None, 
-                              max_steps=500, extended_fire_steps=0, assembly_point=None):
+                              max_steps=500, extended_fire_steps=0, assembly_point=None, material_type="concrete"):
     """
     Run a heuristic-based simulation without PPO model.
     Supports unlimited agents and provides the same output format as RL simulation.
@@ -614,7 +624,9 @@ def run_heuristic_simulation(grid, agent_positions, fire_position, exits=None,
         exits: List of (x, y) exit positions
         max_steps: Maximum simulation steps
         extended_fire_steps: Continue fire spread after agents done
+        extended_fire_steps: Continue fire spread after agents done
         assembly_point: (x, y) for post-escape gathering (optional)
+        material_type: "wood" or "concrete" (default "concrete")
     
     Returns:
         Result dict compatible with frontend
@@ -647,7 +659,7 @@ def run_heuristic_simulation(grid, agent_positions, fire_position, exits=None,
                 print(f"[HEURISTIC] ERROR: Could not find free cell near fire position", flush=True)
     
     # Initialize fire simulator
-    fire_sim = FireSimulator(grid)
+    fire_sim = FireSimulator(grid, material_type=material_type)
     # Fire position needs to be (y, x) for fire_sim - input is (x, y)
     fire_start_yx = (fire_position[1], fire_position[0])
     
@@ -740,22 +752,22 @@ def run_heuristic_simulation(grid, agent_positions, fire_position, exits=None,
         step_count += 1
         fire_sim.step()
         
-        active_agents = [a for a in agents if a.status == 'evacuating']
-        escaped_agents = [a for a in agents if a.status == 'escaped']
         
-        for agent in active_agents:
-            agent.update_state(fire_sim.fire_map)
+        # Unified agent processing loop
+        for agent in agents:
+            # Phase 1: Evacuation logic
+            if agent.status == 'evacuating':
+                agent.update_state(fire_sim.fire_map)
+                
+                # Recompute path periodically or if stuck
+                if not agent.path or step_count % 10 == 0:
+                    agent.compute_path(grid, agent.assigned_exit, fire_sim.fire_map)
+                
+                agent.move(grid, fire_sim.fire_map)
+                agent.check_status(fire_sim.fire_map, exits, assembly_point=assembly_point)
             
-            # Recompute path periodically or if stuck
-            if not agent.path or step_count % 10 == 0:
-                agent.compute_path(grid, agent.assigned_exit, fire_sim.fire_map)
-            
-            agent.move(grid, fire_sim.fire_map)
-            agent.check_status(fire_sim.fire_map, exits, assembly_point=assembly_point)
-        
-        # Handle agents moving to assembly point after escape
-        if assembly_point is not None:
-            for agent in escaped_agents:
+            # Phase 2: Assembly logic (can run in same step if agent just escaped)
+            if agent.status == 'escaped' and assembly_point is not None:
                 agent.move_to_assembly(grid, assembly_point, fire_sim.fire_map)
                 agent.check_status(fire_sim.fire_map, exits, assembly_point=assembly_point)
         

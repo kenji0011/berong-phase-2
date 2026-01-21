@@ -359,6 +359,7 @@ class SimulationConfig(BaseModel):
     use_rl: bool = True  # If False, use heuristic mode (no 10-agent limit)
     threshold: float = 0.5  # U-Net segmentation threshold
     invert_mask: bool = True  # Whether to invert the mask
+    material_type: str = "concrete"  # "wood" or "concrete"
     extended_fire_steps: int = 0  # Continue fire spread after all agents done
     assembly_point: Optional[Tuple[int, int]] = None  # (row, col) for assembly area
 
@@ -857,7 +858,8 @@ def run_simulation_task(job_id: str, config: SimulationConfig):
                 exits=exits_xy,
                 max_steps=500,
                 extended_fire_steps=config.extended_fire_steps,
-                assembly_point=frontend_to_backend(config.assembly_point[0], config.assembly_point[1]) if config.assembly_point else None
+                assembly_point=frontend_to_backend(config.assembly_point[0], config.assembly_point[1]) if config.assembly_point else None,
+                material_type=config.material_type
             )
             update_job_status(job_id, "complete", result=result)
             gc.collect()
