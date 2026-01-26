@@ -132,7 +132,7 @@ export function ContentCard({ content, onClick }: ContentCardProps) {
   // Desktop/Tablet full card layout
   const desktopCardContent = (
     <Card className={cn(
-      "overflow-hidden transition-all duration-300 border-4 hidden sm:block",
+      "overflow-hidden transition-all duration-300 border-4 hidden sm:flex sm:flex-col h-full",
       content.isLocked
         ? "opacity-60 border-gray-300 bg-gray-50"
         : "border-transparent hover:border-yellow-400 hover:shadow-2xl hover:-translate-y-2"
@@ -196,7 +196,7 @@ export function ContentCard({ content, onClick }: ContentCardProps) {
       </div>
 
       {/* Content Section */}
-      <CardContent className="p-5 bg-white">
+      <CardContent className="p-5 bg-white flex-1 flex flex-col">
         <h3 className="font-black text-xl mb-2 text-gray-800 line-clamp-2 group-hover:text-blue-600 transition-colors">
           {content.title}
         </h3>
@@ -208,7 +208,7 @@ export function ContentCard({ content, onClick }: ContentCardProps) {
         )}
 
         {/* Meta information */}
-        <div className="flex items-center justify-between mt-4">
+        <div className="flex items-center justify-between mt-auto pt-3">
           {content.duration && (
             <div className="flex items-center gap-1 text-xs text-gray-500">
               <Play className="h-3 w-3" />
@@ -237,7 +237,7 @@ export function ContentCard({ content, onClick }: ContentCardProps) {
 
   if (content.isLocked) {
     return (
-      <div onClick={onClick} className="group block">
+      <div onClick={onClick} className="group block h-full">
         {mobileCardContent}
         {desktopCardContent}
       </div>
@@ -245,7 +245,7 @@ export function ContentCard({ content, onClick }: ContentCardProps) {
   }
 
   return (
-    <Link href={content.href} onClick={onClick} className="group block cursor-pointer">
+    <Link href={content.href} onClick={onClick} className="group block cursor-pointer h-full">
       {mobileCardContent}
       {desktopCardContent}
     </Link>

@@ -87,42 +87,43 @@ export function FloorPlanUpload({ onUpload, processing }: FloorPlanUploadProps) 
       </CardHeader>
       <CardContent>
         {!preview ? (
-          <div
-            className={`relative border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
-              dragActive
+          <>
+            <div
+              className={`relative border-2 border-dashed rounded-lg p-12 text-center transition-colors ${dragActive
                 ? "border-primary bg-primary/5"
                 : "border-muted-foreground/25 hover:border-muted-foreground/50"
-            }`}
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-          >
-            <input
-              type="file"
-              id="file-upload"
-              accept="image/jpeg,image/jpg,image/png"
-              onChange={handleChange}
-              className="hidden"
-              disabled={processing}
-            />
-            <label
-              htmlFor="file-upload"
-              className="cursor-pointer flex flex-col items-center gap-4"
+                }`}
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
             >
-              <div className="p-4 bg-muted rounded-full">
-                <Upload className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="text-lg font-medium mb-1">
-                  Drop your floor plan here, or click to browse
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Supports JPEG and PNG up to 10MB
-                </p>
-              </div>
-            </label>
-          </div>
+              <input
+                type="file"
+                id="file-upload"
+                accept="image/jpeg,image/jpg,image/png"
+                onChange={handleChange}
+                className="hidden"
+                disabled={processing}
+              />
+              <label
+                htmlFor="file-upload"
+                className="cursor-pointer flex flex-col items-center gap-4"
+              >
+                <div className="p-4 bg-muted rounded-full">
+                  <Upload className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-lg font-medium mb-1">
+                    Drop your floor plan here, or click to browse
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Supports JPEG and PNG up to 10MB
+                  </p>
+                </div>
+              </label>
+            </div>
+          </>
         ) : (
           <div className="space-y-4">
             <div className="relative border rounded-lg overflow-hidden">
@@ -142,7 +143,7 @@ export function FloorPlanUpload({ onUpload, processing }: FloorPlanUploadProps) 
                 </Button>
               )}
             </div>
-            
+
             {selectedFile && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <FileImage className="h-4 w-4" />

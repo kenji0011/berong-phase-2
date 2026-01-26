@@ -7,17 +7,18 @@ export async function GET() {
   try {
     const cookieStore = await cookies()
     const userCookie = cookieStore.get("bfp_user")
-    
+
     if (!userCookie) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
     const userData = JSON.parse(userCookie.value)
-    
+
     const user = await prisma.user.findUnique({
       where: { id: userData.id },
       select: {
         id: true,
+        age: true,
         engagementPoints: true,
         totalTimeSpentMinutes: true,
         preTestScore: true,
@@ -26,6 +27,9 @@ export async function GET() {
         profileCompleted: true,
       }
     })
+
+    // Determine if user is adult (age >= 18) - adults don't need modules
+    const isAdult = (user?.age ?? 18) >= 18
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
@@ -43,7 +47,30 @@ export async function GET() {
       statsMap[stat.eventType] = stat._count.eventType
     })
 
-    const modulesCompleted = statsMap["module"] || 0
+    // Count actual SafeScape module completions (not just engagement logs)
+    // This accounts for modules completed before engagement tracking was added
+    // Note: SafeScape progress may have been saved with a different session cookie
+    let actualModulesCompleted = await prisma.safeScapeProgress.count({
+      where: { userId: userData.id, completed: true }
+    })
+
+    // Also try the 'session' cookie in case progress was saved under that user ID
+    const sessionCookie = cookieStore.get('session')
+    if (sessionCookie?.value && actualModulesCompleted === 0) {
+      try {
+        const sessionData = JSON.parse(sessionCookie.value)
+        if (sessionData?.user?.id && sessionData.user.id !== userData.id) {
+          const sessionModulesCompleted = await prisma.safeScapeProgress.count({
+            where: { userId: sessionData.user.id, completed: true }
+          })
+          actualModulesCompleted = sessionModulesCompleted
+        }
+      } catch {
+        // Ignore session parse errors
+      }
+    }
+
+    const modulesCompleted = actualModulesCompleted
     const quizzesCompleted = statsMap["quiz"] || 0
     const videosWatched = statsMap["video"] || 0
     const gamesPlayed = statsMap["game"] || 0
@@ -97,8 +124,10 @@ export async function GET() {
     }
 
     // Check if all requirements are met
-    const eligible = 
-      current.engagementPoints >= POST_TEST_UNLOCK_THRESHOLDS.MIN_ENGAGEMENT_POINTS &&
+    // Adults only need engagement points (modules are for kids only)
+    const eligible = isAdult
+      ? current.engagementPoints >= POST_TEST_UNLOCK_THRESHOLDS.MIN_ENGAGEMENT_POINTS
+      : current.engagementPoints >= POST_TEST_UNLOCK_THRESHOLDS.MIN_ENGAGEMENT_POINTS &&
       current.modulesCompleted >= POST_TEST_UNLOCK_THRESHOLDS.MIN_MODULES_COMPLETED &&
       current.quizzesCompleted >= POST_TEST_UNLOCK_THRESHOLDS.MIN_QUIZZES_PASSED
 
@@ -109,10 +138,11 @@ export async function GET() {
       if (current.engagementPoints < POST_TEST_UNLOCK_THRESHOLDS.MIN_ENGAGEMENT_POINTS) {
         missing.push(`${POST_TEST_UNLOCK_THRESHOLDS.MIN_ENGAGEMENT_POINTS - current.engagementPoints} more engagement points`)
       }
-      if (current.modulesCompleted < POST_TEST_UNLOCK_THRESHOLDS.MIN_MODULES_COMPLETED) {
+      // Only show module requirement for kids
+      if (!isAdult && current.modulesCompleted < POST_TEST_UNLOCK_THRESHOLDS.MIN_MODULES_COMPLETED) {
         missing.push(`${POST_TEST_UNLOCK_THRESHOLDS.MIN_MODULES_COMPLETED - current.modulesCompleted} more modules`)
       }
-      if (current.quizzesCompleted < POST_TEST_UNLOCK_THRESHOLDS.MIN_QUIZZES_PASSED) {
+      if (!isAdult && current.quizzesCompleted < POST_TEST_UNLOCK_THRESHOLDS.MIN_QUIZZES_PASSED) {
         missing.push(`${POST_TEST_UNLOCK_THRESHOLDS.MIN_QUIZZES_PASSED - current.quizzesCompleted} more quizzes`)
       }
       reason = `You need: ${missing.join(", ")}`
@@ -132,6 +162,7 @@ export async function GET() {
       current,
       progress,
       preTestScore: user.preTestScore,
+      isAdult,
     })
   } catch (error) {
     console.error("Post-test eligibility check error:", error)

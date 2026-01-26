@@ -36,7 +36,7 @@ export default function SimulationPage() {
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">
-            Fire Evacuation AI Simulator
+            Exit Drill In The Home (EDITH)
           </h1>
           <p className="text-muted-foreground text-lg">
             Upload a floor plan and watch AI-powered evacuation scenarios unfold

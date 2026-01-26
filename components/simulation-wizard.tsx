@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Upload, Grid3x3, Settings, Play, Loader2, CheckCircle2, AlertCircle, ArrowRight, ArrowLeft, Pencil } from "lucide-react"
+import { Upload, Grid3x3, Settings, Play, Loader2, CheckCircle2, AlertCircle, ArrowRight, ArrowLeft, Pencil, FolderOpen } from "lucide-react"
 import { FloorPlanUpload } from "@/components/floor-plan-upload"
 import { FloorPlanCanvas } from "@/components/floor-plan-canvas"
 import { SimulationSetup } from "@/components/simulation-setup"
@@ -48,7 +48,7 @@ interface SimulationData {
 
 export function SimulationWizard() {
   const [stage, setStage] = useState<Stage>("upload")
-  const [inputMode, setInputMode] = useState<'upload' | 'draw'>('upload')
+  const [inputMode, setInputMode] = useState<'upload' | 'plans' | 'draw'>('upload')
   const [exitMode, setExitMode] = useState<'view' | 'add-exit' | 'add-assembly'>('view')
   const [data, setData] = useState<SimulationData>({
     imageFile: null,
@@ -402,11 +402,15 @@ export function SimulationWizard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs value={inputMode} onValueChange={(v) => setInputMode(v as 'upload' | 'draw')}>
-              <TabsList className="grid w-full grid-cols-2 mb-4">
+            <Tabs value={inputMode} onValueChange={(v) => setInputMode(v as 'upload' | 'plans' | 'draw')}>
+              <TabsList className="grid w-full grid-cols-3 mb-4">
                 <TabsTrigger value="upload" className="flex items-center gap-2">
                   <Upload className="h-4 w-4" />
                   Upload Image
+                </TabsTrigger>
+                <TabsTrigger value="plans" className="flex items-center gap-2">
+                  <FolderOpen className="h-4 w-4" />
+                  Sample Plans
                 </TabsTrigger>
                 <TabsTrigger value="draw" className="flex items-center gap-2">
                   <Pencil className="h-4 w-4" />
@@ -415,6 +419,56 @@ export function SimulationWizard() {
               </TabsList>
               <TabsContent value="upload" className="mt-0">
                 <FloorPlanUpload onUpload={handleImageUpload} processing={processing} />
+              </TabsContent>
+              <TabsContent value="plans" className="mt-0">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Sample Floor Plans</CardTitle>
+                    <CardDescription>
+                      Choose from our pre-loaded sample floor plans to quickly get started
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-4">
+                      {[
+                        { src: "/Floor Plan 1.png", name: "Floor Plan 1" },
+                        { src: "/Floor Plan 2.png", name: "Floor Plan 2" },
+                        { src: "/Floor Plan 3.png", name: "Floor Plan 3" },
+                      ].map((sample) => (
+                        <button
+                          key={sample.src}
+                          type="button"
+                          disabled={processing}
+                          onClick={async () => {
+                            try {
+                              const response = await fetch(sample.src)
+                              const blob = await response.blob()
+                              const file = new File([blob], sample.name + ".jpg", { type: "image/jpeg" })
+                              handleImageUpload(file)
+                            } catch (err) {
+                              console.error("Failed to load sample:", err)
+                            }
+                          }}
+                          className="relative aspect-[4/3] border-2 border-muted rounded-lg overflow-hidden hover:border-primary hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 group"
+                        >
+                          <img
+                            src={sample.src}
+                            alt={sample.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          />
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white text-sm font-medium py-2 px-3 text-center">
+                            {sample.name}
+                          </div>
+                          {processing && (
+                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                              <Loader2 className="h-6 w-6 animate-spin text-white" />
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
               </TabsContent>
               <TabsContent value="draw" className="mt-0">
                 <FabricFloorPlanBuilder

@@ -4,24 +4,36 @@ import { cookies } from 'next/headers';
 
 const prisma = new PrismaClient();
 
-// Helper to get user from session cookie
+// Helper to get user from cookies - try both bfp_user and session for compatibility
 async function getUserFromSession() {
   const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get('session');
-  
-  if (!sessionCookie?.value) {
-    return null;
-  }
-  
-  try {
-    const session = JSON.parse(sessionCookie.value);
-    if (session?.user?.id) {
-      return session.user;
+
+  // Try bfp_user cookie first (main auth cookie)
+  const bfpUserCookie = cookieStore.get('bfp_user');
+  if (bfpUserCookie?.value) {
+    try {
+      const userData = JSON.parse(bfpUserCookie.value);
+      if (userData?.id) {
+        return userData;
+      }
+    } catch {
+      // Fall through to try session cookie
     }
-  } catch {
-    return null;
   }
-  
+
+  // Fallback to session cookie for backward compatibility
+  const sessionCookie = cookieStore.get('session');
+  if (sessionCookie?.value) {
+    try {
+      const session = JSON.parse(sessionCookie.value);
+      if (session?.user?.id) {
+        return session.user;
+      }
+    } catch {
+      return null;
+    }
+  }
+
   return null;
 }
 
@@ -29,7 +41,7 @@ async function getUserFromSession() {
 export async function GET(request: NextRequest) {
   try {
     const user = await getUserFromSession();
-    
+
     if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -73,7 +85,7 @@ export async function GET(request: NextRequest) {
       completed: boolean;
       completedAt: Date | null;
     }> = {};
-    
+
     allProgress.forEach((p) => {
       progressMap[p.moduleNum] = {
         moduleNum: p.moduleNum,
@@ -108,7 +120,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = await getUserFromSession();
-    
+
     if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -125,6 +137,17 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Check if module was already completed before this update
+    const existingProgress = await prisma.safeScapeProgress.findUnique({
+      where: {
+        userId_moduleNum: {
+          userId: user.id,
+          moduleNum: parseInt(moduleNum),
+        },
+      },
+    });
+    const wasAlreadyCompleted = existingProgress?.completed || false;
 
     // Upsert progress (create or update)
     const progress = await prisma.safeScapeProgress.upsert({
@@ -148,6 +171,25 @@ export async function POST(request: NextRequest) {
         completedAt: completed ? new Date() : null,
       },
     });
+
+    // Log engagement if module is newly completed (not previously completed)
+    if (completed && !wasAlreadyCompleted) {
+      const MODULE_COMPLETION_POINTS = 15;
+      await prisma.$transaction([
+        prisma.user.update({
+          where: { id: user.id },
+          data: { engagementPoints: { increment: MODULE_COMPLETION_POINTS } },
+        }),
+        prisma.engagementLog.create({
+          data: {
+            userId: user.id,
+            eventType: 'module',
+            points: MODULE_COMPLETION_POINTS,
+            eventData: { moduleNum, moduleName: `SafeScape Module ${moduleNum}` },
+          },
+        }),
+      ]);
+    }
 
     return NextResponse.json({
       success: true,

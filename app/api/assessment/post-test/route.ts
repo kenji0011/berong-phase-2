@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
   try {
     const cookieStore = await cookies()
     const userCookie = cookieStore.get("bfp_user")
-    
+
     if (!userCookie) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
       where: { id: userData.id },
       select: {
         id: true,
+        age: true,
         engagementPoints: true,
         preTestScore: true,
         postTestScore: true,
@@ -32,6 +33,9 @@ export async function POST(request: NextRequest) {
         profileCompleted: true,
       }
     })
+
+    // Determine if user is adult (age >= 18) - adults don't need modules
+    const isAdult = (user?.age ?? 18) >= 18
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
@@ -44,9 +48,9 @@ export async function POST(request: NextRequest) {
 
     // Check if already completed
     if (user.postTestScore !== null && user.postTestCompletedAt) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: "Post-test already completed",
-        postTestScore: user.postTestScore 
+        postTestScore: user.postTestScore
       }, { status: 400 })
     }
 
@@ -65,15 +69,16 @@ export async function POST(request: NextRequest) {
     const modulesCompleted = statsMap["module"] || 0
     const quizzesCompleted = statsMap["quiz"] || 0
 
-    // Verify eligibility
-    const eligible = 
-      (user.engagementPoints || 0) >= POST_TEST_UNLOCK_THRESHOLDS.MIN_ENGAGEMENT_POINTS &&
+    // Verify eligibility - adults only need engagement points
+    const eligible = isAdult
+      ? (user.engagementPoints || 0) >= POST_TEST_UNLOCK_THRESHOLDS.MIN_ENGAGEMENT_POINTS
+      : (user.engagementPoints || 0) >= POST_TEST_UNLOCK_THRESHOLDS.MIN_ENGAGEMENT_POINTS &&
       modulesCompleted >= POST_TEST_UNLOCK_THRESHOLDS.MIN_MODULES_COMPLETED &&
       quizzesCompleted >= POST_TEST_UNLOCK_THRESHOLDS.MIN_QUIZZES_PASSED
 
     if (!eligible) {
-      return NextResponse.json({ 
-        error: "You have not met the requirements to take the post-test" 
+      return NextResponse.json({
+        error: "You have not met the requirements to take the post-test"
       }, { status: 403 })
     }
 
@@ -98,7 +103,7 @@ export async function POST(request: NextRequest) {
     for (const question of questions) {
       const selectedAnswer = answers[question.id]
       const isCorrect = selectedAnswer === question.correctAnswer
-      
+
       if (isCorrect) {
         score++
       }
@@ -145,8 +150,8 @@ export async function POST(request: NextRequest) {
     // Calculate improvement
     const preTestScore = user.preTestScore || 0
     const improvement = score - preTestScore
-    const improvementPercentage = preTestScore > 0 
-      ? Math.round(((score - preTestScore) / preTestScore) * 100) 
+    const improvementPercentage = preTestScore > 0
+      ? Math.round(((score - preTestScore) / preTestScore) * 100)
       : score > 0 ? 100 : 0
 
     return NextResponse.json({
@@ -156,11 +161,11 @@ export async function POST(request: NextRequest) {
       preTestScore,
       improvement,
       improvementPercentage,
-      message: improvement > 0 
-        ? `Great job! You improved by ${improvement} points!` 
-        : improvement === 0 
-        ? "You maintained your score. Keep learning!" 
-        : "Keep practicing to improve your fire safety knowledge!",
+      message: improvement > 0
+        ? `Great job! You improved by ${improvement} points!`
+        : improvement === 0
+          ? "You maintained your score. Keep learning!"
+          : "Keep practicing to improve your fire safety knowledge!",
     })
   } catch (error) {
     console.error("Post-test submission error:", error)

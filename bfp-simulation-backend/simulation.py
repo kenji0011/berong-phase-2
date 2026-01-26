@@ -389,6 +389,8 @@ class Person:
             if distance < exit_radius:
                 self.status = 'escaped'
                 self.escape_time = self.steps_taken
+                self.path = []  # Clear path so move_to_assembly computes new path to assembly
+                print(f"[AGENT] Escaped! Clearing path for assembly movement.", flush=True)
                 return
 
     def move_to_assembly(self, grid, assembly_point, fire_map):
@@ -420,9 +422,17 @@ class Person:
                     if self.path:
                         print(f"[ASSEMBLY DEBUG] Phase 1 path found: {len(self.path)} steps to exterior", flush=True)
                     else:
-                        print(f"[ASSEMBLY DEBUG] WARNING: No path to exterior found!", flush=True)
+                        # Fallback: go directly to assembly point if exterior path fails
+                        print(f"[ASSEMBLY DEBUG] WARNING: No path to exterior, trying direct path to assembly", flush=True)
+                        assembly_pos = (int(assembly_point[0]), int(assembly_point[1]))
+                        self.path = a_star_search(grid, current_pos, assembly_pos, fire_map)
+                        if self.path:
+                            print(f"[ASSEMBLY DEBUG] Direct path found: {len(self.path)} steps to assembly", flush=True)
                 else:
-                    print(f"[ASSEMBLY DEBUG] WARNING: No exterior cell found near {current_pos}!", flush=True)
+                    # Fallback: try direct path to assembly
+                    print(f"[ASSEMBLY DEBUG] WARNING: No exterior cell found, trying direct path to assembly", flush=True)
+                    assembly_pos = (int(assembly_point[0]), int(assembly_point[1]))
+                    self.path = a_star_search(grid, current_pos, assembly_pos, fire_map)
             else:
                 # PHASE 2: Already on exterior, use exterior-only path to assembly
                 assembly_pos = (int(assembly_point[0]), int(assembly_point[1]))
@@ -431,11 +441,15 @@ class Person:
                 if self.path:
                     print(f"[ASSEMBLY DEBUG] Phase 2 exterior-only path found: {len(self.path)} steps to assembly", flush=True)
                 else:
-                    print(f"[ASSEMBLY DEBUG] WARNING: No exterior path to assembly found!", flush=True)
+                    # Fallback: use regular A* if exterior-only fails
+                    print(f"[ASSEMBLY DEBUG] WARNING: No exterior path, trying regular A* to assembly", flush=True)
+                    self.path = a_star_search(grid, current_pos, assembly_pos, fire_map)
+                    if self.path:
+                        print(f"[ASSEMBLY DEBUG] Fallback path found: {len(self.path)} steps to assembly", flush=True)
         
-        # Move along path
+        # Move along path with FASTER speed for assembly movement
         if self.path:
-            self.speed = 1.0  # Normal speed when moving to assembly
+            self.speed = 2.0  # Faster speed when moving to assembly (was 1.0)
             self.move(grid)  # No fire avoidance needed for assembly movement
 
     def compute_path(self, grid, goal, fire_map):
@@ -754,7 +768,9 @@ def run_heuristic_simulation(grid, agent_positions, fire_position, exits=None,
         
         
         # Unified agent processing loop
-        for agent in agents:
+        for idx, agent in enumerate(agents):
+            prev_status = agent.status
+            
             # Phase 1: Evacuation logic
             if agent.status == 'evacuating':
                 agent.update_state(fire_sim.fire_map)
@@ -765,9 +781,14 @@ def run_heuristic_simulation(grid, agent_positions, fire_position, exits=None,
                 
                 agent.move(grid, fire_sim.fire_map)
                 agent.check_status(fire_sim.fire_map, exits, assembly_point=assembly_point)
+                
+                # Debug: Log when agent escapes
+                if prev_status == 'evacuating' and agent.status == 'escaped':
+                    print(f"[STEP {step_count}] Agent {idx} just ESCAPED! Now moving to assembly immediately.", flush=True)
             
             # Phase 2: Assembly logic (can run in same step if agent just escaped)
             if agent.status == 'escaped' and assembly_point is not None:
+                print(f"[STEP {step_count}] Agent {idx} status=escaped, calling move_to_assembly", flush=True)
                 agent.move_to_assembly(grid, assembly_point, fire_sim.fire_map)
                 agent.check_status(fire_sim.fire_map, exits, assembly_point=assembly_point)
         

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { Navigation } from "@/components/navigation"
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ArrowLeft, Trophy, Star, CheckCircle, XCircle } from "lucide-react"
 import Link from "next/link"
+import { logEngagement } from "@/lib/engagement-tracker"
 
 interface QuizQuestion {
   id: number
@@ -94,6 +95,8 @@ export default function QuizPage() {
     }
   }
 
+  const hasTrackedQuiz = useRef(false)
+
   const handleNextQuestion = () => {
     if (currentQuestion < quizQuestions.length - 1) {
       setCurrentQuestion(currentQuestion + 1)
@@ -101,6 +104,19 @@ export default function QuizPage() {
       setShowResult(false)
     } else {
       setQuizComplete(true)
+      // Log quiz completion for engagement points
+      if (!hasTrackedQuiz.current) {
+        hasTrackedQuiz.current = true
+        logEngagement({
+          activityType: "QUIZ_COMPLETION",
+          metadata: {
+            quizId: "kids-fire-safety-quiz",
+            quizName: "Fire Safety Quiz",
+            score: score + (selectedAnswer === quizQuestions[currentQuestion].correctAnswer ? 1 : 0),
+            maxScore: quizQuestions.length
+          }
+        })
+      }
     }
   }
 
@@ -208,14 +224,14 @@ export default function QuizPage() {
                   onClick={() => handleAnswerSelect(index)}
                   disabled={showResult}
                   className={`w-full p-4 text-left rounded-lg border-2 transition-all ${selectedAnswer === index
-                      ? showResult
-                        ? index === question.correctAnswer
-                          ? "border-chart-4 bg-chart-4/10"
-                          : "border-destructive bg-destructive/10"
-                        : "border-secondary bg-secondary/10"
-                      : showResult && index === question.correctAnswer
+                    ? showResult
+                      ? index === question.correctAnswer
                         ? "border-chart-4 bg-chart-4/10"
-                        : "border-border hover:border-secondary hover:bg-secondary/5"
+                        : "border-destructive bg-destructive/10"
+                      : "border-secondary bg-secondary/10"
+                    : showResult && index === question.correctAnswer
+                      ? "border-chart-4 bg-chart-4/10"
+                      : "border-border hover:border-secondary hover:bg-secondary/5"
                     } ${showResult ? "cursor-not-allowed" : "cursor-pointer"}`}
                 >
                   <div className="flex items-center justify-between">

@@ -14,7 +14,7 @@ export const BARANGAYS_SANTA_CRUZ = [
   "Barangay III (Poblacion)",
   "Barangay IV (Poblacion)",
   "Barangay V (Poblacion)",
-  
+
   // Other Barangays (21) - Alphabetical
   "Alipit",
   "Bagumbayan",
@@ -165,16 +165,16 @@ export const ASSESSMENT_CATEGORIES = [
 export const POST_TEST_UNLOCK_THRESHOLDS = {
   // Minimum modules completed (out of 5 SafeScape modules)
   MIN_MODULES_COMPLETED: 3,
-  
+
   // Minimum time spent on platform (in minutes)
   MIN_TIME_SPENT_MINUTES: 30,
-  
+
   // Minimum engagement points (quizzes, games, videos watched)
   MIN_ENGAGEMENT_POINTS: 50,
-  
-  // Minimum quizzes passed
-  MIN_QUIZZES_PASSED: 2,
-  
+
+  // Minimum quizzes passed (disabled - modules are sufficient)
+  MIN_QUIZZES_PASSED: 0,
+
   // Days since registration (to prevent rushing)
   MIN_DAYS_SINCE_REGISTRATION: 1,
 } as const;
@@ -240,27 +240,27 @@ export function canUnlockPostTest(userStats: {
   daysSinceRegistration: number;
 }): { unlocked: boolean; reasons: string[] } {
   const reasons: string[] = [];
-  
+
   if (userStats.modulesCompleted < POST_TEST_UNLOCK_THRESHOLDS.MIN_MODULES_COMPLETED) {
     reasons.push(`Complete at least ${POST_TEST_UNLOCK_THRESHOLDS.MIN_MODULES_COMPLETED} modules (${userStats.modulesCompleted}/${POST_TEST_UNLOCK_THRESHOLDS.MIN_MODULES_COMPLETED})`);
   }
-  
+
   if (userStats.timeSpentMinutes < POST_TEST_UNLOCK_THRESHOLDS.MIN_TIME_SPENT_MINUTES) {
     reasons.push(`Spend at least ${POST_TEST_UNLOCK_THRESHOLDS.MIN_TIME_SPENT_MINUTES} minutes learning (${userStats.timeSpentMinutes}/${POST_TEST_UNLOCK_THRESHOLDS.MIN_TIME_SPENT_MINUTES})`);
   }
-  
+
   if (userStats.engagementPoints < POST_TEST_UNLOCK_THRESHOLDS.MIN_ENGAGEMENT_POINTS) {
     reasons.push(`Earn ${POST_TEST_UNLOCK_THRESHOLDS.MIN_ENGAGEMENT_POINTS} engagement points (${userStats.engagementPoints}/${POST_TEST_UNLOCK_THRESHOLDS.MIN_ENGAGEMENT_POINTS})`);
   }
-  
+
   if (userStats.quizzesPassed < POST_TEST_UNLOCK_THRESHOLDS.MIN_QUIZZES_PASSED) {
     reasons.push(`Pass at least ${POST_TEST_UNLOCK_THRESHOLDS.MIN_QUIZZES_PASSED} quizzes (${userStats.quizzesPassed}/${POST_TEST_UNLOCK_THRESHOLDS.MIN_QUIZZES_PASSED})`);
   }
-  
+
   if (userStats.daysSinceRegistration < POST_TEST_UNLOCK_THRESHOLDS.MIN_DAYS_SINCE_REGISTRATION) {
     reasons.push(`Account must be at least ${POST_TEST_UNLOCK_THRESHOLDS.MIN_DAYS_SINCE_REGISTRATION} day(s) old`);
   }
-  
+
   return {
     unlocked: reasons.length === 0,
     reasons,
@@ -277,7 +277,7 @@ export function calculateImprovement(preScore: number, postScore: number, maxSco
 } {
   const absolute = postScore - preScore;
   const percentage = maxScore > 0 ? (absolute / maxScore) * 100 : 0;
-  
+
   return {
     absolute,
     percentage: Math.round(percentage * 10) / 10, // Round to 1 decimal

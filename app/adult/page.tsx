@@ -116,7 +116,7 @@ export default function AdultPage() {
                 <div className="flex items-start gap-3">
                   <Flame className="h-5 w-5 sm:h-6 sm:w-6 text-red-500 flex-shrink-0 mt-0.5" />
                   <div className="min-w-0 flex-1">
-                    <CardTitle className="text-lg sm:text-2xl mb-1 sm:mb-2">Fire Spread Simulation</CardTitle>
+                    <CardTitle className="text-lg sm:text-2xl mb-1 sm:mb-2">Exit Drill In The Home (EDITH)</CardTitle>
                     <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-4 line-clamp-2">
                       Interactive tool to visualize how fire spreads in different environments.
                     </p>

@@ -9,12 +9,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import { 
-  AlertCircle, 
-  ArrowLeft, 
-  ChevronLeft, 
-  ChevronRight, 
-  Check, 
+import {
+  AlertCircle,
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Check,
   Lock,
   Trophy,
   TrendingUp,
@@ -58,6 +58,7 @@ interface EligibilityData {
   preTestScore?: number
   postTestScore?: number
   completedAt?: string
+  isAdult?: boolean
 }
 
 interface PostTestResult {
@@ -99,7 +100,7 @@ export default function PostTestPage() {
           maxScore: 15,
           preTestScore: data.preTestScore || 0,
           improvement: data.postTestScore - (data.preTestScore || 0),
-          improvementPercentage: data.preTestScore 
+          improvementPercentage: data.preTestScore
             ? Math.round(((data.postTestScore - data.preTestScore) / data.preTestScore) * 100)
             : 100,
           message: "You have already completed the post-test"
@@ -122,7 +123,7 @@ export default function PostTestPage() {
     try {
       setLoading(true)
       const role = user?.age && user.age < 18 ? "kid" : "adult"
-      const response = await fetch(`/api/assessment/questions?role=${role}&type=postTest`)
+      const response = await fetch(`/api/assessment/questions?role=${role}&type=postTest&limit=15`)
       if (response.ok) {
         const data = await response.json()
         setQuestions(data.questions || [])
@@ -150,7 +151,7 @@ export default function PostTestPage() {
     try {
       setSubmitting(true)
       setError("")
-      
+
       const response = await fetch("/api/assessment/post-test", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -217,7 +218,7 @@ export default function PostTestPage() {
                 {eligibility.requirements && eligibility.progress && eligibility.current && (
                   <div className="space-y-4">
                     <h4 className="font-medium">Requirements Progress</h4>
-                    
+
                     <div className="space-y-3">
                       <div>
                         <div className="flex justify-between text-sm mb-1">
@@ -226,29 +227,24 @@ export default function PostTestPage() {
                         </div>
                         <Progress value={eligibility.progress.engagementPoints} className="h-2" />
                       </div>
-                      
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Modules Completed</span>
-                          <span>{eligibility.current.modulesCompleted} / {eligibility.requirements.minModulesCompleted}</span>
+
+                      {/* Only show modules requirement for kids */}
+                      {!eligibility.isAdult && (
+                        <div>
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>Modules Completed</span>
+                            <span>{eligibility.current.modulesCompleted} / {eligibility.requirements.minModulesCompleted}</span>
+                          </div>
+                          <Progress value={eligibility.progress.modulesCompleted} className="h-2" />
                         </div>
-                        <Progress value={eligibility.progress.modulesCompleted} className="h-2" />
-                      </div>
-                      
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Quizzes Completed</span>
-                          <span>{eligibility.current.quizzesCompleted} / {eligibility.requirements.minQuizzesCompleted}</span>
-                        </div>
-                        <Progress value={eligibility.progress.quizzesCompleted} className="h-2" />
-                      </div>
+                      )}
                     </div>
                   </div>
                 )}
 
                 <div className="flex gap-4">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="flex-1"
                     onClick={() => router.push(user?.age && user.age < 18 ? "/kids" : "/adult")}
                   >
@@ -314,8 +310,8 @@ export default function PostTestPage() {
                   </AlertDescription>
                 </Alert>
 
-                <Button 
-                  className="w-full" 
+                <Button
+                  className="w-full"
                   size="lg"
                   onClick={startTest}
                   disabled={loading}
@@ -343,7 +339,7 @@ export default function PostTestPage() {
   // Test in progress
   if (stage === "test" && questions.length > 0) {
     const currentQuestion = questions[currentQuestionIndex]
-    
+
     return (
       <ProtectedRoute>
         <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white py-8 px-4">
@@ -397,7 +393,7 @@ export default function PostTestPage() {
                     <ChevronLeft className="h-4 w-4 mr-1" />
                     Previous
                   </Button>
-                  
+
                   {currentQuestionIndex < questions.length - 1 ? (
                     <Button
                       onClick={() => setCurrentQuestionIndex(prev => prev + 1)}
@@ -433,13 +429,12 @@ export default function PostTestPage() {
                     <button
                       key={q.id}
                       onClick={() => setCurrentQuestionIndex(idx)}
-                      className={`w-8 h-8 rounded-full text-xs font-medium transition-colors ${
-                        currentQuestionIndex === idx
-                          ? "bg-orange-500 text-white"
-                          : answers[q.id] !== undefined
+                      className={`w-8 h-8 rounded-full text-xs font-medium transition-colors ${currentQuestionIndex === idx
+                        ? "bg-orange-500 text-white"
+                        : answers[q.id] !== undefined
                           ? "bg-green-100 text-green-700 border border-green-300"
                           : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                      }`}
+                        }`}
                     >
                       {idx + 1}
                     </button>
@@ -457,18 +452,18 @@ export default function PostTestPage() {
   if (stage === "result" && result) {
     const postRating = getScoreRating(Math.round((result.postTestScore / result.maxScore) * 100))
     const preRating = getScoreRating(Math.round((result.preTestScore / result.maxScore) * 100))
-    
-    const ImprovementIcon = result.improvement > 0 
-      ? TrendingUp 
-      : result.improvement < 0 
-      ? TrendingDown 
-      : Minus
 
-    const improvementColor = result.improvement > 0 
-      ? "text-green-600" 
-      : result.improvement < 0 
-      ? "text-red-600" 
-      : "text-gray-600"
+    const ImprovementIcon = result.improvement > 0
+      ? TrendingUp
+      : result.improvement < 0
+        ? TrendingDown
+        : Minus
+
+    const improvementColor = result.improvement > 0
+      ? "text-green-600"
+      : result.improvement < 0
+        ? "text-red-600"
+        : "text-gray-600"
 
     return (
       <ProtectedRoute>
@@ -495,7 +490,7 @@ export default function PostTestPage() {
                       {preRating.label}
                     </Badge>
                   </div>
-                  
+
                   <div className="text-center p-4 bg-orange-50 rounded-lg border-2 border-orange-200">
                     <p className="text-sm text-muted-foreground mb-1">Post-Test Score</p>
                     <p className="text-3xl font-bold" style={{ color: postRating.color }}>
@@ -534,14 +529,14 @@ export default function PostTestPage() {
                 )}
 
                 <div className="flex gap-4">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="flex-1"
                     onClick={() => router.push(user?.age && user.age < 18 ? "/kids" : "/adult")}
                   >
                     Back to Home
                   </Button>
-                  <Button 
+                  <Button
                     className="flex-1"
                     onClick={() => router.push("/profile")}
                   >

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import Link from "next/link"
@@ -16,6 +16,7 @@ import { ManualsDialog } from "@/components/ui/manuals-dialog"
 import { Footer } from "@/components/footer"
 import SpotlightCard from "@/components/ui/spotlight-card"
 import "@/components/ui/spotlight-card.css"
+import { logEngagement } from "@/lib/engagement-tracker"
 
 export default function ProfessionalPage() {
   const router = useRouter()
@@ -24,6 +25,19 @@ export default function ProfessionalPage() {
   const [videos, setVideos] = useState<VideoContent[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedVideo, setSelectedVideo] = useState<VideoContent | null>(null)
+  const trackedVideos = useRef<Set<string>>(new Set())
+
+  // Handle video selection with tracking
+  const handleVideoSelect = (video: VideoContent) => {
+    setSelectedVideo(video)
+    if (!trackedVideos.current.has(video.id)) {
+      trackedVideos.current.add(video.id)
+      logEngagement({
+        activityType: "VIDEO_WATCHED",
+        metadata: { videoId: String(video.id), videoTitle: video.title }
+      })
+    }
+  }
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -203,7 +217,7 @@ export default function ProfessionalPage() {
                 <Card
                   key={video.id}
                   className="hover:shadow-lg transition-shadow cursor-pointer group"
-                  onClick={() => setSelectedVideo(video)}
+                  onClick={() => handleVideoSelect(video)}
                 >
                   <CardHeader className="pb-3">
                     <div className="aspect-video bg-muted rounded-lg overflow-hidden mb-3 relative">

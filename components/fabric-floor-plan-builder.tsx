@@ -27,6 +27,8 @@ interface SavedFloorPlan {
     name: string
     data: string // JSON serialized canvas
     createdAt: string
+    isSample?: boolean // True for pre-loaded sample plans
+    imageUrl?: string // URL for sample plans (to load as background/reference)
 }
 
 interface FabricFloorPlanBuilderProps {
@@ -35,6 +37,31 @@ interface FabricFloorPlanBuilderProps {
 }
 
 type Tool = "select" | "wall" | "door" | "window"
+
+// Default sample floor plans (globally available)
+const SAMPLE_FLOOR_PLANS: SavedFloorPlan[] = [
+    {
+        name: "Floor Plan 1",
+        data: "", // No canvas data - these are image-based
+        createdAt: "2024-01-01T00:00:00.000Z",
+        isSample: true,
+        imageUrl: "/Floor Plan 1.png"
+    },
+    {
+        name: "Floor Plan 2",
+        data: "",
+        createdAt: "2024-01-01T00:00:00.000Z",
+        isSample: true,
+        imageUrl: "/Floor Plan 2.png"
+    },
+    {
+        name: "Floor Plan 3",
+        data: "",
+        createdAt: "2024-01-01T00:00:00.000Z",
+        isSample: true,
+        imageUrl: "/Floor Plan 3.png"
+    }
+]
 
 export function FabricFloorPlanBuilder({ onExport, processing = false }: FabricFloorPlanBuilderProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -95,17 +122,20 @@ export function FabricFloorPlanBuilder({ onExport, processing = false }: FabricF
         }
     }, [])
 
-    // Load saved floor plans from localStorage on mount
+    // Load saved floor plans from localStorage on mount, merge with samples
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('floorPlans')
+            let userPlans: SavedFloorPlan[] = []
             if (saved) {
                 try {
-                    setSavedPlans(JSON.parse(saved))
+                    userPlans = JSON.parse(saved)
                 } catch (e) {
                     console.error('Failed to load saved floor plans:', e)
                 }
             }
+            // Combine samples with user plans (samples first)
+            setSavedPlans([...SAMPLE_FLOOR_PLANS, ...userPlans])
         }
     }, [])
 
@@ -364,16 +394,41 @@ export function FabricFloorPlanBuilder({ onExport, processing = false }: FabricF
             updatedPlans = [...savedPlans, newPlan]
         }
 
-        setSavedPlans(updatedPlans)
-        localStorage.setItem('floorPlans', JSON.stringify(updatedPlans))
+        // Filter out sample plans before saving
+        const userPlansOnly = updatedPlans.filter(p => !p.isSample)
+        setSavedPlans([...SAMPLE_FLOOR_PLANS, ...userPlansOnly])
+        localStorage.setItem('floorPlans', JSON.stringify(userPlansOnly))
         setPlanName("")
         alert(`Floor plan "${name}" saved!`)
     }
 
     // Load floor plan from saved data
-    const loadFloorPlan = (plan: SavedFloorPlan) => {
+    const loadFloorPlan = async (plan: SavedFloorPlan) => {
         const canvas = fabricRef.current
         if (!canvas) return
+
+        // Handle sample plans with imageUrl - redirect to upload flow
+        if (plan.isSample && plan.imageUrl) {
+            try {
+                const response = await fetch(plan.imageUrl)
+                const blob = await response.blob()
+                const file = new File([blob], plan.name + ".jpg", { type: "image/jpeg" })
+
+                // Clear canvas and notify user
+                const objects = canvas.getObjects().filter(obj => (obj as any).objectType)
+                objects.forEach(obj => canvas.remove(obj))
+                canvas.renderAll()
+                setShowSaveLoad(false)
+
+                // Call onExport with the image - this will trigger the upload flow
+                onExport(blob)
+                return
+            } catch (e) {
+                console.error('Failed to load sample floor plan:', e)
+                alert('Failed to load sample floor plan')
+                return
+            }
+        }
 
         // Clear existing objects (except grid)
         const objects = canvas.getObjects().filter(obj => (obj as any).objectType)
@@ -407,10 +462,17 @@ export function FabricFloorPlanBuilder({ onExport, processing = false }: FabricF
 
     // Delete a saved floor plan
     const deleteFloorPlan = (name: string) => {
+        // Prevent deleting sample plans
+        const plan = savedPlans.find(p => p.name === name)
+        if (plan?.isSample) {
+            alert('Sample floor plans cannot be deleted.')
+            return
+        }
+
         if (!confirm(`Delete "${name}"?`)) return
 
-        const updatedPlans = savedPlans.filter(p => p.name !== name)
-        setSavedPlans(updatedPlans)
+        const updatedPlans = savedPlans.filter(p => p.name !== name && !p.isSample)
+        setSavedPlans([...SAMPLE_FLOOR_PLANS, ...updatedPlans])
         localStorage.setItem('floorPlans', JSON.stringify(updatedPlans))
     }
 
@@ -621,17 +683,24 @@ export function FabricFloorPlanBuilder({ onExport, processing = false }: FabricF
                         {savedPlans.length > 0 && (
                             <div className="space-y-2">
                                 <label className="text-xs text-muted-foreground">Saved Floor Plans</label>
-                                <div className="max-h-32 overflow-y-auto space-y-1">
+                                <div className="max-h-40 overflow-y-auto space-y-1">
                                     {savedPlans.map((plan) => (
-                                        <div key={plan.name} className="flex items-center justify-between p-2 bg-background rounded border">
-                                            <span className="text-sm font-medium truncate flex-1">{plan.name}</span>
+                                        <div key={plan.name} className={`flex items-center justify-between p-2 bg-background rounded border ${plan.isSample ? 'border-blue-200 bg-blue-50' : ''}`}>
+                                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                <span className="text-sm font-medium truncate">{plan.name}</span>
+                                                {plan.isSample && (
+                                                    <Badge variant="secondary" className="text-[10px] px-1 py-0 bg-blue-100 text-blue-700">Sample</Badge>
+                                                )}
+                                            </div>
                                             <div className="flex gap-1">
                                                 <Button size="sm" variant="ghost" onClick={() => loadFloorPlan(plan)}>
                                                     Load
                                                 </Button>
-                                                <Button size="sm" variant="ghost" onClick={() => deleteFloorPlan(plan.name)} className="text-red-500 hover:text-red-700">
-                                                    <Trash2 className="h-3 w-3" />
-                                                </Button>
+                                                {!plan.isSample && (
+                                                    <Button size="sm" variant="ghost" onClick={() => deleteFloorPlan(plan.name)} className="text-red-500 hover:text-red-700">
+                                                        <Trash2 className="h-3 w-3" />
+                                                    </Button>
+                                                )}
                                             </div>
                                         </div>
                                     ))}

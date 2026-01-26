@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { Navigation } from "@/components/navigation"
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft, Calendar, User, Flame, AlertCircle } from "lucide-react"
 import type { BlogPost } from "@/lib/mock-data"
 import Link from "next/link"
+import { logEngagement } from "@/lib/engagement-tracker"
 
 export default function BlogPostPage() {
   const router = useRouter()
@@ -15,6 +16,7 @@ export default function BlogPostPage() {
   const { user, isAuthenticated } = useAuth()
   const [loading, setLoading] = useState(true)
   const [blog, setBlog] = useState<BlogPost | null>(null)
+  const hasTracked = useRef(false)
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -48,6 +50,17 @@ export default function BlogPostPage() {
       loadBlog()
     }
   }, [isAuthenticated, user, router, params.id])
+
+  // Track reading engagement when blog is loaded
+  useEffect(() => {
+    if (blog && !hasTracked.current) {
+      hasTracked.current = true
+      logEngagement({
+        activityType: "READING_MATERIAL",
+        metadata: { materialId: String(params.id), materialTitle: blog.title }
+      })
+    }
+  }, [blog, params.id])
 
   // --- Loading State ---
   if (loading) {
