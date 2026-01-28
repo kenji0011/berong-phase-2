@@ -59,7 +59,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+  adduser --system --uid 1001 nextjs
 
 # Install pnpm for Prisma migrations at runtime
 RUN corepack enable && corepack prepare pnpm@10.18.3 --activate
@@ -80,9 +80,9 @@ COPY --from=builder /app/node_modules ./node_modules
 # Copy package.json for prisma CLI
 COPY --from=builder /app/package.json ./package.json
 
-# Copy entrypoint script
+# Copy entrypoint script and convert line endings (Windows CRLF to Unix LF)
 COPY docker-entrypoint.sh ./
-RUN chmod +x docker-entrypoint.sh
+RUN sed -i 's/\r$//' docker-entrypoint.sh && chmod +x docker-entrypoint.sh
 
 # Create uploads directory
 RUN mkdir -p /app/public/uploads
