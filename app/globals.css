@@ -108,3 +108,46 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Chatbot Responsive Styles - ONLY for mobile/tablet screens */
+/* Desktop/Laptop (1024px+) is NOT affected - uses original component styles */
+
+/* Tablet screens (640px - 1023px) */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .chatbot-berong-image {
+    width: 160px !important;
+    height: 160px !important;
+  }
+  
+  .chatbot-window-container {
+    bottom: 80px !important;
+    right: 16px !important;
+  }
+  
+  .chatbot-window {
+    width: 450px !important;
+    height: 80vh !important;
+    min-height: 470px !important;
+    max-height: none !important;
+  }
+}
+
+/* Mobile screens (less than 640px) */
+@media (max-width: 639px) {
+  .chatbot-berong-image {
+    width: 130px !important;
+    height: 130px !important;
+  }
+  
+  .chatbot-window-container {
+    bottom: 64px !important;
+    right: 8px !important;
+  }
+  
+  .chatbot-window {
+    width: calc(100vw - 24px) !important;
+    height: 75vh !important;
+    min-height: 420px !important;
+    max-height: none !important;
+  }
+}

@@ -205,7 +205,7 @@ export function Chatbot() {
                 alt="Berong - BFP Assistant"
                 width={180}
                 height={180}
-                className="drop-shadow-2xl select-none"
+                className="chatbot-berong-image drop-shadow-2xl select-none"
                 draggable={false}
                 priority
               />
@@ -242,10 +242,10 @@ export function Chatbot() {
               damping: 30,
               mass: 0.8
             }}
-            className="fixed bottom-24 right-6 z-50"
+            className="chatbot-window-container fixed bottom-24 right-6 z-50"
             style={{ transformOrigin: 'bottom right' }}
           >
-            <Card className="w-[480px] max-w-[90vw] h-[70vh] min-h-[450px] max-h-[620px] flex flex-col shadow-2xl border-secondary p-0 gap-0 overflow-hidden">
+            <Card className="chatbot-window w-[480px] max-w-[90vw] h-[70vh] min-h-[450px] max-h-[620px] flex flex-col shadow-2xl border-secondary p-0 gap-0 overflow-hidden">
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
                 <div className="flex items-center gap-2">

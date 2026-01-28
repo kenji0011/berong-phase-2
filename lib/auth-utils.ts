@@ -16,9 +16,9 @@ async function ensureConnection() {
 }
 
 export async function registerUser(
-  username: string, 
-  password: string, 
-  name: string, 
+  username: string,
+  password: string,
+  name: string,
   age: number,
   enhancedFields?: {
     gender?: string;
@@ -37,7 +37,7 @@ export async function registerUser(
 ) {
   try {
     await ensureConnection();
-    
+
     // Validate input
     if (!username || !password || !name || !age) {
       throw new Error('All fields are required');
@@ -118,8 +118,8 @@ export async function registerUser(
     // Determine permissions based on role
     const permissions = determinePermissions(role);
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       user: {
         ...user,
         permissions,
@@ -138,7 +138,7 @@ export async function loginUser(identifier: string, password: string) {
 
     // Validate input
     if (!identifier || !password) {
-      throw new Error('Username/Email and password are required');
+      throw new Error('Username and password are required');
     }
 
     // Try to find user by username first, then by email
@@ -154,7 +154,7 @@ export async function loginUser(identifier: string, password: string) {
     }
 
     if (!user) {
-      throw new Error('Invalid username/email or password');
+      throw new Error('Invalid username or password');
     }
 
     // Verify password

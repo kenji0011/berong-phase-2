@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
 
     if (!username || !password) {
       return NextResponse.json(
-        { success: false, error: 'Username/Email and password are required' },
+        { success: false, error: 'Username and password are required' },
         { status: 400 }
       )
     }
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       { success: true, user: result.user },
       { status: 200 }
     )
-    
+
     response.cookies.set('bfp_user', JSON.stringify(result.user), {
       httpOnly: false, // Allow JS access for client-side routing
       secure: process.env.NODE_ENV === 'production',
