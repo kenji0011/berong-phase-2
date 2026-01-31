@@ -181,8 +181,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(userWithPermissions)
       localStorage.setItem('user', JSON.stringify(userWithPermissions))
 
-      // Set cookie for middleware
-      document.cookie = `bfp_user=${encodeURIComponent(JSON.stringify(userWithPermissions))}; path=/; max-age=${60 * 60 * 24 * 7}` // 7 days
+      // Set cookie for middleware with proper attributes for cross-tab/production compatibility
+      const isSecure = window.location.protocol === 'https:'
+      document.cookie = `bfp_user=${encodeURIComponent(JSON.stringify(userWithPermissions))}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax${isSecure ? '; Secure' : ''}` // 7 days
 
       return { success: true }
     } catch (error: any) {
@@ -218,8 +219,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(userWithPermissions)
       localStorage.setItem('user', JSON.stringify(userWithPermissions))
 
-      // Set cookie for middleware
-      document.cookie = `bfp_user=${encodeURIComponent(JSON.stringify(userWithPermissions))}; path=/; max-age=${60 * 60 * 24 * 7}` // 7 days
+      // Set cookie for middleware with proper attributes for cross-tab/production compatibility
+      const isSecure = window.location.protocol === 'https:'
+      document.cookie = `bfp_user=${encodeURIComponent(JSON.stringify(userWithPermissions))}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax${isSecure ? '; Secure' : ''}` // 7 days
 
       return { success: true }
     } catch (error: any) {
