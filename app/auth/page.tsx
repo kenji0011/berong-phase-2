@@ -89,6 +89,9 @@ export default function AuthPage() {
     if (result.success) {
       // Redirect based on user role
       const redirectPath = getRedirectPath()
+      // Small delay to ensure cookie is fully set before middleware checks it
+      // This fixes a race condition where navigation happens before cookie propagation
+      await new Promise(resolve => setTimeout(resolve, 100))
       router.push(redirectPath)
     } else {
       setError(result.error || "Invalid username or password")
@@ -137,14 +140,7 @@ export default function AuthPage() {
       {showRegistrationWizard && (
         <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex items-start justify-center overflow-y-auto py-8">
           <div className="w-full max-w-2xl mx-4">
-            <RegistrationWizard
-              onComplete={() => {
-                setShowRegistrationWizard(false)
-                const redirectPath = getRedirectPath()
-                router.push(redirectPath)
-              }}
-              onCancel={() => setShowRegistrationWizard(false)}
-            />
+            <RegistrationWizard />
           </div>
         </div>
       )}

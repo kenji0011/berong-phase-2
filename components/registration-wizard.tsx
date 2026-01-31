@@ -10,29 +10,29 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Progress } from "@/components/ui/progress"
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { 
-  Shield, 
-  AlertCircle, 
-  ChevronLeft, 
-  ChevronRight, 
-  Check, 
-  User, 
-  MapPin, 
+import {
+  Shield,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  User,
+  MapPin,
   KeyRound,
   ClipboardList,
   Loader2
 } from "lucide-react"
-import { 
-  BARANGAYS_SANTA_CRUZ, 
-  ALL_SCHOOLS, 
-  OCCUPATION_CATEGORIES, 
+import {
+  BARANGAYS_SANTA_CRUZ,
+  ALL_SCHOOLS,
+  OCCUPATION_CATEGORIES,
   GENDER_OPTIONS,
   GRADE_LEVELS,
   getScoreRating
@@ -52,7 +52,7 @@ interface RegistrationData {
   name: string
   age: string
   gender: string
-  
+
   // Step 2: Location & Background
   barangay: string
   school: string
@@ -60,13 +60,13 @@ interface RegistrationData {
   occupation: string
   occupationOther: string
   gradeLevel: string
-  
+
   // Step 3: Account
   username: string
   password: string
   confirmPassword: string
   dataPrivacyConsent: boolean
-  
+
   // Step 4: Pre-Test Answers
   preTestAnswers: Record<number, number> // questionId -> selectedAnswerIndex
 }
@@ -91,7 +91,7 @@ export function RegistrationWizard() {
     maxScore?: number
     user?: any
   } | null>(null)
-  
+
   const [data, setData] = useState<RegistrationData>({
     name: "",
     age: "",
@@ -272,7 +272,11 @@ export function RegistrationWizard() {
     }
   }
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
+    // Small delay to ensure cookie is fully set before middleware checks it
+    // This fixes a race condition where navigation happens before cookie propagation
+    await new Promise(resolve => setTimeout(resolve, 100))
+
     // Redirect based on role
     if (registrationResult?.user) {
       const role = registrationResult.user.role
@@ -287,7 +291,7 @@ export function RegistrationWizard() {
 
   // Show results after registration
   if (registrationResult?.success) {
-    const percentage = registrationResult.maxScore 
+    const percentage = registrationResult.maxScore
       ? Math.round((registrationResult.score! / registrationResult.maxScore) * 100)
       : 0
     const rating = getScoreRating(percentage)
@@ -311,7 +315,7 @@ export function RegistrationWizard() {
               {rating.label}
             </p>
             <p className="text-sm text-muted-foreground mt-4">
-              This is your baseline score. Complete modules and activities to unlock the Post-Test 
+              This is your baseline score. Complete modules and activities to unlock the Post-Test
               and see how much you&apos;ve improved!
             </p>
           </div>
@@ -336,7 +340,7 @@ export function RegistrationWizard() {
         <CardDescription>
           Step {currentStep} of {STEPS.length}: {STEPS[currentStep - 1].description}
         </CardDescription>
-        
+
         {/* Progress Indicator */}
         <div className="mt-4">
           <Progress value={(currentStep / STEPS.length) * 100} className="h-2" />
@@ -346,15 +350,13 @@ export function RegistrationWizard() {
               const isCompleted = currentStep > step.id
               const isCurrent = currentStep === step.id
               return (
-                <div 
-                  key={step.id} 
-                  className={`flex flex-col items-center ${
-                    isCompleted ? "text-green-600" : isCurrent ? "text-orange-500" : "text-gray-400"
-                  }`}
+                <div
+                  key={step.id}
+                  className={`flex flex-col items-center ${isCompleted ? "text-green-600" : isCurrent ? "text-orange-500" : "text-gray-400"
+                    }`}
                 >
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    isCompleted ? "bg-green-100" : isCurrent ? "bg-orange-100" : "bg-gray-100"
-                  }`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isCompleted ? "bg-green-100" : isCurrent ? "bg-orange-100" : "bg-gray-100"
+                    }`}>
                     {isCompleted ? <Check className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
                   </div>
                   <span className="text-xs mt-1 hidden sm:block">{step.title}</span>
@@ -612,14 +614,13 @@ export function RegistrationWizard() {
               <div className="grid gap-1.5 leading-none">
                 <label
                   htmlFor="consent"
-                  className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${
-                    validationErrors.dataPrivacyConsent ? "text-red-500" : ""
-                  }`}
+                  className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${validationErrors.dataPrivacyConsent ? "text-red-500" : ""
+                    }`}
                 >
                   I agree to the Data Privacy Policy *
                 </label>
                 <p className="text-xs text-muted-foreground">
-                  Your data (barangay, school) will be used for community fire safety analytics. 
+                  Your data (barangay, school) will be used for community fire safety analytics.
                   Individual information is kept confidential and only aggregated data is shared.
                 </p>
               </div>
@@ -688,7 +689,7 @@ export function RegistrationWizard() {
                     <ChevronLeft className="h-4 w-4 mr-1" />
                     Previous
                   </Button>
-                  
+
                   {currentQuestionIndex < questions.length - 1 ? (
                     <Button
                       onClick={() => setCurrentQuestionIndex(prev => prev + 1)}
@@ -724,13 +725,12 @@ export function RegistrationWizard() {
                     <button
                       key={q.id}
                       onClick={() => setCurrentQuestionIndex(idx)}
-                      className={`w-8 h-8 rounded-full text-xs font-medium transition-colors ${
-                        currentQuestionIndex === idx
+                      className={`w-8 h-8 rounded-full text-xs font-medium transition-colors ${currentQuestionIndex === idx
                           ? "bg-orange-500 text-white"
                           : data.preTestAnswers[q.id] !== undefined
-                          ? "bg-green-100 text-green-700 border border-green-300"
-                          : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                      }`}
+                            ? "bg-green-100 text-green-700 border border-green-300"
+                            : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                        }`}
                     >
                       {idx + 1}
                     </button>

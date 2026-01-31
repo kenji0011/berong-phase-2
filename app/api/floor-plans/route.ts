@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { cookies } from 'next/headers'
-import { verify } from 'jsonwebtoken'
 
-interface JWTPayload {
-  userId: number
+// User payload from bfp_user cookie
+interface UserPayload {
+  id: number
+  userId?: number // For backwards compatibility
   username: string
   role: string
 }
@@ -27,14 +28,20 @@ interface FloorPlanListItem {
   updatedAt: Date
 }
 
-async function getCurrentUser(): Promise<JWTPayload | null> {
+// Get current user from bfp_user cookie (matches main auth system)
+async function getCurrentUser(): Promise<{ userId: number; username: string; role: string } | null> {
   try {
     const cookieStore = await cookies()
-    const token = cookieStore.get('auth-token')?.value
-    if (!token) return null
-    
-    const decoded = verify(token, process.env.JWT_SECRET || 'fallback-secret') as JWTPayload
-    return decoded
+    const userCookie = cookieStore.get('bfp_user')?.value
+    if (!userCookie) return null
+
+    const decoded = JSON.parse(decodeURIComponent(userCookie)) as UserPayload
+    // Handle both 'id' and 'userId' for compatibility
+    return {
+      userId: decoded.userId || decoded.id,
+      username: decoded.username,
+      role: decoded.role
+    }
   } catch {
     return null
   }
@@ -45,17 +52,17 @@ export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser()
     const { searchParams } = new URL(request.url)
-    
+
     const filter = searchParams.get('filter') || 'all' // 'all', 'mine', 'public'
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
     const search = searchParams.get('search') || ''
-    
+
     const skip = (page - 1) * limit
-    
+
     // Build where clause based on filter
     let where: any = {}
-    
+
     if (filter === 'mine') {
       if (!user) {
         return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
@@ -74,7 +81,7 @@ export async function GET(request: NextRequest) {
         where.isPublic = true
       }
     }
-    
+
     // Add search if provided
     if (search) {
       where.AND = [
@@ -88,7 +95,7 @@ export async function GET(request: NextRequest) {
         }
       ]
     }
-    
+
     const [floorPlans, total] = await Promise.all([
       prisma.floorPlan.findMany({
         where,
@@ -115,14 +122,14 @@ export async function GET(request: NextRequest) {
       }),
       prisma.floorPlan.count({ where })
     ])
-    
+
     // Add ownership flag for current user
     const floorPlansWithOwnership = (floorPlans as FloorPlanListItem[]).map((fp: FloorPlanListItem) => ({
       ...fp,
       isOwner: user ? fp.userId === user.userId : false,
       canEdit: user ? fp.userId === user.userId : false
     }))
-    
+
     return NextResponse.json({
       floorPlans: floorPlansWithOwnership,
       pagination: {
@@ -145,13 +152,13 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
-    
+
     const body = await request.json()
-    const { 
-      name, 
-      description, 
-      gridData, 
-      thumbnail, 
+    const {
+      name,
+      description,
+      gridData,
+      thumbnail,
       originalImage,
       isPublic = false,
       exitCount = 0,
@@ -159,17 +166,17 @@ export async function POST(request: NextRequest) {
       threshold,
       invertMask
     } = body
-    
+
     if (!name || !gridData) {
       return NextResponse.json({ error: 'Name and gridData are required' }, { status: 400 })
     }
-    
+
     // Get user's name for denormalized field
     const userData = await prisma.user.findUnique({
       where: { id: user.userId },
       select: { name: true, username: true }
     })
-    
+
     const floorPlan = await prisma.floorPlan.create({
       data: {
         name,
@@ -186,9 +193,9 @@ export async function POST(request: NextRequest) {
         invertMask
       }
     })
-    
-    return NextResponse.json({ 
-      success: true, 
+
+    return NextResponse.json({
+      success: true,
       floorPlan: {
         id: floorPlan.id,
         name: floorPlan.name,

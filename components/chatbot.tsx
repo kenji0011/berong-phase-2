@@ -34,6 +34,10 @@ export function Chatbot() {
   const [showQuickQuestions, setShowQuickQuestions] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
+  // Draggable chathead state - vertical position only (stays on right side)
+  const [isDragging, setIsDragging] = useState(false)
+  const constraintsRef = useRef<HTMLDivElement>(null)
+
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -185,21 +189,39 @@ export function Chatbot() {
 
   return (
     <>
-      {/* Chatbot Toggle - Berong Character on the right side */}
-      <div className="fixed bottom-0 right-0 z-[60] pointer-events-none">
+      {/* Chatbot Toggle - Berong Character fixed to right side, draggable vertically */}
+      <div ref={constraintsRef} className="fixed top-0 bottom-0 right-0 w-[180px] z-[60] pointer-events-none">
         {/* Berong Character - Clickable to toggle chat, hidden when chat is open */}
         <AnimatePresence>
           {!isOpen && (
             <motion.div
-              className="pointer-events-auto cursor-pointer"
+              className="pointer-events-auto absolute right-0 bottom-0"
+              drag="y"
+              dragConstraints={constraintsRef}
+              dragElastic={0.1}
+              dragMomentum={false}
+              onDragStart={() => setIsDragging(true)}
+              onDragEnd={() => setIsDragging(false)}
               initial={{ opacity: 0, x: 100 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 100 }}
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: isDragging ? 1 : 1.05 }}
               whileTap={{ scale: 0.95 }}
+              whileDrag={{ scale: 1.1, cursor: "grabbing" }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
-              onClick={() => setIsOpen(true)}
+              onClick={() => {
+                // Only open chat if not dragging
+                if (!isDragging) setIsOpen(true)
+              }}
+              style={{
+                cursor: isDragging ? "grabbing" : "pointer",
+                touchAction: "none" // Better touch support
+              }}
             >
+              {/* Drag handle hint */}
+              <div className="absolute top-2 left-2 bg-black/20 backdrop-blur-sm rounded-full px-2 py-0.5 text-[10px] text-white/80 opacity-0 hover:opacity-100 transition-opacity">
+                ↕ Drag
+              </div>
               <Image
                 src="/berong_chatbot.png"
                 alt="Berong - BFP Assistant"
@@ -214,7 +236,7 @@ export function Chatbot() {
         </AnimatePresence>
       </div>
 
-      {/* Chatbot Window - Positioned above chathead */}
+      {/* Chatbot Window - Positioned above chathead on the right */}
       <AnimatePresence>
         {isOpen && (
           <motion.div

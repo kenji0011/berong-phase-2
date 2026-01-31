@@ -1,22 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { cookies } from 'next/headers'
-import { verify } from 'jsonwebtoken'
 
-interface JWTPayload {
-  userId: number
+// User payload from bfp_user cookie
+interface UserPayload {
+  id: number
+  userId?: number // For backwards compatibility
   username: string
   role: string
 }
 
-async function getCurrentUser(): Promise<JWTPayload | null> {
+// Get current user from bfp_user cookie (matches main auth system)
+async function getCurrentUser(): Promise<{ userId: number; username: string; role: string } | null> {
   try {
     const cookieStore = await cookies()
-    const token = cookieStore.get('auth-token')?.value
-    if (!token) return null
-    
-    const decoded = verify(token, process.env.JWT_SECRET || 'fallback-secret') as JWTPayload
-    return decoded
+    const userCookie = cookieStore.get('bfp_user')?.value
+    if (!userCookie) return null
+
+    const decoded = JSON.parse(decodeURIComponent(userCookie)) as UserPayload
+    // Handle both 'id' and 'userId' for compatibility
+    return {
+      userId: decoded.userId || decoded.id,
+      username: decoded.username,
+      role: decoded.role
+    }
   } catch {
     return null
   }
@@ -30,36 +37,36 @@ export async function POST(
   try {
     const { id } = await params
     const sourceId = parseInt(id)
-    
+
     if (isNaN(sourceId)) {
       return NextResponse.json({ error: 'Invalid floor plan ID' }, { status: 400 })
     }
-    
+
     const user = await getCurrentUser()
     if (!user) {
       return NextResponse.json({ error: 'Authentication required to clone floor plans' }, { status: 401 })
     }
-    
+
     // Get source floor plan
     const source = await prisma.floorPlan.findUnique({
       where: { id: sourceId }
     })
-    
+
     if (!source) {
       return NextResponse.json({ error: 'Source floor plan not found' }, { status: 404 })
     }
-    
+
     // Check access: must be public or owner
     if (!source.isPublic && source.userId !== user.userId) {
       return NextResponse.json({ error: 'Cannot clone private floor plan' }, { status: 403 })
     }
-    
+
     // Get user's name for denormalized field
     const userData = await prisma.user.findUnique({
       where: { id: user.userId },
       select: { name: true, username: true }
     })
-    
+
     // Parse request body for optional name override
     let newName = `${source.name} (Copy)`
     try {
@@ -70,7 +77,7 @@ export async function POST(
     } catch {
       // No body provided, use default name
     }
-    
+
     // Create clone
     const clone = await prisma.floorPlan.create({
       data: {
@@ -91,7 +98,7 @@ export async function POST(
         invertMask: source.invertMask
       }
     })
-    
+
     return NextResponse.json({
       success: true,
       message: `Floor plan cloned successfully`,
