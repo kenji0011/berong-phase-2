@@ -129,7 +129,7 @@ export function SimulationWizard() {
     // Manual Drawing Mode Bypass (Skip Backend U-Net)
     if (directGrid) {
       try {
-        console.log("[SimulationWizard] Using direct grid from builder")
+
 
         // Convert blob/file to base64 for display
         const reader = new FileReader()
@@ -140,7 +140,7 @@ export function SimulationWizard() {
           const PADDING = 20
           const paddedGrid = addPadding(directGrid, PADDING)
 
-          console.log(`[SimulationWizard] Added local padding: ${directGrid.length} -> ${paddedGrid.length}`)
+
 
           setData(prev => ({
             ...prev,
@@ -180,7 +180,7 @@ export function SimulationWizard() {
       }
 
       const result = await response.json()
-      console.log('Process image result:', result)
+
 
       // Auto-flip grid if wall percentage is abnormally high (>50%)
       // In a typical floor plan, walls are thin lines (~10-20% of area)
@@ -190,10 +190,10 @@ export function SimulationWizard() {
       const wallCount = processedGrid.flat().filter((c: number) => c === 1).length
       const wallPercentage = (wallCount / total) * 100
 
-      console.log(`[AUTO-FLIP] Grid composition: ${wallPercentage.toFixed(1)}% walls`)
+
 
       if (wallPercentage > 50) {
-        console.log('[AUTO-FLIP] Wall percentage > 50%, auto-flipping grid...')
+
         processedGrid = processedGrid.map((row: number[]) =>
           row.map((cell: number) => {
             if (cell === 0) return 1
@@ -202,7 +202,7 @@ export function SimulationWizard() {
           })
         )
         const newWallCount = processedGrid.flat().filter((c: number) => c === 1).length
-        console.log(`[AUTO-FLIP] After flip: ${((newWallCount / total) * 100).toFixed(1)}% walls`)
+
       }
 
       setData(prev => ({
@@ -238,11 +238,7 @@ export function SimulationWizard() {
       // Convert user exits to [row, col] format (exit.y = row, exit.x = col)
       const exitsForBackend = data.userExits.map(exit => [exit.y, exit.x] as [number, number])
 
-      console.log('Starting simulation with:', {
-        userExits: exitsForBackend.length,
-        agents: data.config.agentPositions.length,
-        material: data.config.materialType
-      })
+
 
       // Convert assembly point to [row, col] format
       const assemblyForBackend = data.assemblyPoint
@@ -271,7 +267,7 @@ export function SimulationWizard() {
       }
 
       const { job_id } = await response.json()
-      console.log('Simulation job started:', job_id)
+
       setData(prev => ({ ...prev, jobId: job_id }))
 
       // Poll for results
@@ -301,14 +297,14 @@ export function SimulationWizard() {
         }
 
         const status = await response.json()
-        console.log(`Status check ${attempts + 1}:`, status.status)
+
 
         if (status.status === "complete") {
-          console.log('Simulation complete!', status.result)
+
 
           // Validate result structure
           if (!status.result || !status.result.agent_results) {
-            console.warn('Received incomplete results:', status.result)
+
             // If we have dashboard data but no agents, we can still show partial results
             // or we might want to fail if it's critical. 
             // For now, let's allow it but ensure the component handles missing data (which we fixed in simulation-results.tsx)

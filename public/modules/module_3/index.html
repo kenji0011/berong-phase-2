@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,10 +8,20 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/shared.css">
-    
+
     <style>
-        .fade-in { animation: fadeIn 0.8s ease-out forwards; opacity: 0; transform: translateY(20px); }
-        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
         .scan-line {
             position: absolute;
@@ -21,13 +32,37 @@
             animation: scan 3s linear infinite;
             pointer-events: none;
         }
-        @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
 
-        .quiz-option { transition: all 0.2s; }
-        .quiz-option:hover { transform: translateX(5px); }
-        .option-correct { background-color: #15803d !important; border-color: #4ade80 !important; color: white; }
-        .option-wrong { background-color: #991b1b !important; border-color: #f87171 !important; opacity: 0.7; }
-        
+        @keyframes scan {
+            0% {
+                top: 0%;
+            }
+
+            100% {
+                top: 100%;
+            }
+        }
+
+        .quiz-option {
+            transition: all 0.2s;
+        }
+
+        .quiz-option:hover {
+            transform: translateX(5px);
+        }
+
+        .option-correct {
+            background-color: #15803d !important;
+            border-color: #4ade80 !important;
+            color: white;
+        }
+
+        .option-wrong {
+            background-color: #991b1b !important;
+            border-color: #f87171 !important;
+            opacity: 0.7;
+        }
+
         #game-container {
             position: relative;
             background-color: #020617;
@@ -36,9 +71,13 @@
             overflow: hidden;
             cursor: crosshair;
         }
-        canvas { display: block; }
+
+        canvas {
+            display: block;
+        }
     </style>
 </head>
+
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen">
 
     <!-- NAVIGATION -->
@@ -48,11 +87,13 @@
                 <i class="fa-solid fa-shield-cat"></i>
                 <h1>SafeScape <span>| Module 3</span></h1>
             </a>
-            
+
             <div class="ss-module-indicators">
-                <a href="../module_1/index.html" class="ss-module-dot completed" id="nav-1" title="Module 1"><i class="fa-solid fa-check"></i></a>
+                <a href="../module_1/index.html" class="ss-module-dot completed" id="nav-1" title="Module 1"><i
+                        class="fa-solid fa-check"></i></a>
                 <div class="ss-module-connector active"></div>
-                <a href="../module_2/index.html" class="ss-module-dot completed" id="nav-2" title="Module 2"><i class="fa-solid fa-check"></i></a>
+                <a href="../module_2/index.html" class="ss-module-dot completed" id="nav-2" title="Module 2"><i
+                        class="fa-solid fa-check"></i></a>
                 <div class="ss-module-connector active"></div>
                 <a href="index.html" class="ss-module-dot current" title="Module 3">3</a>
                 <div class="ss-module-connector" id="conn-3-4"></div>
@@ -71,18 +112,21 @@
 
         <!-- HEADER -->
         <section class="fade-in text-center max-w-3xl mx-auto space-y-4" style="animation-delay: 0.1s;">
-            <h1 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400">
+            <h1
+                class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400">
                 Get Out & Stay Out!
             </h1>
             <p class="text-lg text-slate-300 leading-relaxed">
-                A hero always has a strategy. Learn to navigate the danger zone, check your path, and show integrity by never going back inside.
+                A hero always has a strategy. Learn to navigate the danger zone, check your path, and show integrity by
+                never going back inside.
             </p>
         </section>
 
         <!-- VIDEO -->
         <section id="section-video" class="fade-in ss-section" style="animation-delay: 0.2s;">
             <div class="ss-section-badge"><i class="fa-solid fa-check"></i></div>
-            <div class="w-full aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-slate-700 relative group">
+            <div
+                class="w-full aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-slate-700 relative group">
                 <video id="module-video" controls class="w-full h-full object-cover" onplay="onVideoPlay()">
                     <source src="../assets/videos/m3.mp4" type="video/mp4">
                 </video>
@@ -100,7 +144,7 @@
                             <h2 class="text-2xl font-bold text-white">Two Ways Out</h2>
                         </div>
                         <p class="text-slate-300 leading-relaxed">
-                            Every room needs a primary exit (usually the door) and a backup plan (usually a window). 
+                            Every room needs a primary exit (usually the door) and a backup plan (usually a window).
                             If smoke blocks one path, <strong class="text-white">reroute immediately</strong>.
                         </p>
                     </div>
@@ -110,38 +154,46 @@
                             <h2 class="text-2xl font-bold text-white">The Hand Check Algorithm</h2>
                         </div>
                         <p class="text-slate-300 leading-relaxed">
-                            Before opening a closed door, you must run a safety check. 
-                            Use the <strong class="text-orange-400">back of your hand</strong> to touch the door and knob.
+                            Before opening a closed door, you must run a safety check.
+                            Use the <strong class="text-orange-400">back of your hand</strong> to touch the door and
+                            knob.
                             <br><br>
                             <span class="font-mono text-red-400">IF (HOT) -> DO NOT OPEN.</span><br>
                             <span class="font-mono text-green-400">IF (COOL) -> OPEN SLOWLY.</span>
                         </p>
                     </div>
-                    
+
                     <button onclick="markContentRead()" class="ss-btn ss-btn-secondary mt-4">
                         <i class="fa-solid fa-check"></i> I understand the escape plan
                     </button>
                 </div>
 
                 <!-- Interactive Blueprint SCANNER -->
-                <div class="bg-slate-800 rounded-xl p-1 border-4 border-slate-700 shadow-lg relative min-h-[300px] overflow-hidden group">
+                <div
+                    class="bg-slate-800 rounded-xl p-1 border-4 border-slate-700 shadow-lg relative min-h-[300px] overflow-hidden group">
                     <div class="scan-line z-20"></div>
-                    <div class="absolute top-0 left-0 w-full bg-slate-900/80 p-2 z-20 flex justify-between items-center backdrop-blur-sm">
-                        <span class="text-xs font-mono text-green-400"><i class="fa-solid fa-radar animate-pulse mr-2"></i>SCANNING ROOM...</span>
+                    <div
+                        class="absolute top-0 left-0 w-full bg-slate-900/80 p-2 z-20 flex justify-between items-center backdrop-blur-sm">
+                        <span class="text-xs font-mono text-green-400"><i
+                                class="fa-solid fa-radar animate-pulse mr-2"></i>SCANNING ROOM...</span>
                         <span class="text-xs font-mono text-slate-400">Floor: 2 | Room: 4B</span>
                     </div>
 
                     <div class="relative w-full h-80 bg-slate-900 flex items-center justify-center overflow-hidden">
-                        <img src="../assets/images/blueprint.png" alt="Room Blueprint" class="w-full h-full object-contain" onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
+                        <img src="../assets/images/blueprint.png" alt="Room Blueprint"
+                            class="w-full h-full object-contain"
+                            onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
                         <div class="text-center opacity-30 hidden">
                             <i class="fa-solid fa-map text-6xl mb-2"></i>
                             <p class="font-mono text-sm">[ blueprint.png - 800x500px ]</p>
                         </div>
                         <div class="absolute inset-0 z-10">
-                            <button onclick="alert('Primary Exit: The Door')" class="absolute top-1/3 right-10 w-8 h-8 rounded-full border-2 border-red-500 bg-red-500/20 hover:bg-red-500 flex items-center justify-center animate-pulse transition-colors">
+                            <button onclick="alert('Primary Exit: The Door')"
+                                class="absolute top-1/3 right-10 w-8 h-8 rounded-full border-2 border-red-500 bg-red-500/20 hover:bg-red-500 flex items-center justify-center animate-pulse transition-colors">
                                 <i class="fa-solid fa-door-closed text-xs text-white"></i>
                             </button>
-                            <button onclick="alert('Secondary Exit: The Window')" class="absolute bottom-1/3 left-10 w-8 h-8 rounded-full border-2 border-blue-500 bg-blue-500/20 hover:bg-blue-500 flex items-center justify-center animate-pulse transition-colors">
+                            <button onclick="alert('Secondary Exit: The Window')"
+                                class="absolute bottom-1/3 left-10 w-8 h-8 rounded-full border-2 border-blue-500 bg-blue-500/20 hover:bg-blue-500 flex items-center justify-center animate-pulse transition-colors">
                                 <i class="fa-solid fa-window-maximize text-xs text-white"></i>
                             </button>
                         </div>
@@ -151,11 +203,15 @@
         </section>
 
         <!-- PART 2: THE CANVAS GAME -->
-        <section id="section-game" class="fade-in ss-section bg-slate-800 rounded-2xl p-8 shadow-2xl border border-slate-700 text-center" style="animation-delay: 0.5s;">
+        <section id="section-game"
+            class="fade-in ss-section bg-slate-800 rounded-2xl p-8 shadow-2xl border border-slate-700 text-center"
+            style="animation-delay: 0.5s;">
             <div class="ss-section-badge"><i class="fa-solid fa-check"></i></div>
             <div class="mb-6">
-                <h2 class="text-3xl font-bold text-white mb-2"><i class="fa-solid fa-compass-drafting text-blue-400 mr-2"></i> The Smoke Labyrinth</h2>
-                <p class="text-slate-400">Use <strong class="text-white border px-2 rounded bg-slate-700">ARROW KEYS</strong> to find your way through the smoke.</p>
+                <h2 class="text-3xl font-bold text-white mb-2"><i
+                        class="fa-solid fa-compass-drafting text-blue-400 mr-2"></i> The Smoke Labyrinth</h2>
+                <p class="text-slate-400">Use <strong class="text-white border px-2 rounded bg-slate-700">ARROW
+                        KEYS</strong> to find your way through the smoke.</p>
             </div>
 
             <div class="flex flex-col xl:flex-row gap-8 justify-center items-start">
@@ -168,47 +224,68 @@
                         </div>
                         <div class="absolute bottom-4 right-4 grid grid-cols-3 gap-1 md:hidden opacity-50">
                             <div></div>
-                            <button onpointerdown="startMove(0,-1)" onpointerup="stopMove()" class="bg-slate-700 w-12 h-12 rounded-full"><i class="fa-solid fa-arrow-up"></i></button>
+                            <button onpointerdown="startMove(0,-1)" onpointerup="stopMove()"
+                                class="bg-slate-700 w-12 h-12 rounded-full"><i
+                                    class="fa-solid fa-arrow-up"></i></button>
                             <div></div>
-                            <button onpointerdown="startMove(-1,0)" onpointerup="stopMove()" class="bg-slate-700 w-12 h-12 rounded-full"><i class="fa-solid fa-arrow-left"></i></button>
-                            <button onpointerdown="startMove(0,1)" onpointerup="stopMove()" class="bg-slate-700 w-12 h-12 rounded-full"><i class="fa-solid fa-arrow-down"></i></button>
-                            <button onpointerdown="startMove(1,0)" onpointerup="stopMove()" class="bg-slate-700 w-12 h-12 rounded-full"><i class="fa-solid fa-arrow-right"></i></button>
+                            <button onpointerdown="startMove(-1,0)" onpointerup="stopMove()"
+                                class="bg-slate-700 w-12 h-12 rounded-full"><i
+                                    class="fa-solid fa-arrow-left"></i></button>
+                            <button onpointerdown="startMove(0,1)" onpointerup="stopMove()"
+                                class="bg-slate-700 w-12 h-12 rounded-full"><i
+                                    class="fa-solid fa-arrow-down"></i></button>
+                            <button onpointerdown="startMove(1,0)" onpointerup="stopMove()"
+                                class="bg-slate-700 w-12 h-12 rounded-full"><i
+                                    class="fa-solid fa-arrow-right"></i></button>
                         </div>
                     </div>
                 </div>
 
-                <div class="w-full xl:w-72 bg-slate-900 p-4 rounded-xl border border-slate-600 text-left h-auto min-h-[300px] flex flex-col">
+                <div
+                    class="w-full xl:w-72 bg-slate-900 p-4 rounded-xl border border-slate-600 text-left h-auto min-h-[300px] flex flex-col">
                     <h3 class="text-xs font-mono text-slate-500 uppercase mb-2">System Log</h3>
-                    <div id="game-log" class="text-sm font-mono space-y-2 h-48 overflow-y-auto mb-4 border-b border-slate-700 pb-2">
+                    <div id="game-log"
+                        class="text-sm font-mono space-y-2 h-48 overflow-y-auto mb-4 border-b border-slate-700 pb-2">
                         <p class="text-green-400">> Environment Loaded.</p>
                         <p class="text-slate-300">> Smoke Density: 90%</p>
                     </div>
 
                     <div class="mt-auto">
-                        <button onclick="initGame()" class="w-full bg-slate-800 hover:bg-slate-700 text-xs py-2 rounded mb-2 border border-slate-600">
+                        <button onclick="initGame()"
+                            class="w-full bg-slate-800 hover:bg-slate-700 text-xs py-2 rounded mb-2 border border-slate-600">
                             <i class="fa-solid fa-rotate mr-2"></i>Reset Simulation
                         </button>
                     </div>
-                    
-                    <div id="integrity-modal" class="hidden mt-4 pt-4 border-t border-slate-700 animate-pulse bg-slate-800 p-2 rounded">
+
+                    <div id="integrity-modal"
+                        class="hidden mt-4 pt-4 border-t border-slate-700 animate-pulse bg-slate-800 p-2 rounded">
                         <p class="text-orange-400 font-bold text-sm mb-2 text-center">⚠️ TEMPTATION ALERT!</p>
-                        <p class="text-xs text-slate-300 mb-2 text-center">You are safe outside. But you left your tablet inside!</p>
+                        <p class="text-xs text-slate-300 mb-2 text-center">You are safe outside. But you left your
+                            tablet inside!</p>
                         <div class="flex flex-col gap-2">
-                            <button onclick="handleIntegrity(false)" class="bg-red-900 hover:bg-red-800 text-white text-xs py-2 rounded font-bold">Go Back For It</button>
-                            <button onclick="handleIntegrity(true)" class="bg-green-700 hover:bg-green-600 text-white text-xs py-2 rounded font-bold">Stay Out (Integrity)</button>
+                            <button onclick="handleIntegrity(false)"
+                                class="bg-red-900 hover:bg-red-800 text-white text-xs py-2 rounded font-bold">Go Back
+                                For It</button>
+                            <button onclick="handleIntegrity(true)"
+                                class="bg-green-700 hover:bg-green-600 text-white text-xs py-2 rounded font-bold">Stay
+                                Out (Integrity)</button>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             <div id="door-check-overlay" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
                 <div class="bg-slate-800 p-8 rounded-2xl border-2 border-orange-500 max-w-sm text-center shadow-2xl">
                     <i class="fa-solid fa-hand-back-fist text-6xl text-orange-400 mb-4"></i>
                     <h3 class="text-xl font-bold text-white mb-2">Closed Door Detected</h3>
                     <p class="text-slate-300 mb-6 text-sm">You must check for heat before proceeding.</p>
                     <div class="grid gap-3">
-                        <button onclick="resolveDoor(false)" class="bg-red-900 hover:bg-red-800 p-3 rounded border border-red-700 text-sm">Open Immediately</button>
-                        <button onclick="resolveDoor(true)" class="bg-blue-600 hover:bg-blue-500 p-3 rounded font-bold text-sm">Touch with Back of Hand</button>
+                        <button onclick="resolveDoor(false)"
+                            class="bg-red-900 hover:bg-red-800 p-3 rounded border border-red-700 text-sm">Open
+                            Immediately</button>
+                        <button onclick="resolveDoor(true)"
+                            class="bg-blue-600 hover:bg-blue-500 p-3 rounded font-bold text-sm">Touch with Back of
+                            Hand</button>
                     </div>
                 </div>
             </div>
@@ -216,18 +293,23 @@
             <div id="completion-msg" class="hidden mt-8 bg-green-900/50 p-6 rounded-xl border border-green-500">
                 <h3 class="text-green-400 text-2xl font-bold mb-2">ESCAPE SUCCESSFUL</h3>
                 <p class="text-white mb-4">You navigated the smoke and showed perfect integrity.</p>
-                <button onclick="scrollToQuiz()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full shadow-lg">
+                <button onclick="scrollToQuiz()"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full shadow-lg">
                     Take Final Certification <i class="fa-solid fa-arrow-down ml-2"></i>
                 </button>
             </div>
         </section>
 
         <!-- QUIZ SECTION -->
-        <section id="final-quiz" class="fade-in ss-section bg-slate-800 rounded-2xl p-8 md:p-12 border border-slate-700 shadow-2xl" style="animation-delay: 0.6s;">
+        <section id="final-quiz"
+            class="fade-in ss-section bg-slate-800 rounded-2xl p-8 md:p-12 border border-slate-700 shadow-2xl"
+            style="animation-delay: 0.6s;">
             <div class="ss-section-badge"><i class="fa-solid fa-check"></i></div>
             <div class="text-center mb-8">
-                <h2 class="text-3xl font-bold text-white mb-2"><i class="fa-solid fa-graduation-cap text-yellow-400 mr-2"></i> Strategic Certification</h2>
-                <p class="text-slate-400">Prove your knowledge. Score <span class="text-orange-400 font-bold">4/5</span> to pass.</p>
+                <h2 class="text-3xl font-bold text-white mb-2"><i
+                        class="fa-solid fa-graduation-cap text-yellow-400 mr-2"></i> Strategic Certification</h2>
+                <p class="text-slate-400">Prove your knowledge. Score <span class="text-orange-400 font-bold">4/5</span>
+                    to pass.</p>
             </div>
 
             <div id="quiz-container" class="max-w-2xl mx-auto space-y-8"></div>
@@ -236,9 +318,10 @@
                 <div class="text-5xl mb-4" id="result-icon"></div>
                 <h3 class="text-2xl font-bold text-white mb-2" id="result-title"></h3>
                 <p class="text-slate-400 mb-6" id="result-desc"></p>
-                
+
                 <div class="flex justify-center gap-4">
-                    <button id="btn-retake" onclick="renderQuiz()" class="text-sm text-slate-500 hover:text-white underline hidden">Retake Quiz</button>
+                    <button id="btn-retake" onclick="renderQuiz()"
+                        class="text-sm text-slate-500 hover:text-white underline hidden">Retake Quiz</button>
                     <a href="../module_4/index.html" id="btn-next-module" class="hidden ss-btn ss-btn-success">
                         Go to Module 4 <i class="fa-solid fa-arrow-right ml-2"></i>
                     </a>
@@ -246,17 +329,6 @@
             </div>
         </section>
 
-        <!-- MODULE COMPLETE -->
-        <section id="section-complete" class="fade-in text-center py-12 hidden">
-            <div class="bg-green-900/30 border border-green-500 rounded-2xl p-8 max-w-xl mx-auto">
-                <i class="fa-solid fa-circle-check text-6xl text-green-500 mb-4"></i>
-                <h2 class="text-3xl font-bold text-white mb-2">Module 3 Complete!</h2>
-                <p class="text-slate-300 mb-6">You've mastered the escape plan and integrity principles.</p>
-                <a href="../module_4/index.html" class="ss-btn ss-btn-primary text-lg">
-                    Continue to Module 4 <i class="fa-solid fa-arrow-right ml-2"></i>
-                </a>
-            </div>
-        </section>
 
     </main>
 
@@ -308,7 +380,6 @@
             });
             updateModuleProgress();
             updateSectionStates();
-            checkModuleComplete();
         }
 
         function updateModuleProgress() {
@@ -325,11 +396,6 @@
             if (localState.quizPassed) document.getElementById('final-quiz').classList.add('completed');
         }
 
-        function checkModuleComplete() {
-            if (localState.quizPassed && localState.integrityPassed) {
-                document.getElementById('section-complete').classList.remove('hidden');
-            }
-        }
 
         function updateNavigation() {
             const progress = SafeScapeProgress.getProgress();
@@ -386,44 +452,44 @@
         function generateMaze() {
             let maze = Array(ROWS).fill().map(() => Array(COLS).fill(1));
             let stack = [];
-            let current = {x: 1, y: 1};
+            let current = { x: 1, y: 1 };
             maze[current.y][current.x] = 0;
             stack.push(current);
 
-            while(stack.length > 0) {
+            while (stack.length > 0) {
                 current = stack[stack.length - 1];
                 let neighbors = [];
-                const dirs = [{x: 0, y: -2}, {x: 2, y: 0}, {x: 0, y: 2}, {x: -2, y: 0}];
+                const dirs = [{ x: 0, y: -2 }, { x: 2, y: 0 }, { x: 0, y: 2 }, { x: -2, y: 0 }];
                 dirs.forEach(d => {
                     let nx = current.x + d.x;
                     let ny = current.y + d.y;
-                    if(nx > 0 && nx < COLS-1 && ny > 0 && ny < ROWS-1 && maze[ny][nx] === 1) {
-                        neighbors.push({x: nx, y: ny, dx: d.x/2, dy: d.y/2});
+                    if (nx > 0 && nx < COLS - 1 && ny > 0 && ny < ROWS - 1 && maze[ny][nx] === 1) {
+                        neighbors.push({ x: nx, y: ny, dx: d.x / 2, dy: d.y / 2 });
                     }
                 });
-                if(neighbors.length > 0) {
+                if (neighbors.length > 0) {
                     let next = neighbors[Math.floor(Math.random() * neighbors.length)];
                     maze[current.y + next.dy][current.x + next.dx] = 0;
                     maze[next.y][next.x] = 0;
-                    stack.push({x: next.x, y: next.y});
+                    stack.push({ x: next.x, y: next.y });
                 } else {
                     stack.pop();
                 }
             }
 
-            for(let y=1; y<ROWS-1; y++) {
-                for(let x=1; x<COLS-1; x++) {
-                    if(maze[y][x] === 0) {
+            for (let y = 1; y < ROWS - 1; y++) {
+                for (let x = 1; x < COLS - 1; x++) {
+                    if (maze[y][x] === 0) {
                         let wallCount = 0;
-                        if(maze[y-1][x]===1) wallCount++;
-                        if(maze[y+1][x]===1) wallCount++;
-                        if(maze[y][x-1]===1) wallCount++;
-                        if(maze[y][x+1]===1) wallCount++;
-                        if(wallCount >= 3 && Math.random() > 0.5) {
-                            let dirs = [{x:0, y:-1}, {x:0, y:1}, {x:-1, y:0}, {x:1, y:0}];
-                            let d = dirs[Math.floor(Math.random()*dirs.length)];
-                            if(x+d.x > 0 && x+d.x < COLS-1 && y+d.y > 0 && y+d.y < ROWS-1) {
-                                maze[y+d.y][x+d.x] = 0;
+                        if (maze[y - 1][x] === 1) wallCount++;
+                        if (maze[y + 1][x] === 1) wallCount++;
+                        if (maze[y][x - 1] === 1) wallCount++;
+                        if (maze[y][x + 1] === 1) wallCount++;
+                        if (wallCount >= 3 && Math.random() > 0.5) {
+                            let dirs = [{ x: 0, y: -1 }, { x: 0, y: 1 }, { x: -1, y: 0 }, { x: 1, y: 0 }];
+                            let d = dirs[Math.floor(Math.random() * dirs.length)];
+                            if (x + d.x > 0 && x + d.x < COLS - 1 && y + d.y > 0 && y + d.y < ROWS - 1) {
+                                maze[y + d.y][x + d.x] = 0;
                             }
                         }
                     }
@@ -431,17 +497,17 @@
             }
 
             walls = [];
-            for(let y=0; y<ROWS; y++) {
-                for(let x=0; x<COLS; x++) {
-                    if(maze[y][x] === 1) {
-                        walls.push({x: x * CELL_SIZE, y: y * CELL_SIZE, w: CELL_SIZE, h: CELL_SIZE});
+            for (let y = 0; y < ROWS; y++) {
+                for (let x = 0; x < COLS; x++) {
+                    if (maze[y][x] === 1) {
+                        walls.push({ x: x * CELL_SIZE, y: y * CELL_SIZE, w: CELL_SIZE, h: CELL_SIZE });
                     }
                 }
             }
 
             exits = [
-                { type: 'door', x: (COLS-2)*CELL_SIZE, y: (ROWS-5)*CELL_SIZE, w: CELL_SIZE, h: CELL_SIZE*2, color: '#ef4444', label: 'DOOR' },
-                { type: 'window', x: 2*CELL_SIZE, y: (ROWS-3)*CELL_SIZE, w: CELL_SIZE*2, h: CELL_SIZE, color: '#3b82f6', label: 'WINDOW' }
+                { type: 'door', x: (COLS - 2) * CELL_SIZE, y: (ROWS - 5) * CELL_SIZE, w: CELL_SIZE, h: CELL_SIZE * 2, color: '#ef4444', label: 'DOOR' },
+                { type: 'window', x: 2 * CELL_SIZE, y: (ROWS - 3) * CELL_SIZE, w: CELL_SIZE * 2, h: CELL_SIZE, color: '#3b82f6', label: 'WINDOW' }
             ];
         }
 
@@ -460,7 +526,7 @@
         }
 
         function gameLoop() {
-            if(gameState !== 'playing') return;
+            if (gameState !== 'playing') return;
             updatePhysics();
             drawGame();
             requestAnimationFrame(gameLoop);
@@ -468,32 +534,32 @@
 
         function updatePhysics() {
             player.dx = 0; player.dy = 0;
-            if(keys.ArrowUp) player.dy = -player.speed;
-            if(keys.ArrowDown) player.dy = player.speed;
-            if(keys.ArrowLeft) player.dx = -player.speed;
-            if(keys.ArrowRight) player.dx = player.speed;
+            if (keys.ArrowUp) player.dy = -player.speed;
+            if (keys.ArrowDown) player.dy = player.speed;
+            if (keys.ArrowLeft) player.dx = -player.speed;
+            if (keys.ArrowRight) player.dx = player.speed;
 
             let nextX = player.x + player.dx;
             let nextY = player.y + player.dy;
             let collided = false;
-            
+
             for (let w of walls) {
-                if (rectCircleColliding({x: nextX, y: nextY, r: player.radius}, w)) {
+                if (rectCircleColliding({ x: nextX, y: nextY, r: player.radius }, w)) {
                     collided = true;
                     break;
                 }
             }
 
             for (let e of exits) {
-                if (rectCircleColliding({x: nextX, y: nextY, r: player.radius}, e)) {
-                    if(e.type === 'door') handleDoorCollision(e);
-                    if(e.type === 'window') handleWindowCollision();
+                if (rectCircleColliding({ x: nextX, y: nextY, r: player.radius }, e)) {
+                    if (e.type === 'door') handleDoorCollision(e);
+                    if (e.type === 'window') handleWindowCollision();
                     collided = true;
                     break;
                 }
             }
 
-            if(!collided) {
+            if (!collided) {
                 player.x = nextX;
                 player.y = nextY;
             }
@@ -514,7 +580,7 @@
                 ctx.fillRect(e.x, e.y, e.w, e.h);
                 const pulse = (Math.sin(Date.now() / 200) + 1) * 5;
                 ctx.beginPath();
-                ctx.arc(e.x + e.w/2, e.y + e.h/2, 20 + pulse, 0, Math.PI*2);
+                ctx.arc(e.x + e.w / 2, e.y + e.h / 2, 20 + pulse, 0, Math.PI * 2);
                 ctx.strokeStyle = e.color;
                 ctx.globalAlpha = 0.3;
                 ctx.stroke();
@@ -527,16 +593,16 @@
             ctx.drawImage(fogCanvas, 0, 0);
         }
 
-        function rectCircleColliding(circle, rect){
-            let distX = Math.abs(circle.x - rect.x - rect.w/2);
-            let distY = Math.abs(circle.y - rect.y - rect.h/2);
-            if (distX > (rect.w/2 + circle.r)) return false;
-            if (distY > (rect.h/2 + circle.r)) return false;
-            if (distX <= (rect.w/2)) return true;
-            if (distY <= (rect.h/2)) return true;
-            let dx=distX-rect.w/2;
-            let dy=distY-rect.h/2;
-            return (dx*dx+dy*dy<=(circle.r*circle.r));
+        function rectCircleColliding(circle, rect) {
+            let distX = Math.abs(circle.x - rect.x - rect.w / 2);
+            let distY = Math.abs(circle.y - rect.y - rect.h / 2);
+            if (distX > (rect.w / 2 + circle.r)) return false;
+            if (distY > (rect.h / 2 + circle.r)) return false;
+            if (distX <= (rect.w / 2)) return true;
+            if (distY <= (rect.h / 2)) return true;
+            let dx = distX - rect.w / 2;
+            let dy = distY - rect.h / 2;
+            return (dx * dx + dy * dy <= (circle.r * circle.r));
         }
 
         function handleDoorCollision(door) {
@@ -546,12 +612,12 @@
 
         function resolveDoor(checkedHeat) {
             document.getElementById('door-check-overlay').classList.add('hidden');
-            if(checkedHeat) {
-                if(doorIsHot) {
+            if (checkedHeat) {
+                if (doorIsHot) {
                     log("CHECK: Door is HOT! Find the Window.");
                     fogCtx.globalCompositeOperation = 'destination-out';
                     fogCtx.beginPath();
-                    fogCtx.arc(exits[0].x + 10, exits[0].y + 10, 40, 0, Math.PI*2);
+                    fogCtx.arc(exits[0].x + 10, exits[0].y + 10, 40, 0, Math.PI * 2);
                     fogCtx.fill();
                     fogCtx.globalCompositeOperation = 'source-over';
                     player.x -= 10;
@@ -587,7 +653,7 @@
 
         function handleIntegrity(stayOut) {
             document.getElementById('integrity-modal').classList.add('hidden');
-            if(stayOut) {
+            if (stayOut) {
                 document.getElementById('completion-msg').classList.remove('hidden');
                 log("SUCCESS: Integrity verified.");
                 if (!localState.integrityPassed) {
@@ -610,20 +676,20 @@
         }
 
         window.addEventListener('keydown', e => {
-            if(keys.hasOwnProperty(e.code)) keys[e.code] = true;
-            if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code)) e.preventDefault();
+            if (keys.hasOwnProperty(e.code)) keys[e.code] = true;
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) e.preventDefault();
         });
         window.addEventListener('keyup', e => {
-            if(keys.hasOwnProperty(e.code)) keys[e.code] = false;
+            if (keys.hasOwnProperty(e.code)) keys[e.code] = false;
         });
 
         function startMove(dx, dy) {
             player.dx = dx * player.speed;
             player.dy = dy * player.speed;
-            keys = {ArrowUp: dy<0, ArrowDown: dy>0, ArrowLeft: dx<0, ArrowRight: dx>0};
+            keys = { ArrowUp: dy < 0, ArrowDown: dy > 0, ArrowLeft: dx < 0, ArrowRight: dx > 0 };
         }
         function stopMove() {
-            keys = {ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false};
+            keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
         }
 
         // --- QUIZ LOGIC ---
@@ -699,7 +765,7 @@
                 title.className = "text-2xl font-bold text-green-400 mb-2";
                 desc.innerText = `You scored ${correctCount}/5. You know how to make smart decisions under pressure.`;
                 nextBtn.classList.remove('hidden');
-                
+
                 if (!localState.quizPassed) {
                     localState.quizPassed = true;
                     saveLocalProgress();
@@ -730,4 +796,5 @@
         }
     </script>
 </body>
+
 </html>

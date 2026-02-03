@@ -2,7 +2,6 @@ var cacheName = 'clicker';
 
 /* Start the service worker and cache all of the app's content or use the existing one */
 self.addEventListener('install', function (e) {
-    console.log('Service worker installed.');
     self.skipWaiting();
 });
 
@@ -64,11 +63,10 @@ async function fetchAndCache(request) {
     } catch (e) {
 
         if (cachedResponse) {
-            console.log('Served from cache: ' + request.url);
             return cachedResponse;
         }
 
-        console.log('Not found in cache: ' + request.url);
+
 
         throw e;
     }
@@ -83,7 +81,7 @@ self.addEventListener('fetch', function (e) {
 self.addEventListener('message', function (e) {
     if (e.data[0] == "clearCache") {
         caches.delete(cacheName);
-        console.log("Cache cleared in service worker.");
+
 
         addToCache = false;
     } else if (e.data[0] == "loadCache") {

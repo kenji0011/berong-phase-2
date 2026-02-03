@@ -4,6 +4,38 @@ import { NotificationService } from '@/lib/notification-service'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * Extracts YouTube video ID from various URL formats:
+ * - https://www.youtube.com/watch?v=VIDEO_ID
+ * - https://youtu.be/VIDEO_ID
+ * - https://www.youtube.com/embed/VIDEO_ID
+ * - VIDEO_ID (direct ID)
+ */
+function extractYouTubeId(input: string): string {
+  if (!input) return ''
+
+  // Already just an ID (11 characters, alphanumeric with - and _)
+  if (/^[a-zA-Z0-9_-]{11}$/.test(input)) {
+    return input
+  }
+
+  // Try to extract from URL
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([a-zA-Z0-9_-]{11})/,
+    /[?&]v=([a-zA-Z0-9_-]{11})/
+  ]
+
+  for (const pattern of patterns) {
+    const match = input.match(pattern)
+    if (match && match[1]) {
+      return match[1]
+    }
+  }
+
+  // Return as-is if no pattern matches (might be a custom format)
+  return input.trim()
+}
+
 export async function GET() {
   try {
     const videos = await prisma.video.findMany({
@@ -42,11 +74,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Extract YouTube ID from URL or use directly
+    const youtubeId = extractYouTubeId(body.youtubeId)
+
     const newVideo = await prisma.video.create({
       data: {
         title: body.title,
         description: body.description || '',
-        youtubeId: body.youtubeId,
+        youtubeId: youtubeId,
         category: body.category,
         duration: body.duration || '',
         isActive: body.isActive ?? true,

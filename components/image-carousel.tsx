@@ -57,7 +57,6 @@ export function ImageCarousel({ images }: ImageCarouselProps) {
       {/* Transparent Button Overlay for Full-Screen View */}
       <button
         onClick={() => {
-          console.log("🖱️ Overlay button clicked!")
           setIsViewerOpen(true)
         }}
         className="absolute inset-0 z-10 cursor-pointer bg-red-500/20 hover:bg-red-500/30 transition-colors group/fullscreen border-4 border-red-500"

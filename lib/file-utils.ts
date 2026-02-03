@@ -3,28 +3,32 @@ import path from 'path';
 
 /**
  * Safely deletes a file from the public/uploads directory based on its URL.
- * @param fileUrl The URL of the file to delete (e.g., /uploads/image.jpg)
- * @returns boolean indicating if deletion was attempted
+ * 
+ * For Base64 data URLs (data:image/...), no deletion is needed since the data
+ * is stored directly in the database and will be removed with the record.
+ * 
+ * For legacy file paths (/uploads/...), attempts to delete from filesystem.
+ * 
+ * @param fileUrl The URL of the file to delete (e.g., /uploads/image.jpg or data:image/...)
+ * @returns boolean indicating if deletion was attempted/needed
  */
 export async function deleteUploadedFile(fileUrl: string | null | undefined): Promise<boolean> {
     if (!fileUrl) return false;
 
+    // Base64 data URLs are stored in the database, not the filesystem
+    // No deletion needed - the data will be removed when the database record is deleted
+    if (fileUrl.startsWith('data:')) {
+        return true; // No-op, but return true since "cleanup" is successful
+    }
+
+    // Legacy: Handle file paths (for backwards compatibility with existing uploads)
     try {
-        // Extract the relative path from the URL
-        // Assuming URLs start with /uploads/
         const uploadsDir = path.join(process.cwd(), 'public');
-
-        // Remove query parameters if any
         const cleanUrl = fileUrl.split('?')[0];
-
-        // Construct full file path
         const filePath = path.join(uploadsDir, cleanUrl);
 
-        // Check if file exists
         if (fs.existsSync(filePath)) {
-            // Delete the file
             await fs.promises.unlink(filePath);
-            console.log(`Deleted file: ${filePath}`);
             return true;
         } else {
             console.warn(`File not found for deletion: ${filePath}`);

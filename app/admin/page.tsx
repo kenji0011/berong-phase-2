@@ -678,7 +678,7 @@ export default function AdminPage() {
               </div>
               <p className="text-sm sm:text-base text-muted-foreground">Manage content, users, and platform settings</p>
             </div>
-            <Button 
+            <Button
               onClick={() => router.push("/admin/analytics")}
               className="bg-orange-500 hover:bg-orange-600"
             >
@@ -797,15 +797,7 @@ export default function AdminPage() {
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="carousel-url">Image URL</Label>
-                  <Input
-                    id="carousel-url"
-                    placeholder="/path/to/image.jpg or https://..."
-                    value={newCarousel.url}
-                    onChange={(e) => setNewCarousel({ ...newCarousel, url: e.target.value })}
-                  />
-                </div>
+                {/* Image URL is now set automatically from the upload component - hidden from user */}
                 <Button onClick={handleAddCarousel} variant="secondary">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Image
@@ -857,15 +849,7 @@ export default function AdminPage() {
                     <option value="adult">Adult</option>
                   </select>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="blog-image">Image URL</Label>
-                  <Input
-                    id="blog-image"
-                    placeholder="/path/to/image.jpg"
-                    value={newBlog.imageUrl}
-                    onChange={(e) => setNewBlog({ ...newBlog, imageUrl: e.target.value })}
-                  />
-                </div>
+                {/* Image URL is now set automatically from the upload component - hidden from user */}
                 <div className="space-y-2">
                   <Label htmlFor="blog-excerpt">Excerpt</Label>
                   <Textarea
@@ -914,7 +898,7 @@ export default function AdminPage() {
                           </div>
                           <p className="text-sm text-muted-foreground">{post.excerpt}</p>
                           <p className="text-xs text-muted-foreground mt-2">
-                            By {post.author} • {post.createdAt}
+                            By {post.author} • {new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                           </p>
                         </div>
                         <Button
@@ -962,10 +946,10 @@ export default function AdminPage() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="video-youtube-id">YouTube ID</Label>
+                    <Label htmlFor="video-youtube-id">YouTube URL or ID</Label>
                     <Input
                       id="video-youtube-id"
-                      placeholder="YouTube video ID (e.g., W25rzeEO740)"
+                      placeholder="Paste full URL or video ID"
                       value={newVideo.youtubeId}
                       onChange={(e) => setNewVideo({ ...newVideo, youtubeId: e.target.value })}
                     />

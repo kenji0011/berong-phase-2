@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,10 +8,20 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/shared.css">
-    
+
     <style>
-        .fade-in { animation: fadeIn 0.8s ease-out forwards; opacity: 0; transform: translateY(20px); }
-        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
         /* HAZARD HUNT STYLES */
         .hazard-box {
@@ -24,8 +35,11 @@
             justify-content: flex-start;
             border-radius: 8px;
         }
-        .hazard-box:hover { background-color: rgba(255, 255, 255, 0.1); }
-        
+
+        .hazard-box:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
         .hazard-label {
             background-color: #22c55e;
             color: white;
@@ -38,17 +52,31 @@
             transform: translateY(-5px);
             transition: all 0.3s;
         }
-        .found .hazard-label { opacity: 1; transform: translateY(0); }
-        .found { 
-            border-color: #22c55e; 
-            background-color: rgba(34, 197, 94, 0.25); 
+
+        .found .hazard-label {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .found {
+            border-color: #22c55e;
+            background-color: rgba(34, 197, 94, 0.25);
             pointer-events: none;
             animation: hazardPop 0.4s ease-out;
         }
+
         @keyframes hazardPop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
         /* CERTIFICATE */
@@ -61,25 +89,51 @@
             color: #1e293b;
             position: relative;
         }
+
         .seal {
-            width: 100px; height: 100px;
+            width: 100px;
+            height: 100px;
             background-color: #b91c1c;
             border-radius: 50%;
             position: absolute;
-            bottom: 30px; right: 40px;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-weight: bold; border: 4px solid #fcd34d;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            bottom: 30px;
+            right: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            border: 4px solid #fcd34d;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
-        @keyframes bounceIn {
-            0% { transform: scale(0.5); opacity: 0; }
-            60% { transform: scale(1.05); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .animate-bounce-in { animation: bounceIn 0.5s ease-out; }
 
-        .quiz-option { transition: all 0.2s; }
-        .quiz-option:hover { background-color: #334155 !important; }
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            60% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .animate-bounce-in {
+            animation: bounceIn 0.5s ease-out;
+        }
+
+        .quiz-option {
+            transition: all 0.2s;
+        }
+
+        .quiz-option:hover {
+            background-color: #334155 !important;
+        }
 
         /* SDR SEQUENCE TRAP GAME */
         .sdr-trap-arena {
@@ -91,6 +145,7 @@
             overflow: hidden;
             border: 2px solid #334155;
         }
+
         .sdr-word {
             position: absolute;
             padding: 12px 24px;
@@ -103,41 +158,98 @@
             user-select: none;
             z-index: 10;
         }
+
         .sdr-word:hover {
             transform: scale(1.1);
-            box-shadow: 0 0 20px rgba(255,255,255,0.3);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
         }
-        .sdr-word.correct { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; }
-        .sdr-word.decoy { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
-        .sdr-word.fade-out { animation: wordFade 0.3s ease-out forwards; }
-        .sdr-word.clicked-correct { animation: correctClick 0.3s ease-out; background: #4ade80 !important; }
-        .sdr-word.clicked-wrong { animation: wrongClick 0.5s ease-out; background: #f87171 !important; }
-        
+
+        .sdr-word.correct {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+        }
+
+        .sdr-word.decoy {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .sdr-word.fade-out {
+            animation: wordFade 0.3s ease-out forwards;
+        }
+
+        .sdr-word.clicked-correct {
+            animation: correctClick 0.3s ease-out;
+            background: #4ade80 !important;
+        }
+
+        .sdr-word.clicked-wrong {
+            animation: wrongClick 0.5s ease-out;
+            background: #f87171 !important;
+        }
+
         @keyframes wordPop {
-            0% { transform: scale(0); opacity: 0; }
-            70% { transform: scale(1.1); }
-            100% { transform: scale(1); opacity: 1; }
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            70% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
+
         @keyframes wordFade {
-            to { transform: scale(0.5); opacity: 0; }
+            to {
+                transform: scale(0.5);
+                opacity: 0;
+            }
         }
+
         @keyframes correctClick {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.3); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.3);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
+
         @keyframes wrongClick {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-10px); }
-            40%, 80% { transform: translateX(10px); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20%,
+            60% {
+                transform: translateX(-10px);
+            }
+
+            40%,
+            80% {
+                transform: translateX(10px);
+            }
         }
-        
+
         .round-indicator {
             display: flex;
             gap: 8px;
             justify-content: center;
             margin-bottom: 16px;
         }
+
         .round-dot {
             width: 12px;
             height: 12px;
@@ -145,15 +257,23 @@
             background: #475569;
             transition: all 0.3s;
         }
-        .round-dot.active { background: #f59e0b; transform: scale(1.2); }
-        .round-dot.complete { background: #22c55e; }
-        
+
+        .round-dot.active {
+            background: #f59e0b;
+            transform: scale(1.2);
+        }
+
+        .round-dot.complete {
+            background: #22c55e;
+        }
+
         .sequence-tracker {
             display: flex;
             gap: 8px;
             justify-content: center;
             margin-top: 12px;
         }
+
         .seq-step {
             padding: 6px 16px;
             border-radius: 6px;
@@ -163,10 +283,19 @@
             color: #64748b;
             transition: all 0.3s;
         }
-        .seq-step.next { background: #fbbf24; color: #1e293b; }
-        .seq-step.done { background: #22c55e; color: white; }
+
+        .seq-step.next {
+            background: #fbbf24;
+            color: #1e293b;
+        }
+
+        .seq-step.done {
+            background: #22c55e;
+            color: white;
+        }
     </style>
 </head>
+
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen">
 
     <!-- NAVIGATION -->
@@ -176,15 +305,19 @@
                 <i class="fa-solid fa-shield-cat"></i>
                 <h1>SafeScape <span>| Module 5</span></h1>
             </a>
-            
+
             <div class="ss-module-indicators">
-                <a href="../module_1/index.html" class="ss-module-dot completed" title="Module 1"><i class="fa-solid fa-check"></i></a>
+                <a href="../module_1/index.html" class="ss-module-dot completed" title="Module 1"><i
+                        class="fa-solid fa-check"></i></a>
                 <div class="ss-module-connector active"></div>
-                <a href="../module_2/index.html" class="ss-module-dot completed" title="Module 2"><i class="fa-solid fa-check"></i></a>
+                <a href="../module_2/index.html" class="ss-module-dot completed" title="Module 2"><i
+                        class="fa-solid fa-check"></i></a>
                 <div class="ss-module-connector active"></div>
-                <a href="../module_3/index.html" class="ss-module-dot completed" title="Module 3"><i class="fa-solid fa-check"></i></a>
+                <a href="../module_3/index.html" class="ss-module-dot completed" title="Module 3"><i
+                        class="fa-solid fa-check"></i></a>
                 <div class="ss-module-connector active"></div>
-                <a href="../module_4/index.html" class="ss-module-dot completed" title="Module 4"><i class="fa-solid fa-check"></i></a>
+                <a href="../module_4/index.html" class="ss-module-dot completed" title="Module 4"><i
+                        class="fa-solid fa-check"></i></a>
                 <div class="ss-module-connector active"></div>
                 <a href="index.html" class="ss-module-dot current" title="Module 5">5</a>
             </div>
@@ -199,7 +332,8 @@
 
         <!-- HEADER -->
         <section class="fade-in text-center max-w-3xl mx-auto space-y-4" style="animation-delay: 0.1s;">
-            <h1 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-400">
+            <h1
+                class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-yellow-400">
                 The Ultimate Defense
             </h1>
             <p class="text-lg text-slate-300 leading-relaxed">
@@ -219,29 +353,36 @@
         </section>
 
         <!-- PART 1: STOP DROP ROLL -->
-        <section id="section-sdr" class="fade-in ss-section grid grid-cols-1 lg:grid-cols-2 gap-12 items-start" style="animation-delay: 0.3s;">
+        <section id="section-sdr" class="fade-in ss-section grid grid-cols-1 lg:grid-cols-2 gap-12 items-start"
+            style="animation-delay: 0.3s;">
             <div class="ss-section-badge"><i class="fa-solid fa-check"></i></div>
             <div class="space-y-6">
-                <h2 class="text-3xl font-bold text-white"><i class="fa-solid fa-fire-extinguisher text-red-500 mr-2"></i> Protocol 1: Reactive</h2>
-                
+                <h2 class="text-3xl font-bold text-white"><i
+                        class="fa-solid fa-fire-extinguisher text-red-500 mr-2"></i> Protocol 1: Reactive</h2>
+
                 <div class="prose prose-invert text-slate-300">
                     <p>
-                        It is very rare for a person's clothes to catch on fire, but knowing exactly what to do prevents panic. 
-                        This is one of the most famous fire safety rules, and it's a powerful move that every hero should know by heart.
+                        It is very rare for a person's clothes to catch on fire, but knowing exactly what to do prevents
+                        panic.
+                        This is one of the most famous fire safety rules, and it's a powerful move that every hero
+                        should know by heart.
                     </p>
                     <h3 class="text-xl font-bold text-orange-400 mt-4">The Three Hero Steps</h3>
                     <ul class="space-y-4 mt-2 list-none p-0">
                         <li class="bg-slate-800 p-4 rounded-lg border-l-4 border-red-500">
                             <strong class="text-white block mb-1">1. STOP</strong>
-                            Stop right where you are. <strong>Do not run!</strong> Running around only gives the fire more air (Oxygen), which makes it grow bigger and faster.
+                            Stop right where you are. <strong>Do not run!</strong> Running around only gives the fire
+                            more air (Oxygen), which makes it grow bigger and faster.
                         </li>
                         <li class="bg-slate-800 p-4 rounded-lg border-l-4 border-orange-500">
                             <strong class="text-white block mb-1">2. DROP</strong>
-                            Drop to the ground right away. Lie flat on your tummy and cover your face with your hands to protect your eyes and skin from the flames.
+                            Drop to the ground right away. Lie flat on your tummy and cover your face with your hands to
+                            protect your eyes and skin from the flames.
                         </li>
                         <li class="bg-slate-800 p-4 rounded-lg border-l-4 border-green-500">
                             <strong class="text-white block mb-1">3. ROLL</strong>
-                            Roll over and over on the ground. Keep rolling until the fire is completely out. This smothers the flames by cutting off the air they need to burn.
+                            Roll over and over on the ground. Keep rolling until the fire is completely out. This
+                            smothers the flames by cutting off the air they need to burn.
                         </li>
                     </ul>
                 </div>
@@ -250,29 +391,40 @@
             <!-- KEY PRESS GAME -->
             <div class="bg-slate-800 p-8 rounded-xl border-4 border-slate-700 text-center shadow-lg sticky top-24">
                 <h3 class="text-slate-400 text-sm font-mono mb-4">KEYBOARD REFLEX TEST</h3>
-                <div id="sdr-screen" class="h-40 bg-slate-900 rounded mb-4 flex items-center justify-center relative overflow-hidden">
+                <div id="sdr-screen"
+                    class="h-40 bg-slate-900 rounded mb-4 flex items-center justify-center relative overflow-hidden">
                     <div id="fire-overlay" class="absolute inset-0 bg-red-500/0 transition-all duration-200"></div>
                     <i id="hero-icon" class="fa-solid fa-person text-6xl text-white transition-all duration-500"></i>
                     <div id="game-text" class="absolute bottom-2 text-xs font-mono text-slate-500">Press START</div>
                 </div>
-                
+
                 <div class="flex justify-center gap-2 mb-4">
-                    <div id="key-s" class="w-12 h-12 bg-slate-700 rounded border-b-4 border-slate-900 flex items-center justify-center font-bold text-white">S</div>
-                    <div id="key-d" class="w-12 h-12 bg-slate-700 rounded border-b-4 border-slate-900 flex items-center justify-center font-bold text-white">D</div>
-                    <div id="key-r" class="w-12 h-12 bg-slate-700 rounded border-b-4 border-slate-900 flex items-center justify-center font-bold text-white">R</div>
+                    <div id="key-s"
+                        class="w-12 h-12 bg-slate-700 rounded border-b-4 border-slate-900 flex items-center justify-center font-bold text-white">
+                        S</div>
+                    <div id="key-d"
+                        class="w-12 h-12 bg-slate-700 rounded border-b-4 border-slate-900 flex items-center justify-center font-bold text-white">
+                        D</div>
+                    <div id="key-r"
+                        class="w-12 h-12 bg-slate-700 rounded border-b-4 border-slate-900 flex items-center justify-center font-bold text-white">
+                        R</div>
                 </div>
 
-                <button onclick="startSDR()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-full w-full">Start Simulation</button>
+                <button onclick="startSDR()"
+                    class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-full w-full">Start
+                    Simulation</button>
             </div>
         </section>
 
         <!-- SDR SEQUENCE TRAP GAME -->
         <section id="section-sdr-trap" class="fade-in ss-section space-y-6" style="animation-delay: 0.35s;">
             <div class="ss-section-badge"><i class="fa-solid fa-check"></i></div>
-            
+
             <div class="text-center">
-                <h2 class="text-2xl font-bold text-white"><i class="fa-solid fa-crosshairs text-yellow-400 mr-2"></i> SDR Sequence Challenge</h2>
-                <p class="text-slate-400 mt-2">Words will spawn randomly. Click STOP → DROP → ROLL in order. Avoid decoys!</p>
+                <h2 class="text-2xl font-bold text-white"><i class="fa-solid fa-crosshairs text-yellow-400 mr-2"></i>
+                    SDR Sequence Challenge</h2>
+                <p class="text-slate-400 mt-2">Words will spawn randomly. Click STOP → DROP → ROLL in order. Avoid
+                    decoys!</p>
             </div>
 
             <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
@@ -289,17 +441,20 @@
 
                 <!-- Game Arena -->
                 <div class="sdr-trap-arena" id="sdr-trap-arena">
-                    <div id="trap-game-overlay" class="absolute inset-0 bg-slate-900/90 flex items-center justify-center z-20">
+                    <div id="trap-game-overlay"
+                        class="absolute inset-0 bg-slate-900/90 flex items-center justify-center z-20">
                         <div class="text-center">
                             <i class="fa-solid fa-fire-flame-curved text-6xl text-orange-500 mb-4"></i>
                             <h3 class="text-xl font-bold text-white mb-2">Ready for the Challenge?</h3>
-                            <p class="text-slate-400 text-sm mb-4">Click words in order: STOP → DROP → ROLL<br>Avoid RUN, JUMP, HIDE!</p>
-                            <button onclick="startTrapGame()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-full">
+                            <p class="text-slate-400 text-sm mb-4">Click words in order: STOP → DROP → ROLL<br>Avoid
+                                RUN, JUMP, HIDE!</p>
+                            <button onclick="startTrapGame()"
+                                class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-full">
                                 <i class="fa-solid fa-play mr-2"></i>Start Challenge
                             </button>
                         </div>
                     </div>
-                    
+
                     <!-- Words spawn here dynamically -->
                 </div>
 
@@ -320,7 +475,8 @@
                     <div id="trap-result-icon" class="text-5xl mb-3"></div>
                     <h3 id="trap-result-title" class="text-xl font-bold text-white mb-2"></h3>
                     <p id="trap-result-desc" class="text-slate-400 mb-4"></p>
-                    <button onclick="restartTrapGame()" id="trap-retry-btn" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-full">
+                    <button onclick="restartTrapGame()" id="trap-retry-btn"
+                        class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-full">
                         <i class="fa-solid fa-redo mr-2"></i>Try Again
                     </button>
                 </div>
@@ -331,9 +487,11 @@
         <section id="section-hazard" class="fade-in ss-section space-y-8" style="animation-delay: 0.4s;">
             <div class="ss-section-badge"><i class="fa-solid fa-check"></i></div>
             <div class="text-center max-w-4xl mx-auto">
-                <h2 class="text-3xl font-bold text-white"><i class="fa-solid fa-magnifying-glass-chart text-green-400 mr-2"></i> Protocol 2: Prevention</h2>
+                <h2 class="text-3xl font-bold text-white"><i
+                        class="fa-solid fa-magnifying-glass-chart text-green-400 mr-2"></i> Protocol 2: Prevention</h2>
                 <p class="text-slate-300 mt-4 text-lg">
-                    Being a hero isn't just about emergencies. It is about doing small things every day to stop fires before they start.
+                    Being a hero isn't just about emergencies. It is about doing small things every day to stop fires
+                    before they start.
                     You can be a great <strong>Fire Safety Helper</strong> for your family!
                 </p>
             </div>
@@ -341,15 +499,18 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <!-- Left Column: The Checklist Text -->
                 <div class="bg-slate-800 p-6 rounded-xl border border-slate-600 h-fit">
-                    <h3 class="text-xl font-bold text-yellow-400 mb-4"><i class="fa-solid fa-list-check mr-2"></i> Your Helper Checklist</h3>
+                    <h3 class="text-xl font-bold text-yellow-400 mb-4"><i class="fa-solid fa-list-check mr-2"></i> Your
+                        Helper Checklist</h3>
                     <ul class="space-y-4 text-sm text-slate-300">
                         <li class="flex gap-3">
                             <i class="fa-solid fa-ruler-horizontal text-blue-400 mt-1"></i>
-                            <span>Keep toys, books, and papers at least <strong>three feet</strong> (three big steps) away from heaters, stoves, and fireplaces.</span>
+                            <span>Keep toys, books, and papers at least <strong>three feet</strong> (three big steps)
+                                away from heaters, stoves, and fireplaces.</span>
                         </li>
                         <li class="flex gap-3">
                             <i class="fa-solid fa-plug text-red-400 mt-1"></i>
-                            <span>Tell a grown-up if you see an electrical cord that looks broken, cracked, or worn out.</span>
+                            <span>Tell a grown-up if you see an electrical cord that looks broken, cracked, or worn
+                                out.</span>
                         </li>
                         <li class="flex gap-3">
                             <i class="fa-solid fa-ban text-red-500 mt-1"></i>
@@ -357,7 +518,8 @@
                         </li>
                         <li class="flex gap-3">
                             <i class="fa-solid fa-wind text-gray-400 mt-1"></i>
-                            <span>If you smell something strange, like rotten eggs, tell a grown-up immediately. It could be a gas leak.</span>
+                            <span>If you smell something strange, like rotten eggs, tell a grown-up immediately. It
+                                could be a gas leak.</span>
                         </li>
                         <li class="flex gap-3">
                             <i class="fa-solid fa-cake-candles text-orange-400 mt-1"></i>
@@ -374,8 +536,11 @@
 
                     <!-- Hazard Room Image Container -->
                     <div class="relative w-full max-w-2xl mx-auto">
-                        <img src="../assets/images/hazard_room.png" alt="Room with hazards" class="w-full rounded-xl shadow-lg border-2 border-slate-700" onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
-                        <div class="w-full aspect-video bg-slate-800 flex items-center justify-center text-slate-500 rounded-xl hidden">
+                        <img src="../assets/images/hazard_room.png" alt="Room with hazards"
+                            class="w-full rounded-xl shadow-lg border-2 border-slate-700"
+                            onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
+                        <div
+                            class="w-full aspect-video bg-slate-800 flex items-center justify-center text-slate-500 rounded-xl hidden">
                             <div>
                                 <i class="fa-regular fa-image text-6xl block mx-auto mb-2"></i>
                                 [ hazard_room.png ]
@@ -384,26 +549,31 @@
 
                         <!-- CLICK ZONES - Invisible until clicked -->
                         <!-- Candle: Left side on small table near curtains -->
-                        <div onclick="foundHazard(this, 'Candle')" class="hazard-box w-17 h-14" style="top: 50%; left: 11%;">
+                        <div onclick="foundHazard(this, 'Candle')" class="hazard-box w-17 h-14"
+                            style="top: 50%; left: 11%;">
                             <div class="hazard-label">CANDLE</div>
                         </div>
                         <!-- Power Strip: Bottom center, overloaded on floor -->
-                        <div onclick="foundHazard(this, 'Power Strip')" class="hazard-box w-15 h-12" style="bottom: 6%; left: 50%;">
+                        <div onclick="foundHazard(this, 'Power Strip')" class="hazard-box w-15 h-12"
+                            style="bottom: 6%; left: 50%;">
                             <div class="hazard-label">POWER STRIP</div>
                         </div>
                         <!-- Heater: Center-right, space heater with blanket/teddy -->
-                        <div onclick="foundHazard(this, 'Heater')" class="hazard-box w-20 h-20" style="bottom: 20%; right: 25%;">
+                        <div onclick="foundHazard(this, 'Heater')" class="hazard-box w-20 h-20"
+                            style="bottom: 20%; right: 25%;">
                             <div class="hazard-label">HEATER</div>
                         </div>
                         <!-- Fireplace: Far right, stone fireplace with fire -->
-                        <div onclick="foundHazard(this, 'Fireplace')" class="hazard-box w-20 h-20" style="top: 45%; right: 9%;">
+                        <div onclick="foundHazard(this, 'Fireplace')" class="hazard-box w-20 h-20"
+                            style="top: 45%; right: 9%;">
                             <div class="hazard-label">FIREPLACE</div>
                         </div>
                     </div>
 
                     <!-- Counter -->
                     <div class="text-center mt-4">
-                        <span class="bg-slate-800 px-6 py-2 rounded-full text-green-400 font-mono font-bold border border-slate-600">
+                        <span
+                            class="bg-slate-800 px-6 py-2 rounded-full text-green-400 font-mono font-bold border border-slate-600">
                             HAZARDS FOUND: <span id="hazard-count">0</span>/4
                         </span>
                     </div>
@@ -412,32 +582,40 @@
         </section>
 
         <!-- HERO SUMMARY -->
-        <section class="fade-in mt-24 bg-gradient-to-r from-blue-900 to-slate-900 p-10 rounded-3xl border border-blue-500 shadow-2xl text-center relative overflow-hidden" style="animation-delay: 0.5s;">
+        <section
+            class="fade-in mt-24 bg-gradient-to-r from-blue-900 to-slate-900 p-10 rounded-3xl border border-blue-500 shadow-2xl text-center relative overflow-hidden"
+            style="animation-delay: 0.5s;">
             <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
                 <i class="fa-solid fa-shield-cat text-9xl absolute -top-10 -left-10 text-white"></i>
                 <i class="fa-solid fa-star text-9xl absolute -bottom-10 -right-10 text-white"></i>
             </div>
-            
+
             <div class="relative z-10 max-w-4xl mx-auto space-y-6">
                 <h2 class="text-4xl font-extrabold text-white">You Are a Fire Safety Hero!</h2>
                 <div class="h-1 w-24 bg-orange-500 mx-auto rounded-full"></div>
-                
+
                 <p class="text-lg text-blue-100 leading-relaxed">
-                    Congratulations! You have completed your training. You learned that <strong>fire is a tool, not a toy</strong>, and what it needs to burn (Fuel, Heat, Oxygen). 
-                    You know that <strong>smoke alarms</strong> are your home's nose, and you know exactly what to do when they beep.
+                    Congratulations! You have completed your training. You learned that <strong>fire is a tool, not a
+                        toy</strong>, and what it needs to burn (Fuel, Heat, Oxygen).
+                    You know that <strong>smoke alarms</strong> are your home's nose, and you know exactly what to do
+                    when they beep.
                 </p>
                 <p class="text-lg text-blue-100 leading-relaxed">
-                    You mastered the <strong>Family Escape Plan</strong> with two ways out and a safe meeting spot. 
-                    And you've learned the special hero moves of <strong>"Get Low and Go"</strong> and <strong>"Stop, Drop, and Roll!"</strong>
+                    You mastered the <strong>Family Escape Plan</strong> with two ways out and a safe meeting spot.
+                    And you've learned the special hero moves of <strong>"Get Low and Go"</strong> and <strong>"Stop,
+                        Drop, and Roll!"</strong>
                 </p>
                 <p class="text-xl font-bold text-white italic">
-                    "By remembering these rules and sharing them, you are protecting everyone you love. Your knowledge is your power. Be proud, be prepared, and stay safe!"
+                    "By remembering these rules and sharing them, you are protecting everyone you love. Your knowledge
+                    is your power. Be proud, be prepared, and stay safe!"
                 </p>
             </div>
         </section>
 
         <!-- FINAL EXAM -->
-        <section id="final-exam" class="fade-in ss-section bg-slate-800 rounded-2xl p-10 border-t-8 border-orange-500 shadow-2xl mt-20" style="animation-delay: 0.6s;">
+        <section id="final-exam"
+            class="fade-in ss-section bg-slate-800 rounded-2xl p-10 border-t-8 border-orange-500 shadow-2xl mt-20"
+            style="animation-delay: 0.6s;">
             <div class="ss-section-badge"><i class="fa-solid fa-check"></i></div>
             <div class="text-center mb-10">
                 <h2 class="text-4xl font-bold text-white mb-2">THE FINAL EXAM</h2>
@@ -451,30 +629,21 @@
                 <div class="text-5xl mb-4" id="result-icon"></div>
                 <h3 class="text-2xl font-bold text-white mb-2" id="result-title"></h3>
                 <p class="text-slate-400 mb-6" id="result-desc"></p>
-                <button id="btn-retake" onclick="loadExam()" class="hidden text-sm text-slate-500 hover:text-white underline">Retake Exam</button>
+                <button id="btn-retake" onclick="loadExam()"
+                    class="hidden text-sm text-slate-500 hover:text-white underline">Retake Exam</button>
                 <button id="btn-view-cert" onclick="showCertificate()" class="hidden ss-btn ss-btn-success">
                     <i class="fa-solid fa-award mr-2"></i>View Your Certificate
                 </button>
             </div>
 
             <div id="exam-submit" class="text-center mt-10">
-                <button onclick="submitFinalExam()" class="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-bold text-xl py-4 px-12 rounded-full shadow-lg transform transition hover:scale-105">
+                <button onclick="submitFinalExam()"
+                    class="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-bold text-xl py-4 px-12 rounded-full shadow-lg transform transition hover:scale-105">
                     SUBMIT ANSWERS
                 </button>
             </div>
         </section>
 
-        <!-- COURSE COMPLETE -->
-        <section id="section-complete" class="fade-in text-center py-12 hidden">
-            <div class="bg-gradient-to-r from-yellow-900/30 to-orange-900/30 border border-yellow-500 rounded-2xl p-8 max-w-xl mx-auto">
-                <i class="fa-solid fa-trophy text-6xl text-yellow-500 mb-4"></i>
-                <h2 class="text-3xl font-bold text-white mb-2">Course Complete!</h2>
-                <p class="text-slate-300 mb-6">Congratulations! You've completed the SafeScape Fire Safety Course.</p>
-                <button onclick="showCertificate()" class="ss-btn ss-btn-primary text-lg">
-                    <i class="fa-solid fa-award mr-2"></i>View Certificate
-                </button>
-            </div>
-        </section>
 
     </main>
 
@@ -483,14 +652,14 @@
         <div class="certificate max-w-2xl w-full animate-bounce-in">
             <h1 class="text-4xl font-bold text-red-800 mb-2">CERTIFICATE OF HEROISM</h1>
             <p class="text-lg italic mb-8">This certifies that</p>
-            
+
             <h2 id="cert-name" class="text-5xl font-bold text-black mb-8 underline decoration-double">Future Hero</h2>
-            
+
             <p class="text-xl mb-4">Has successfully completed the</p>
             <h3 class="text-2xl font-bold text-orange-700 mb-8">SafeScape Intelligent Fire Safety Course</h3>
-            
+
             <p class="text-md">Demonstrating knowledge in Fire Science, Evacuation Strategy, and Hazard Prevention.</p>
-            
+
             <div class="mt-8 flex justify-between items-end">
                 <div class="text-left">
                     <p class="border-t border-black w-40 pt-2 font-bold">SafeScape System</p>
@@ -500,10 +669,12 @@
                 <div class="seal">OFFICIAL<br>HERO</div>
             </div>
 
-            <button onclick="closeCert()" class="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-2xl"><i class="fa-solid fa-xmark"></i></button>
-            
+            <button onclick="closeCert()" class="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-2xl"><i
+                    class="fa-solid fa-xmark"></i></button>
+
             <div class="mt-6 pt-4 border-t border-amber-300">
-                <button onclick="downloadCertificate()" class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-full text-sm font-bold">
+                <button onclick="downloadCertificate()"
+                    class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-full text-sm font-bold">
                     <i class="fa-solid fa-download mr-2"></i>Download Certificate
                 </button>
             </div>
@@ -548,8 +719,8 @@
             const gainNode = audioCtx.createGain();
             oscillator.connect(gainNode);
             gainNode.connect(audioCtx.destination);
-            
-            switch(type) {
+
+            switch (type) {
                 case 'spawn':
                     oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
                     oscillator.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.1);
@@ -627,7 +798,6 @@
             });
             updateModuleProgress();
             updateSectionStates();
-            checkCourseComplete();
         }
 
         function updateModuleProgress() {
@@ -648,12 +818,6 @@
             if (localState.sdrTrapCompleted) document.getElementById('section-sdr-trap').classList.add('completed');
             if (localState.hazardHuntCompleted) document.getElementById('section-hazard').classList.add('completed');
             if (localState.examPassed) document.getElementById('final-exam').classList.add('completed');
-        }
-
-        function checkCourseComplete() {
-            if (localState.certificateEarned) {
-                document.getElementById('section-complete').classList.remove('hidden');
-            }
         }
 
         function onVideoPlay() {
@@ -683,25 +847,25 @@
         }
 
         document.addEventListener('keydown', (e) => {
-            if(!sdrActive) return;
+            if (!sdrActive) return;
             const key = e.key.toLowerCase();
-            
-            if(document.getElementById(`key-${key}`)) {
+
+            if (document.getElementById(`key-${key}`)) {
                 document.getElementById(`key-${key}`).classList.add('bg-yellow-500');
                 setTimeout(() => document.getElementById(`key-${key}`).classList.remove('bg-yellow-500'), 100);
             }
 
-            if(key === sequence[seqIndex]) {
+            if (key === sequence[seqIndex]) {
                 seqIndex++;
-                if(seqIndex === 1) {
+                if (seqIndex === 1) {
                     document.getElementById('game-text').innerText = "STOPPED! Now DROP (D)!";
                     document.getElementById('hero-icon').classList.replace('fa-person', 'fa-person-walking');
                 }
-                if(seqIndex === 2) {
+                if (seqIndex === 2) {
                     document.getElementById('game-text').innerText = "DROPPED! Now ROLL (R)!";
                     document.getElementById('hero-icon').style.transform = "rotate(90deg)";
                 }
-                if(seqIndex === 3) {
+                if (seqIndex === 3) {
                     sdrActive = false;
                     document.getElementById('fire-overlay').classList.remove('bg-red-500/50');
                     document.getElementById('fire-overlay').classList.add('bg-green-500/20');
@@ -709,7 +873,7 @@
                     document.getElementById('hero-icon').classList.remove('animate-pulse', 'text-red-200');
                     document.getElementById('game-text').innerText = "FIRE OUT! SAFE.";
                     document.getElementById('game-text').className = "text-green-400 font-bold absolute bottom-2";
-                    
+
                     if (!localState.sdrCompleted) {
                         localState.sdrCompleted = true;
                         saveLocalProgress();
@@ -724,12 +888,12 @@
 
         // --- HAZARD HUNT GAME ---
         function foundHazard(el, name) {
-            if(el.classList.contains('found')) return;
+            if (el.classList.contains('found')) return;
             el.classList.add('found');
             hazardsFound++;
             document.getElementById('hazard-count').innerText = hazardsFound;
-            
-            if(hazardsFound === 4) {
+
+            if (hazardsFound === 4) {
                 document.getElementById('hazard-count').classList.add('text-yellow-400', 'animate-bounce');
                 if (!localState.hazardHuntCompleted) {
                     localState.hazardHuntCompleted = true;
@@ -779,16 +943,16 @@
                 activeWords: [],
                 usedPositions: []
             };
-            
+
             document.getElementById('trap-game-overlay').classList.add('hidden');
             document.getElementById('trap-game-result').classList.add('hidden');
-            
+
             startRound();
         }
 
         function startRound() {
             const config = trapGameConfig.rounds[trapGameState.currentRound];
-            
+
             // Update round indicators
             document.querySelectorAll('.round-dot').forEach((dot, i) => {
                 dot.classList.remove('active', 'complete');
@@ -796,67 +960,67 @@
                 if (i === trapGameState.currentRound) dot.classList.add('active');
             });
             document.getElementById('round-difficulty').textContent = config.name;
-            
+
             // Reset sequence tracker
             trapGameState.sequenceIndex = 0;
             updateSequenceTracker();
-            
+
             document.getElementById('trap-game-status').textContent = `Round ${trapGameState.currentRound + 1}: ${config.name} - Find the sequence!`;
-            
+
             // Clear any existing words
             clearAllWords();
-            
+
             // Start spawning words
             spawnWord();
             trapGameState.spawnTimer = setInterval(spawnWord, config.spawnInterval);
         }
 
         function getRandomPosition() {
-            const available = trapGameConfig.spawnPositions.filter((_, i) => 
+            const available = trapGameConfig.spawnPositions.filter((_, i) =>
                 !trapGameState.usedPositions.includes(i)
             );
-            
+
             if (available.length === 0) {
                 trapGameState.usedPositions = [];
                 return trapGameConfig.spawnPositions[Math.floor(Math.random() * trapGameConfig.spawnPositions.length)];
             }
-            
+
             const idx = trapGameConfig.spawnPositions.indexOf(available[Math.floor(Math.random() * available.length)]);
             trapGameState.usedPositions.push(idx);
             if (trapGameState.usedPositions.length > 5) trapGameState.usedPositions.shift();
-            
+
             return trapGameConfig.spawnPositions[idx];
         }
 
         function spawnWord() {
             if (!trapGameState.active) return;
-            
+
             const config = trapGameConfig.rounds[trapGameState.currentRound];
             const arena = document.getElementById('sdr-trap-arena');
-            
+
             // Decide what word to spawn
             const allWords = [...trapGameConfig.correctSequence, ...config.decoys];
             const word = allWords[Math.floor(Math.random() * allWords.length)];
             const isDecoy = config.decoys.includes(word);
-            
+
             // Create word element
             const wordEl = document.createElement('div');
             wordEl.className = `sdr-word ${isDecoy ? 'decoy' : 'correct'}`;
             wordEl.textContent = word;
             wordEl.dataset.word = word;
             wordEl.dataset.isDecoy = isDecoy;
-            
+
             // Position randomly
             const pos = getRandomPosition();
             Object.keys(pos).forEach(key => wordEl.style[key] = pos[key]);
-            
+
             // Click handler
             wordEl.onclick = () => handleWordClick(wordEl);
-            
+
             arena.appendChild(wordEl);
             trapGameState.activeWords.push(wordEl);
             playSound('spawn');
-            
+
             // Auto-remove after duration
             setTimeout(() => {
                 if (wordEl.parentNode && !wordEl.classList.contains('clicked-correct')) {
@@ -871,11 +1035,11 @@
 
         function handleWordClick(wordEl) {
             if (!trapGameState.active) return;
-            
+
             const word = wordEl.dataset.word;
             const isDecoy = wordEl.dataset.isDecoy === 'true';
             const expectedWord = trapGameConfig.correctSequence[trapGameState.sequenceIndex];
-            
+
             if (isDecoy) {
                 // Clicked a decoy - LOSE
                 wordEl.classList.add('clicked-wrong');
@@ -883,24 +1047,24 @@
                 endGame(false, `You clicked "${word}" - that's a decoy!`);
                 return;
             }
-            
+
             if (word === expectedWord) {
                 // Correct click!
                 wordEl.classList.add('clicked-correct');
                 playSound('correct');
                 trapGameState.sequenceIndex++;
                 updateSequenceTracker();
-                
+
                 setTimeout(() => {
                     if (wordEl.parentNode) wordEl.remove();
                     trapGameState.activeWords = trapGameState.activeWords.filter(w => w !== wordEl);
                 }, 300);
-                
+
                 // Check if sequence complete
                 if (trapGameState.sequenceIndex >= trapGameConfig.correctSequence.length) {
                     // Round complete!
                     clearInterval(trapGameState.spawnTimer);
-                    
+
                     if (trapGameState.currentRound >= trapGameConfig.rounds.length - 1) {
                         // All rounds complete - WIN!
                         playSound('win');
@@ -910,7 +1074,7 @@
                         playSound('roundUp');
                         trapGameState.currentRound++;
                         document.getElementById('trap-game-status').textContent = `Round ${trapGameState.currentRound} complete! Get ready...`;
-                        
+
                         setTimeout(() => {
                             clearAllWords();
                             startRound();
@@ -943,25 +1107,25 @@
         function endGame(won, message) {
             trapGameState.active = false;
             clearInterval(trapGameState.spawnTimer);
-            
+
             setTimeout(() => {
                 clearAllWords();
-                
+
                 const resultDiv = document.getElementById('trap-game-result');
                 const icon = document.getElementById('trap-result-icon');
                 const title = document.getElementById('trap-result-title');
                 const desc = document.getElementById('trap-result-desc');
                 const retryBtn = document.getElementById('trap-retry-btn');
-                
+
                 resultDiv.classList.remove('hidden');
-                
+
                 if (won) {
                     icon.textContent = '🏆';
                     title.textContent = 'SEQUENCE MASTER!';
                     title.className = 'text-xl font-bold text-green-400 mb-2';
                     desc.textContent = message;
                     retryBtn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Play Again';
-                    
+
                     if (!localState.sdrTrapCompleted) {
                         localState.sdrTrapCompleted = true;
                         saveLocalProgress();
@@ -980,19 +1144,19 @@
         function restartTrapGame() {
             document.getElementById('trap-game-result').classList.add('hidden');
             document.getElementById('trap-game-overlay').classList.remove('hidden');
-            
+
             // Reset round indicators
             document.querySelectorAll('.round-dot').forEach(dot => {
                 dot.classList.remove('active', 'complete');
             });
             document.getElementById('round-difficulty').textContent = 'Easy';
-            
+
             // Reset sequence tracker
             document.querySelectorAll('.seq-step').forEach((step, i) => {
                 step.classList.remove('next', 'done');
                 if (i === 0) step.classList.add('next');
             });
-            
+
             document.getElementById('trap-game-status').textContent = 'Complete all 3 rounds to master SDR!';
         }
 
@@ -1022,15 +1186,15 @@
             document.getElementById('exam-submit').classList.remove('hidden');
             document.getElementById('btn-retake').classList.add('hidden');
             document.getElementById('btn-view-cert').classList.add('hidden');
-            
+
             finalQuestions.forEach((item, idx) => {
                 const div = document.createElement('div');
                 div.className = "bg-slate-700 p-4 rounded-lg";
                 div.innerHTML = `<p class="font-bold text-white mb-3">${item.q}</p>`;
-                
+
                 const opts = document.createElement('div');
                 opts.className = "grid grid-cols-1 md:grid-cols-3 gap-2";
-                
+
                 item.o.forEach((opt, optIdx) => {
                     opts.innerHTML += `<label class="quiz-option bg-slate-800 p-3 rounded cursor-pointer flex items-center gap-2">
                         <input type="radio" name="q${idx}" value="${optIdx}" class="accent-orange-500">
@@ -1045,22 +1209,22 @@
         function submitFinalExam() {
             let score = 0;
             let answered = 0;
-            
+
             finalQuestions.forEach((item, idx) => {
                 const selected = document.querySelector(`input[name="q${idx}"]:checked`);
-                if(selected) {
+                if (selected) {
                     answered++;
-                    if(parseInt(selected.value) === item.a) score++;
+                    if (parseInt(selected.value) === item.a) score++;
                 }
             });
 
-            if(answered < 15) {
+            if (answered < 15) {
                 showToast('error', 'Please answer all 15 questions first!');
                 return;
             }
 
             localState.examScore = score;
-            
+
             const resultDiv = document.getElementById('exam-result');
             const icon = document.getElementById('result-icon');
             const title = document.getElementById('result-title');
@@ -1069,13 +1233,13 @@
             document.getElementById('exam-submit').classList.add('hidden');
             resultDiv.classList.remove('hidden');
 
-            if(score >= 12) {
+            if (score >= 12) {
                 icon.innerText = "🏆";
                 title.innerText = "CONGRATULATIONS, HERO!";
                 title.className = "text-2xl font-bold text-green-400 mb-2";
                 desc.innerText = `You scored ${score}/15. You have proven yourself as a Fire Safety Hero!`;
                 document.getElementById('btn-view-cert').classList.remove('hidden');
-                
+
                 if (!localState.examPassed) {
                     localState.examPassed = true;
                     localState.certificateEarned = true;
@@ -1097,7 +1261,7 @@
             const studentName = progress.studentName || 'Future Hero';
             const score = progress.certificate?.score || localState.examScore;
             const date = progress.certificate?.earnedDate || new Date().toLocaleDateString();
-            
+
             document.getElementById('cert-name').textContent = studentName;
             document.getElementById('cert-date').textContent = date;
             document.getElementById('cert-score').textContent = score;
@@ -1126,4 +1290,5 @@
         }
     </script>
 </body>
+
 </html>

@@ -205,7 +205,8 @@
                 <h2 class="text-2xl font-bold text-white"><i class="fa-solid fa-ear-listen text-blue-400 mr-2"></i> The
                     Sound Detective</h2>
                 <p class="text-slate-400">Step 1: Listen to all three sounds.<br>Step 2: Choose the correct
-                    <strong>School Fire Alarm</strong>.</p>
+                    <strong>School Fire Alarm</strong>.
+                </p>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
                     <!-- Option A -->
@@ -466,18 +467,6 @@
             </div>
         </section>
 
-        <!-- MODULE COMPLETE -->
-        <section id="section-complete" class="fade-in text-center py-12 hidden">
-            <div class="bg-green-900/30 border border-green-500 rounded-2xl p-8 max-w-xl mx-auto">
-                <i class="fa-solid fa-circle-check text-6xl text-green-500 mb-4"></i>
-                <h2 class="text-3xl font-bold text-white mb-2">Module 2 Complete!</h2>
-                <p class="text-slate-300 mb-6">Excellent! You've mastered the fire drill and learned to lead with calm.
-                </p>
-                <a href="../module_3/index.html" class="ss-btn ss-btn-primary text-lg">
-                    Continue to Module 3 <i class="fa-solid fa-arrow-right ml-2"></i>
-                </a>
-            </div>
-        </section>
 
     </main>
 
@@ -531,7 +520,6 @@
             });
             updateModuleProgress();
             updateSectionStates();
-            checkModuleComplete();
         }
 
         function updateModuleProgress() {
@@ -549,11 +537,6 @@
             if (localState.quizPassed) document.getElementById('final-quiz').classList.add('completed');
         }
 
-        function checkModuleComplete() {
-            if (localState.quizPassed) {
-                document.getElementById('section-complete').classList.remove('hidden');
-            }
-        }
 
         // --- NAVIGATION UPDATE ---
         function updateNavigation() {

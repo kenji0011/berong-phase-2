@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,27 +8,54 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/shared.css">
-    
+
     <style>
-        .fade-in { animation: fadeIn 0.8s ease-out forwards; opacity: 0; transform: translateY(20px); }
-        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
 
-        .info-card { transition: transform 0.3s ease; }
-        .info-card:hover { transform: translateY(-5px); }
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-        .qa-input:focus { border-color: #f97316; box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2); }
-        
+        .info-card {
+            transition: transform 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .qa-input:focus {
+            border-color: #f97316;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
+        }
+
         .answer-reveal {
             animation: revealAnswer 0.5s ease-out forwards;
         }
+
         @keyframes revealAnswer {
-            0% { opacity: 0; transform: translateY(-10px); }
-            100% { opacity: 1; transform: translateY(0); }
+            0% {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .card-complete {
             border-color: #22c55e !important;
         }
+
         .card-complete::after {
             content: '✓';
             position: absolute;
@@ -46,6 +74,7 @@
         }
     </style>
 </head>
+
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen">
 
     <!-- NAVIGATION -->
@@ -55,13 +84,16 @@
                 <i class="fa-solid fa-shield-cat"></i>
                 <h1>SafeScape <span>| Module 4</span></h1>
             </a>
-            
+
             <div class="ss-module-indicators">
-                <a href="../module_1/index.html" class="ss-module-dot completed" id="nav-1" title="Module 1"><i class="fa-solid fa-check"></i></a>
+                <a href="../module_1/index.html" class="ss-module-dot completed" id="nav-1" title="Module 1"><i
+                        class="fa-solid fa-check"></i></a>
                 <div class="ss-module-connector active"></div>
-                <a href="../module_2/index.html" class="ss-module-dot completed" id="nav-2" title="Module 2"><i class="fa-solid fa-check"></i></a>
+                <a href="../module_2/index.html" class="ss-module-dot completed" id="nav-2" title="Module 2"><i
+                        class="fa-solid fa-check"></i></a>
                 <div class="ss-module-connector active"></div>
-                <a href="../module_3/index.html" class="ss-module-dot completed" id="nav-3" title="Module 3"><i class="fa-solid fa-check"></i></a>
+                <a href="../module_3/index.html" class="ss-module-dot completed" id="nav-3" title="Module 3"><i
+                        class="fa-solid fa-check"></i></a>
                 <div class="ss-module-connector active"></div>
                 <a href="index.html" class="ss-module-dot current" title="Module 4">4</a>
                 <div class="ss-module-connector" id="conn-4-5"></div>
@@ -78,11 +110,12 @@
 
         <!-- HEADER -->
         <section class="fade-in text-center max-w-3xl mx-auto space-y-4" style="animation-delay: 0.1s;">
-            <h1 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-200 to-slate-400">
+            <h1
+                class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-200 to-slate-400">
                 Get Low and Go!
             </h1>
             <p class="text-lg text-slate-300 leading-relaxed">
-                Fire creates more than just flames. It creates a dark, toxic enemy called smoke. 
+                Fire creates more than just flames. It creates a dark, toxic enemy called smoke.
                 Learn the physics of why staying low is the only way to survive.
             </p>
         </section>
@@ -94,31 +127,41 @@
         </div>
 
         <!-- CARD 1: PHYSICS OF SMOKE -->
-        <section id="card-1" class="fade-in bg-slate-800 rounded-2xl overflow-hidden shadow-xl border border-slate-700 info-card relative" style="animation-delay: 0.2s;">
+        <section id="card-1"
+            class="fade-in bg-slate-800 rounded-2xl overflow-hidden shadow-xl border border-slate-700 info-card relative"
+            style="animation-delay: 0.2s;">
             <div class="grid grid-cols-1 md:grid-cols-2">
                 <div class="p-8 flex flex-col justify-center space-y-4">
-                    <h2 class="text-2xl font-bold text-orange-400"><i class="fa-solid fa-wind mr-2"></i> The Physics of Heat</h2>
+                    <h2 class="text-2xl font-bold text-orange-400"><i class="fa-solid fa-wind mr-2"></i> The Physics of
+                        Heat</h2>
                     <p class="text-slate-300 leading-relaxed">
-                        Heat creates energy. Because hot air is lighter than cold air, it rises rapidly to the ceiling. 
+                        Heat creates energy. Because hot air is lighter than cold air, it rises rapidly to the ceiling.
                         This pushes the cooler, cleaner air down to the floor.
                     </p>
                     <div class="bg-slate-900/50 p-4 rounded-lg border-l-4 border-green-500">
                         <p class="text-sm text-green-300 font-bold">The Green Zone:</p>
                         <p class="text-sm text-slate-400">The safest air is 1-2 feet off the ground.</p>
                     </div>
-                    
+
                     <!-- Q&A Section -->
                     <div class="mt-4 pt-4 border-t border-slate-700">
                         <div id="qa-1" class="space-y-3">
-                            <p class="text-sm text-yellow-400 font-semibold"><i class="fa-solid fa-question-circle mr-1"></i> Think About It:</p>
+                            <p class="text-sm text-yellow-400 font-semibold"><i
+                                    class="fa-solid fa-question-circle mr-1"></i> Think About It:</p>
                             <p class="text-slate-300 text-sm">Why does hot air rise to the ceiling?</p>
                             <div class="flex gap-2">
-                                <input type="text" id="answer-1" class="qa-input flex-1 bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-sm text-white focus:outline-none" placeholder="Type your answer...">
-                                <button onclick="submitAnswer(1)" class="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-lg text-sm font-bold transition-colors">Submit</button>
+                                <input type="text" id="answer-1"
+                                    class="qa-input flex-1 bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-sm text-white focus:outline-none"
+                                    placeholder="Type your answer...">
+                                <button onclick="submitAnswer(1)"
+                                    class="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-lg text-sm font-bold transition-colors">Submit</button>
                             </div>
-                            <div id="reveal-1" class="hidden answer-reveal bg-green-900/30 border border-green-600 rounded-lg p-3">
-                                <p class="text-green-400 text-sm font-bold"><i class="fa-solid fa-lightbulb mr-1"></i> Answer:</p>
-                                <p class="text-white text-sm">Hot air rises because it is lighter (less dense) than cold air. The heat makes air molecules move faster and spread apart!</p>
+                            <div id="reveal-1"
+                                class="hidden answer-reveal bg-green-900/30 border border-green-600 rounded-lg p-3">
+                                <p class="text-green-400 text-sm font-bold"><i class="fa-solid fa-lightbulb mr-1"></i>
+                                    Answer:</p>
+                                <p class="text-white text-sm">Hot air rises because it is lighter (less dense) than cold
+                                    air. The heat makes air molecules move faster and spread apart!</p>
                             </div>
                         </div>
                     </div>
@@ -126,7 +169,9 @@
                 <!-- IMAGE PLACEHOLDER 1 -->
                 <div class="bg-slate-900 p-6 flex items-center justify-center">
                     <div class="relative w-full max-w-sm">
-                        <img src="../assets/images/card1_stratification.jpg" class="w-full rounded-xl shadow-lg opacity-90 hover:opacity-100 transition-opacity" onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
+                        <img src="../assets/images/card1_stratification.jpg"
+                            class="w-full rounded-xl shadow-lg opacity-90 hover:opacity-100 transition-opacity"
+                            onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
                         <div class="text-center text-slate-500 hidden py-16">
                             <i class="fa-solid fa-layer-group text-5xl mb-2"></i>
                             <p class="font-mono text-sm">[ card1_stratification.jpg ]</p>
@@ -137,39 +182,52 @@
         </section>
 
         <!-- CARD 2: THE TOXIC CLOUD -->
-        <section id="card-2" class="fade-in bg-slate-800 rounded-2xl overflow-hidden shadow-xl border border-slate-700 info-card relative" style="animation-delay: 0.3s;">
+        <section id="card-2"
+            class="fade-in bg-slate-800 rounded-2xl overflow-hidden shadow-xl border border-slate-700 info-card relative"
+            style="animation-delay: 0.3s;">
             <div class="grid grid-cols-1 md:grid-cols-2">
                 <!-- Image Left on Desktop for Variety -->
                 <div class="order-2 md:order-1 bg-slate-900 p-6 flex items-center justify-center">
                     <div class="relative w-full max-w-sm">
-                        <img src="../assets/images/card2_toxic.jpg" class="w-full rounded-xl shadow-lg opacity-90 hover:opacity-100 transition-opacity" onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
+                        <img src="../assets/images/card2_toxic.jpg"
+                            class="w-full rounded-xl shadow-lg opacity-90 hover:opacity-100 transition-opacity"
+                            onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
                         <div class="text-center text-slate-500 hidden py-16">
                             <i class="fa-solid fa-skull-crossbones text-5xl mb-2"></i>
                             <p class="font-mono text-sm">[ card2_toxic.jpg ]</p>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="order-1 md:order-2 p-8 flex flex-col justify-center space-y-4">
-                    <h2 class="text-2xl font-bold text-red-500"><i class="fa-solid fa-biohazard mr-2"></i> The Toxic Cloud</h2>
+                    <h2 class="text-2xl font-bold text-red-500"><i class="fa-solid fa-biohazard mr-2"></i> The Toxic
+                        Cloud</h2>
                     <p class="text-slate-300 leading-relaxed">
-                        Smoke isn't just dark air; it is full of toxic chemicals and particles. 
+                        Smoke isn't just dark air; it is full of toxic chemicals and particles.
                         Breathing it in can make you sleepy, confused, or hurt your lungs instantly.
                     </p>
-                    <p class="text-slate-400 text-sm italic">"Most injuries in fires come from the smoke, not the flames."</p>
-                    
+                    <p class="text-slate-400 text-sm italic">"Most injuries in fires come from the smoke, not the
+                        flames."</p>
+
                     <!-- Q&A Section -->
                     <div class="mt-4 pt-4 border-t border-slate-700">
                         <div id="qa-2" class="space-y-3">
-                            <p class="text-sm text-yellow-400 font-semibold"><i class="fa-solid fa-question-circle mr-1"></i> Think About It:</p>
+                            <p class="text-sm text-yellow-400 font-semibold"><i
+                                    class="fa-solid fa-question-circle mr-1"></i> Think About It:</p>
                             <p class="text-slate-300 text-sm">What causes more injuries in a fire - flames or smoke?</p>
                             <div class="flex gap-2">
-                                <input type="text" id="answer-2" class="qa-input flex-1 bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-sm text-white focus:outline-none" placeholder="Type your answer...">
-                                <button onclick="submitAnswer(2)" class="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-lg text-sm font-bold transition-colors">Submit</button>
+                                <input type="text" id="answer-2"
+                                    class="qa-input flex-1 bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-sm text-white focus:outline-none"
+                                    placeholder="Type your answer...">
+                                <button onclick="submitAnswer(2)"
+                                    class="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-lg text-sm font-bold transition-colors">Submit</button>
                             </div>
-                            <div id="reveal-2" class="hidden answer-reveal bg-green-900/30 border border-green-600 rounded-lg p-3">
-                                <p class="text-green-400 text-sm font-bold"><i class="fa-solid fa-lightbulb mr-1"></i> Answer:</p>
-                                <p class="text-white text-sm">Smoke causes more injuries! It contains toxic gases like carbon monoxide that can knock you unconscious before flames even reach you.</p>
+                            <div id="reveal-2"
+                                class="hidden answer-reveal bg-green-900/30 border border-green-600 rounded-lg p-3">
+                                <p class="text-green-400 text-sm font-bold"><i class="fa-solid fa-lightbulb mr-1"></i>
+                                    Answer:</p>
+                                <p class="text-white text-sm">Smoke causes more injuries! It contains toxic gases like
+                                    carbon monoxide that can knock you unconscious before flames even reach you.</p>
                             </div>
                         </div>
                     </div>
@@ -178,12 +236,15 @@
         </section>
 
         <!-- CARD 3: THE CRAWL TECHNIQUE -->
-        <section id="card-3" class="fade-in bg-slate-800 rounded-2xl overflow-hidden shadow-xl border border-slate-700 info-card relative" style="animation-delay: 0.4s;">
+        <section id="card-3"
+            class="fade-in bg-slate-800 rounded-2xl overflow-hidden shadow-xl border border-slate-700 info-card relative"
+            style="animation-delay: 0.4s;">
             <div class="grid grid-cols-1 md:grid-cols-2">
                 <div class="p-8 flex flex-col justify-center space-y-4">
-                    <h2 class="text-2xl font-bold text-blue-400"><i class="fa-solid fa-person-crawling mr-2"></i> Hands and Knees</h2>
+                    <h2 class="text-2xl font-bold text-blue-400"><i class="fa-solid fa-person-crawling mr-2"></i> Hands
+                        and Knees</h2>
                     <p class="text-slate-300 leading-relaxed">
-                        Don't slither like a snake! Crawl on your hands and knees. 
+                        Don't slither like a snake! Crawl on your hands and knees.
                         This keeps your head in the 'Clean Air Zone' but allows you to move fast.
                     </p>
                     <ul class="list-disc list-inside text-slate-400 space-y-1">
@@ -191,19 +252,28 @@
                         <li>Move quickly but calmly.</li>
                         <li>Stay near walls if visibility is zero.</li>
                     </ul>
-                    
+
                     <!-- Q&A Section -->
                     <div class="mt-4 pt-4 border-t border-slate-700">
                         <div id="qa-3" class="space-y-3">
-                            <p class="text-sm text-yellow-400 font-semibold"><i class="fa-solid fa-question-circle mr-1"></i> Think About It:</p>
-                            <p class="text-slate-300 text-sm">Why should you crawl on hands and knees instead of slithering on your belly?</p>
+                            <p class="text-sm text-yellow-400 font-semibold"><i
+                                    class="fa-solid fa-question-circle mr-1"></i> Think About It:</p>
+                            <p class="text-slate-300 text-sm">Why should you crawl on hands and knees instead of
+                                slithering on your belly?</p>
                             <div class="flex gap-2">
-                                <input type="text" id="answer-3" class="qa-input flex-1 bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-sm text-white focus:outline-none" placeholder="Type your answer...">
-                                <button onclick="submitAnswer(3)" class="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-lg text-sm font-bold transition-colors">Submit</button>
+                                <input type="text" id="answer-3"
+                                    class="qa-input flex-1 bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-sm text-white focus:outline-none"
+                                    placeholder="Type your answer...">
+                                <button onclick="submitAnswer(3)"
+                                    class="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-lg text-sm font-bold transition-colors">Submit</button>
                             </div>
-                            <div id="reveal-3" class="hidden answer-reveal bg-green-900/30 border border-green-600 rounded-lg p-3">
-                                <p class="text-green-400 text-sm font-bold"><i class="fa-solid fa-lightbulb mr-1"></i> Answer:</p>
-                                <p class="text-white text-sm">Crawling on hands and knees lets you move faster while still keeping your head in the clean air zone near the floor. Slithering is too slow!</p>
+                            <div id="reveal-3"
+                                class="hidden answer-reveal bg-green-900/30 border border-green-600 rounded-lg p-3">
+                                <p class="text-green-400 text-sm font-bold"><i class="fa-solid fa-lightbulb mr-1"></i>
+                                    Answer:</p>
+                                <p class="text-white text-sm">Crawling on hands and knees lets you move faster while
+                                    still keeping your head in the clean air zone near the floor. Slithering is too
+                                    slow!</p>
                             </div>
                         </div>
                     </div>
@@ -211,7 +281,9 @@
                 <!-- IMAGE PLACEHOLDER 3 -->
                 <div class="bg-slate-900 p-6 flex items-center justify-center">
                     <div class="relative w-full max-w-sm">
-                        <img src="../assets/images/card3_crawl.jpg" class="w-full rounded-xl shadow-lg opacity-90 hover:opacity-100 transition-opacity" onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
+                        <img src="../assets/images/card3_crawl.jpg"
+                            class="w-full rounded-xl shadow-lg opacity-90 hover:opacity-100 transition-opacity"
+                            onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
                         <div class="text-center text-slate-500 hidden py-16">
                             <i class="fa-solid fa-person-running text-5xl mb-2"></i>
                             <p class="font-mono text-sm">[ card3_crawl.jpg ]</p>
@@ -222,39 +294,53 @@
         </section>
 
         <!-- CARD 4: THE VISIBILITY TRAP -->
-        <section id="card-4" class="fade-in bg-slate-800 rounded-2xl overflow-hidden shadow-xl border border-slate-700 info-card relative" style="animation-delay: 0.5s;">
+        <section id="card-4"
+            class="fade-in bg-slate-800 rounded-2xl overflow-hidden shadow-xl border border-slate-700 info-card relative"
+            style="animation-delay: 0.5s;">
             <div class="grid grid-cols-1 md:grid-cols-2">
                 <!-- Image Left on Desktop -->
                 <div class="order-2 md:order-1 bg-slate-900 p-6 flex items-center justify-center">
                     <div class="relative w-full max-w-sm">
-                        <img src="../assets/images/card4_darkness.jpg" class="w-full rounded-xl shadow-lg opacity-90 hover:opacity-100 transition-opacity" onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
+                        <img src="../assets/images/card4_darkness.jpg"
+                            class="w-full rounded-xl shadow-lg opacity-90 hover:opacity-100 transition-opacity"
+                            onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
                         <div class="text-center text-slate-500 hidden py-16">
                             <i class="fa-solid fa-eye-slash text-5xl mb-2"></i>
                             <p class="font-mono text-sm">[ card4_darkness.jpg ]</p>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="order-1 md:order-2 p-8 flex flex-col justify-center space-y-4">
-                    <h2 class="text-2xl font-bold text-purple-400"><i class="fa-solid fa-moon mr-2"></i> Pitch Black</h2>
+                    <h2 class="text-2xl font-bold text-purple-400"><i class="fa-solid fa-moon mr-2"></i> Pitch Black
+                    </h2>
                     <p class="text-slate-300 leading-relaxed">
-                        In movies, smoke looks grey. In real life, smoke is <strong class="text-white">pitch black</strong>. 
+                        In movies, smoke looks grey. In real life, smoke is <strong class="text-white">pitch
+                            black</strong>.
                         You often cannot see your own hand in front of your face.
                     </p>
                     <p class="text-slate-300">Getting low helps you see the floorboards and exit paths.</p>
-                    
+
                     <!-- Q&A Section -->
                     <div class="mt-4 pt-4 border-t border-slate-700">
                         <div id="qa-4" class="space-y-3">
-                            <p class="text-sm text-yellow-400 font-semibold"><i class="fa-solid fa-question-circle mr-1"></i> Think About It:</p>
-                            <p class="text-slate-300 text-sm">How is real smoke different from smoke you see in movies?</p>
+                            <p class="text-sm text-yellow-400 font-semibold"><i
+                                    class="fa-solid fa-question-circle mr-1"></i> Think About It:</p>
+                            <p class="text-slate-300 text-sm">How is real smoke different from smoke you see in movies?
+                            </p>
                             <div class="flex gap-2">
-                                <input type="text" id="answer-4" class="qa-input flex-1 bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-sm text-white focus:outline-none" placeholder="Type your answer...">
-                                <button onclick="submitAnswer(4)" class="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-lg text-sm font-bold transition-colors">Submit</button>
+                                <input type="text" id="answer-4"
+                                    class="qa-input flex-1 bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-sm text-white focus:outline-none"
+                                    placeholder="Type your answer...">
+                                <button onclick="submitAnswer(4)"
+                                    class="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-lg text-sm font-bold transition-colors">Submit</button>
                             </div>
-                            <div id="reveal-4" class="hidden answer-reveal bg-green-900/30 border border-green-600 rounded-lg p-3">
-                                <p class="text-green-400 text-sm font-bold"><i class="fa-solid fa-lightbulb mr-1"></i> Answer:</p>
-                                <p class="text-white text-sm">Real smoke is pitch black, not grey like in movies! You can't see anything - not even your own hand in front of your face.</p>
+                            <div id="reveal-4"
+                                class="hidden answer-reveal bg-green-900/30 border border-green-600 rounded-lg p-3">
+                                <p class="text-green-400 text-sm font-bold"><i class="fa-solid fa-lightbulb mr-1"></i>
+                                    Answer:</p>
+                                <p class="text-white text-sm">Real smoke is pitch black, not grey like in movies! You
+                                    can't see anything - not even your own hand in front of your face.</p>
                             </div>
                         </div>
                     </div>
@@ -263,31 +349,44 @@
         </section>
 
         <!-- CARD 5: THE SHIRT FILTER -->
-        <section id="card-5" class="fade-in bg-slate-800 rounded-2xl overflow-hidden shadow-xl border border-slate-700 info-card relative" style="animation-delay: 0.6s;">
+        <section id="card-5"
+            class="fade-in bg-slate-800 rounded-2xl overflow-hidden shadow-xl border border-slate-700 info-card relative"
+            style="animation-delay: 0.6s;">
             <div class="grid grid-cols-1 md:grid-cols-2">
                 <div class="p-8 flex flex-col justify-center space-y-4">
-                    <h2 class="text-2xl font-bold text-teal-400"><i class="fa-solid fa-shirt mr-2"></i> Use a Filter</h2>
+                    <h2 class="text-2xl font-bold text-teal-400"><i class="fa-solid fa-shirt mr-2"></i> Use a Filter
+                    </h2>
                     <p class="text-slate-300 leading-relaxed">
-                        If you can, pull your shirt up over your nose or use a cloth. 
+                        If you can, pull your shirt up over your nose or use a cloth.
                         This acts as a basic filter against large soot particles, helping you breathe a little easier.
                     </p>
                     <div class="bg-slate-900/50 p-4 rounded-lg border-l-4 border-teal-500">
                         <p class="text-sm text-teal-300 font-bold">Pro Tip:</p>
-                        <p class="text-sm text-slate-400">Do not waste time looking for a wet towel. Just use your shirt and GO.</p>
+                        <p class="text-sm text-slate-400">Do not waste time looking for a wet towel. Just use your shirt
+                            and GO.</p>
                     </div>
-                    
+
                     <!-- Q&A Section -->
                     <div class="mt-4 pt-4 border-t border-slate-700">
                         <div id="qa-5" class="space-y-3">
-                            <p class="text-sm text-yellow-400 font-semibold"><i class="fa-solid fa-question-circle mr-1"></i> Think About It:</p>
-                            <p class="text-slate-300 text-sm">What can you use to cover your nose and mouth if you don't have a mask?</p>
+                            <p class="text-sm text-yellow-400 font-semibold"><i
+                                    class="fa-solid fa-question-circle mr-1"></i> Think About It:</p>
+                            <p class="text-slate-300 text-sm">What can you use to cover your nose and mouth if you don't
+                                have a mask?</p>
                             <div class="flex gap-2">
-                                <input type="text" id="answer-5" class="qa-input flex-1 bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-sm text-white focus:outline-none" placeholder="Type your answer...">
-                                <button onclick="submitAnswer(5)" class="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-lg text-sm font-bold transition-colors">Submit</button>
+                                <input type="text" id="answer-5"
+                                    class="qa-input flex-1 bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-sm text-white focus:outline-none"
+                                    placeholder="Type your answer...">
+                                <button onclick="submitAnswer(5)"
+                                    class="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-lg text-sm font-bold transition-colors">Submit</button>
                             </div>
-                            <div id="reveal-5" class="hidden answer-reveal bg-green-900/30 border border-green-600 rounded-lg p-3">
-                                <p class="text-green-400 text-sm font-bold"><i class="fa-solid fa-lightbulb mr-1"></i> Answer:</p>
-                                <p class="text-white text-sm">Your shirt! Just pull it up over your nose. Any cloth works as a basic filter against soot particles. Don't waste time looking for a wet towel - just GO!</p>
+                            <div id="reveal-5"
+                                class="hidden answer-reveal bg-green-900/30 border border-green-600 rounded-lg p-3">
+                                <p class="text-green-400 text-sm font-bold"><i class="fa-solid fa-lightbulb mr-1"></i>
+                                    Answer:</p>
+                                <p class="text-white text-sm">Your shirt! Just pull it up over your nose. Any cloth
+                                    works as a basic filter against soot particles. Don't waste time looking for a wet
+                                    towel - just GO!</p>
                             </div>
                         </div>
                     </div>
@@ -295,7 +394,9 @@
                 <!-- IMAGE PLACEHOLDER 5 -->
                 <div class="bg-slate-900 p-6 flex items-center justify-center">
                     <div class="relative w-full max-w-sm">
-                        <img src="../assets/images/card5_filter.jpg" class="w-full rounded-xl shadow-lg opacity-90 hover:opacity-100 transition-opacity" onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
+                        <img src="../assets/images/card5_filter.jpg"
+                            class="w-full rounded-xl shadow-lg opacity-90 hover:opacity-100 transition-opacity"
+                            onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
                         <div class="text-center text-slate-500 hidden py-16">
                             <i class="fa-solid fa-mask-face text-5xl mb-2"></i>
                             <p class="font-mono text-sm">[ card5_filter.jpg ]</p>
@@ -306,9 +407,11 @@
         </section>
 
         <!-- INTERACTIVE KNOWLEDGE CHECK -->
-        <section id="section-check" class="fade-in ss-section max-w-2xl mx-auto bg-slate-900 p-8 rounded-2xl border-2 border-slate-600 text-center space-y-6" style="animation-delay: 0.7s;">
+        <section id="section-check"
+            class="fade-in ss-section max-w-2xl mx-auto bg-slate-900 p-8 rounded-2xl border-2 border-slate-600 text-center space-y-6"
+            style="animation-delay: 0.7s;">
             <div class="ss-section-badge"><i class="fa-solid fa-check"></i></div>
-            
+
             <div id="check-locked" class="">
                 <i class="fa-solid fa-lock text-4xl text-slate-600 mb-4"></i>
                 <h3 class="text-xl font-bold text-slate-500">Complete All Cards First</h3>
@@ -316,32 +419,22 @@
             </div>
 
             <div id="check-unlocked" class="hidden">
-                <h3 class="text-2xl font-bold text-white mb-6"><i class="fa-solid fa-clipboard-check text-yellow-400 mr-2"></i> True or False</h3>
+                <h3 class="text-2xl font-bold text-white mb-6"><i
+                        class="fa-solid fa-clipboard-check text-yellow-400 mr-2"></i> True or False</h3>
                 <p class="text-slate-400 text-sm mb-4">Answer all 5 questions correctly to complete the module</p>
-                
+
                 <div id="tf-questions" class="space-y-4 text-left">
                     <!-- Questions rendered by JS -->
                 </div>
 
                 <div id="check-result" class="hidden font-bold text-xl transition-all mt-6"></div>
             </div>
-            
+
             <a href="../module_5/index.html" id="btn-next" class="hidden mt-6 ss-btn ss-btn-success inline-block">
                 Continue to Module 5 <i class="fa-solid fa-arrow-right ml-2"></i>
             </a>
         </section>
 
-        <!-- MODULE COMPLETE -->
-        <section id="section-complete" class="fade-in text-center py-12 hidden">
-            <div class="bg-green-900/30 border border-green-500 rounded-2xl p-8 max-w-xl mx-auto">
-                <i class="fa-solid fa-circle-check text-6xl text-green-500 mb-4"></i>
-                <h2 class="text-3xl font-bold text-white mb-2">Module 4 Complete!</h2>
-                <p class="text-slate-300 mb-6">You understand smoke behavior and the "Get Low and Go" technique.</p>
-                <a href="../module_5/index.html" class="ss-btn ss-btn-primary text-lg">
-                    Continue to Final Module <i class="fa-solid fa-arrow-right ml-2"></i>
-                </a>
-            </div>
-        </section>
 
     </main>
 
@@ -399,7 +492,6 @@
             });
             updateModuleProgress();
             updateSectionStates();
-            checkModuleComplete();
         }
 
         function updateModuleProgress() {
@@ -415,11 +507,6 @@
             if (localState.finalCheckPassed) document.getElementById('section-check').classList.add('completed');
         }
 
-        function checkModuleComplete() {
-            if (localState.finalCheckPassed) {
-                document.getElementById('section-complete').classList.remove('hidden');
-            }
-        }
 
         function updateNavigation() {
             const progress = SafeScapeProgress.getProgress();
@@ -467,7 +554,7 @@
         function submitAnswer(cardNum) {
             const input = document.getElementById(`answer-${cardNum}`);
             const answer = input.value.trim();
-            
+
             if (!answer) {
                 showToast('error', 'Please type an answer first!');
                 return;
@@ -475,16 +562,16 @@
 
             // Mark card as completed (any answer accepted)
             localState.cardsCompleted[cardNum - 1] = true;
-            
+
             // Show reveal
             document.getElementById(`reveal-${cardNum}`).classList.remove('hidden');
             document.getElementById(`card-${cardNum}`).classList.add('card-complete');
-            
+
             // Disable input
             input.disabled = true;
             input.parentElement.querySelector('button').disabled = true;
             input.parentElement.querySelector('button').classList.add('opacity-50');
-            
+
             // Update UI
             updateCardsUI();
             saveLocalProgress();
@@ -498,7 +585,7 @@
         function renderTFQuestions() {
             const container = document.getElementById('tf-questions');
             container.innerHTML = '';
-            
+
             tfQuestions.forEach((q, idx) => {
                 const div = document.createElement('div');
                 div.className = 'bg-slate-800 p-4 rounded-xl border border-slate-600';
@@ -609,7 +696,7 @@
                 const correctCount = localState.tfAnswers.filter((ans, idx) => tfQuestions[idx].answer === ans).length;
                 result.innerHTML = `<span class='text-orange-400'><i class='fa-solid fa-info-circle mr-2'></i>You got ${correctCount}/5 correct. Review the answers above!</span>`;
                 result.classList.remove('hidden');
-                
+
                 // Still allow progression if they answered all
                 setTimeout(() => {
                     btn.classList.remove('hidden');
@@ -635,4 +722,5 @@
         }
     </script>
 </body>
+
 </html>

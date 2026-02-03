@@ -65,7 +65,6 @@ function SortableCarouselItem({
             <div className="flex-1 min-w-0">
                 <h4 className="font-semibold truncate">{image.title}</h4>
                 <p className="text-sm text-muted-foreground truncate">{image.altText}</p>
-                <p className="text-xs text-muted-foreground mt-1 truncate">{image.url}</p>
             </div>
 
             <Button

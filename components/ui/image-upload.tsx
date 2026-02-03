@@ -40,15 +40,15 @@ export function ImageUpload({ onUploadComplete, title = "Image Upload", descript
         return;
       }
 
-      // Validate file size (max 5MB)
-      if (selectedFile.size > 5 * 1024 * 1024) {
-        setError('File size too large. Maximum 5MB allowed.');
+      // Validate file size (max 15MB)
+      if (selectedFile.size > 15 * 1024 * 1024) {
+        setError('File size too large. Maximum 15MB allowed.');
         return;
       }
 
       setFile(selectedFile);
       setError(null);
-      
+
       // Create preview URL
       const url = URL.createObjectURL(selectedFile);
       setPreviewUrl(url);
@@ -56,7 +56,7 @@ export function ImageUpload({ onUploadComplete, title = "Image Upload", descript
     }
   };
 
- const handleUpload = async () => {
+  const handleUpload = async () => {
     if (!file) {
       setError('Please select a file first');
       return;
@@ -95,13 +95,13 @@ export function ImageUpload({ onUploadComplete, title = "Image Upload", descript
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     }
- };
+  };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
   };
 
- const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const droppedFile = e.dataTransfer.files?.[0];
     if (droppedFile) {
@@ -110,8 +110,8 @@ export function ImageUpload({ onUploadComplete, title = "Image Upload", descript
         return;
       }
 
-      if (droppedFile.size > 5 * 1024 * 1024) {
-        setError('File size too large. Maximum 5MB allowed.');
+      if (droppedFile.size > 15 * 1024 * 1024) {
+        setError('File size too large. Maximum 15MB allowed.');
         return;
       }
 
@@ -123,7 +123,7 @@ export function ImageUpload({ onUploadComplete, title = "Image Upload", descript
       setPreviewUrl(url);
       setUploadUrl('');
     }
- };
+  };
 
   return (
     <Card>
@@ -132,7 +132,7 @@ export function ImageUpload({ onUploadComplete, title = "Image Upload", descript
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div 
+        <div
           className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-primary transition-colors"
           onDragOver={handleDragOver}
           onDrop={handleDrop}
@@ -151,7 +151,7 @@ export function ImageUpload({ onUploadComplete, title = "Image Upload", descript
               {file ? file.name : 'Click or drag an image to upload'}
             </p>
             <p className="text-xs text-muted-foreground">
-              Maximum file size: 5MB
+              Maximum file size: 15MB
             </p>
           </div>
         </div>
@@ -163,15 +163,15 @@ export function ImageUpload({ onUploadComplete, title = "Image Upload", descript
         {previewUrl && !uploadUrl && (
           <div className="mt-4">
             <div className="flex justify-center">
-              <img 
-                src={previewUrl} 
-                alt="Preview" 
+              <img
+                src={previewUrl}
+                alt="Preview"
                 className="max-h-48 rounded-md object-contain"
               />
             </div>
             <div className="mt-4 flex justify-center">
-              <Button 
-                onClick={handleUpload} 
+              <Button
+                onClick={handleUpload}
                 disabled={isUploading}
                 className="w-full md:w-auto"
               >
@@ -194,34 +194,23 @@ export function ImageUpload({ onUploadComplete, title = "Image Upload", descript
         {uploadUrl && (
           <div className="mt-4 space-y-4">
             <div className="flex justify-center">
-              <img 
-                src={uploadUrl} 
-                alt="Uploaded" 
+              <img
+                src={uploadUrl}
+                alt="Uploaded"
                 className="max-h-48 rounded-md object-contain"
               />
             </div>
-            
-            <div className="space-y-2">
-              <Label>Generated URL:</Label>
-              <div className="flex">
-                <Input 
-                  value={uploadUrl} 
-                  readOnly 
-                  className="rounded-r-none"
-                />
-                <Button 
-                  type="button" 
-                  variant="secondary" 
-                  className="rounded-l-none border-l-0 px-3"
-                  onClick={handleCopyUrl}
-                >
-                  {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                </Button>
-              </div>
+
+            {/* Success message instead of showing the raw Base64 URL */}
+            <div className="flex items-center justify-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+              <Check className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                Image Uploaded Successfully
+              </span>
             </div>
-            
-            <p className="text-sm text-muted-foreground">
-              Copy the URL above and paste it in the "Image URL" field
+
+            <p className="text-sm text-muted-foreground text-center">
+              Your image is ready. Fill in the other fields and submit.
             </p>
           </div>
         )}
