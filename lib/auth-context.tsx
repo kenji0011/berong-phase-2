@@ -134,7 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           method: 'GET',
           credentials: 'include',
         })
-        
+
         if (response.ok) {
           const data = await response.json()
           if (data.user) {
@@ -149,7 +149,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         console.error('Failed to check auth status:', error)
       }
-      
+
       setIsLoading(false)
     }
 
@@ -164,6 +164,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Important for CORS cookie handling
         body: JSON.stringify({ username, password, name, age }),
       })
 
@@ -183,7 +184,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Set cookie for middleware with proper attributes for cross-tab/production compatibility
       const isSecure = window.location.protocol === 'https:'
-      document.cookie = `bfp_user=${encodeURIComponent(JSON.stringify(userWithPermissions))}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax${isSecure ? '; Secure' : ''}` // 7 days
+      const cookieValue = encodeURIComponent(JSON.stringify(userWithPermissions))
+      // Cookie settings: SameSite=Lax allows the cookie to be sent on same-site navigations
+      // Secure flag is only added for HTTPS connections
+      // Path=/ ensures cookie is available site-wide
+      document.cookie = `bfp_user=${cookieValue}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax${isSecure ? '; Secure' : ''}`
 
       return { success: true }
     } catch (error: any) {
@@ -202,6 +207,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Important for CORS cookie handling
         body: JSON.stringify({ username, password }),
       })
 
@@ -219,9 +225,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(userWithPermissions)
       localStorage.setItem('user', JSON.stringify(userWithPermissions))
 
-      // Set cookie for middleware with proper attributes for cross-tab/production compatibility
+      // Set cookie for middleware with proper attributes for cross-tab/production compatibility  
       const isSecure = window.location.protocol === 'https:'
-      document.cookie = `bfp_user=${encodeURIComponent(JSON.stringify(userWithPermissions))}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax${isSecure ? '; Secure' : ''}` // 7 days
+      const cookieValue = encodeURIComponent(JSON.stringify(userWithPermissions))
+      // Cookie settings: SameSite=Lax allows the cookie to be sent on same-site navigations
+      // Secure flag is only added for HTTPS connections
+      // Path=/ ensures cookie is available site-wide
+      document.cookie = `bfp_user=${cookieValue}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax${isSecure ? '; Secure' : ''}`
 
       return { success: true }
     } catch (error: any) {
