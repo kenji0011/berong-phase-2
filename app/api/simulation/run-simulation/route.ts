@@ -47,30 +47,57 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Forward to Python backend
-    const response = await fetch(`${BACKEND_URL}/api/run-simulation`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(body)
-    })
+    // Forward to Python backend with timeout
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout for starting simulation
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error("Backend error:", errorText)
-      return NextResponse.json(
-        { error: "Failed to start simulation" },
-        { status: response.status }
-      )
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/run-simulation`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body),
+        signal: controller.signal
+      })
+      clearTimeout(timeoutId)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("Backend error:", errorText)
+        return NextResponse.json(
+          { error: "Failed to start simulation", details: errorText },
+          { status: response.status }
+        )
+      }
+
+      const result = await response.json()
+      return NextResponse.json(result)
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId)
+      
+      if (fetchError.name === 'AbortError') {
+        console.error("Backend request timeout when starting simulation")
+        return NextResponse.json(
+          { error: "Simulation backend is taking too long to respond. It may be processing another request." },
+          { status: 503 }
+        )
+      }
+      
+      if (fetchError.cause?.code === 'ECONNREFUSED' || fetchError.message?.includes('fetch failed')) {
+        console.error("Cannot connect to simulation backend:", BACKEND_URL)
+        return NextResponse.json(
+          { error: `Cannot connect to simulation backend. Please ensure the Python server is running at ${BACKEND_URL}` },
+          { status: 503 }
+        )
+      }
+      
+      throw fetchError
     }
-
-    const result = await response.json()
-    return NextResponse.json(result)
-  } catch (error) {
+  } catch (error: any) {
     console.error("Run simulation error:", error)
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error", details: error.message },
       { status: 500 }
     )
   }

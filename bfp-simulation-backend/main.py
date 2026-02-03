@@ -18,11 +18,45 @@ from datetime import datetime
 from PIL import Image
 from io import BytesIO
 import pickle
-import nltk
-from nltk.stem import WordNetLemmatizer
-import tensorflow as tf
-from tensorflow.keras.models import load_model
-import google.generativeai as genai
+
+# Chatbot dependencies - optional (TensorFlow doesn't support Python 3.13 yet)
+TENSORFLOW_AVAILABLE = False
+nltk = None
+WordNetLemmatizer = None
+load_model = None
+
+# Check Python version before attempting TensorFlow import
+import sys
+PYTHON_VERSION = sys.version_info
+
+if PYTHON_VERSION >= (3, 13):
+    print(f"[WARN] Python {PYTHON_VERSION.major}.{PYTHON_VERSION.minor} detected - TensorFlow not supported")
+    print("[WARN] Chatbot will be disabled, but simulation will work.")
+else:
+    try:
+        import nltk
+        from nltk.stem import WordNetLemmatizer
+        import tensorflow as tf
+        from tensorflow.keras.models import load_model
+        TENSORFLOW_AVAILABLE = True
+    except Exception as e:
+        print(f"[WARN] TensorFlow/NLTK not available: {e}")
+        print("[WARN] Chatbot will be disabled, but simulation will work.")
+        TENSORFLOW_AVAILABLE = False
+
+# Google Generative AI - optional
+GENAI_AVAILABLE = False
+genai = None
+
+if PYTHON_VERSION >= (3, 13):
+    print("[WARN] Google API libraries may not work on Python 3.13")
+else:
+    try:
+        import google.generativeai as genai
+        GENAI_AVAILABLE = True
+    except Exception as e:
+        print(f"[WARN] google-generativeai not available: {e}")
+        genai = None
 
 from stable_baselines3 import PPO
 from sb3_contrib import MaskablePPO
@@ -134,59 +168,69 @@ async def lifespan(app: FastAPI):
         traceback.print_exc()
         ppo_model = None
     
-    # Load Chatbot model (optional)
+    # Load Chatbot model (optional - requires TensorFlow)
     print("\n[3/3] Loading Fire Safety Chatbot Model...")
-    try:
-        # Download required NLTK data if not already present
-        try:
-            nltk.data.find('tokenizers/punkt')
-        except LookupError:
-            print("  Downloading NLTK punkt tokenizer...")
-            nltk.download('punkt')
-
-        try:
-            nltk.data.find('corpora/wordnet')
-        except LookupError:
-            print("  Downloading NLTK wordnet...")
-            nltk.download('wordnet')
-
-        try:
-            nltk.data.find('corpora/omw-1.4')
-        except LookupError:
-            print("  Downloading NLTK omw-1.4...")
-            nltk.download('omw-1.4')
-
-        # Initialize lemmatizer
-        lemmatizer = WordNetLemmatizer()
-
-        # Load the model and data files
-        chatbot_model = load_model('Fire Safety Chatbot/chatbot_model.h5')
-        words = pickle.load(open('Fire Safety Chatbot/words.pkl', 'rb'))
-        classes = pickle.load(open('Fire Safety Chatbot/classes.pkl', 'rb'))
-        intents = json.load(open('Fire Safety Chatbot/intents.json', 'rb'))
-        print("  [OK] Chatbot model loaded successfully")
-    except Exception as e:
-        print(f"  [WARN] WARNING: Chatbot failed to load:")
-        print(f"  {type(e).__name__}: {str(e)}")
-        print(f"  Chatbot will not be available, but simulation will work.")
+    
+    if not TENSORFLOW_AVAILABLE:
+        print("  [SKIP] TensorFlow not available - chatbot disabled")
+        print("  (This is normal on Python 3.13+, simulation will still work)")
         chatbot_model = None
+        lemmatizer = None
+    else:
+        try:
+            # Download required NLTK data if not already present
+            try:
+                nltk.data.find('tokenizers/punkt')
+            except LookupError:
+                print("  Downloading NLTK punkt tokenizer...")
+                nltk.download('punkt')
+
+            try:
+                nltk.data.find('corpora/wordnet')
+            except LookupError:
+                print("  Downloading NLTK wordnet...")
+                nltk.download('wordnet')
+
+            try:
+                nltk.data.find('corpora/omw-1.4')
+            except LookupError:
+                print("  Downloading NLTK omw-1.4...")
+                nltk.download('omw-1.4')
+
+            # Initialize lemmatizer
+            lemmatizer = WordNetLemmatizer()
+
+            # Load the model and data files
+            chatbot_model = load_model('Fire Safety Chatbot/chatbot_model.h5')
+            words = pickle.load(open('Fire Safety Chatbot/words.pkl', 'rb'))
+            classes = pickle.load(open('Fire Safety Chatbot/classes.pkl', 'rb'))
+            intents = json.load(open('Fire Safety Chatbot/intents.json', 'rb'))
+            print("  [OK] Chatbot model loaded successfully")
+        except Exception as e:
+            print(f"  [WARN] WARNING: Chatbot failed to load:")
+            print(f"  {type(e).__name__}: {str(e)}")
+            print(f"  Chatbot will not be available, but simulation will work.")
+            chatbot_model = None
     
     # Try to initialize Gemini API
-    gemini_api_key = os.environ.get("GEMINI_API_KEY")
-    if gemini_api_key and gemini_api_key != "your-gemini-api-key":
-        try:
-            print("\n  Initializing Google Gemini AI...")
-            genai.configure(api_key=gemini_api_key)
-            gemini_model = genai.GenerativeModel('gemini-1.5-flash')
-            use_gemini = True
-            print("  [OK] Gemini API configured successfully")
-        except Exception as e:
-            print(f"  [WARN] Gemini API initialization failed: {e}")
-            print("  Falling back to TensorFlow chatbot model")
-            use_gemini = False
+    use_gemini = False
+    if GENAI_AVAILABLE:
+        gemini_api_key = os.environ.get("GEMINI_API_KEY")
+        if gemini_api_key and gemini_api_key != "your-gemini-api-key":
+            try:
+                print("\n  Initializing Google Gemini AI...")
+                genai.configure(api_key=gemini_api_key)
+                gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+                use_gemini = True
+                print("  [OK] Gemini API configured successfully")
+            except Exception as e:
+                print(f"  [WARN] Gemini API initialization failed: {e}")
+                print("  Falling back to TensorFlow chatbot model")
+                use_gemini = False
+        else:
+            print("  [INFO] GEMINI_API_KEY not configured, using TensorFlow model")
     else:
-        print("  [INFO] GEMINI_API_KEY not configured, using TensorFlow model")
-        use_gemini = False
+        print("  [INFO] Gemini API not available")
     
     # Print summary
     print("\n" + "=" * 60)
@@ -194,7 +238,7 @@ async def lifespan(app: FastAPI):
     print("=" * 60)
     print(f"  U-Net Model:     {'[OK] Loaded' if unet_model else '[FAIL] FAILED'}")
     print(f"  PPO Model:       {'[OK] Loaded' if ppo_model else '[FAIL] FAILED'}")
-    print(f"  Chatbot:         {'[OK] Gemini API' if use_gemini else ('[OK] TensorFlow' if chatbot_model else '[WARN] Not Available')}")
+    print(f"  Chatbot:         {'[OK] Gemini API' if use_gemini else ('[OK] TensorFlow' if chatbot_model else '[SKIP] Not Available')}")
     print("=" * 60)
     
     if not unet_model or not ppo_model:
@@ -254,6 +298,8 @@ class ChatbotResponse(BaseModel):
 
 def clean_up_sentence(sentence):
     """Tokenize and lemmatize the sentence"""
+    if not TENSORFLOW_AVAILABLE or nltk is None:
+        return sentence.lower().split()  # Fallback to simple split
     if lemmatizer is None:
         return nltk.word_tokenize(sentence)
     sentence_words = nltk.word_tokenize(sentence)
@@ -262,6 +308,8 @@ def clean_up_sentence(sentence):
 
 def bow(sentence, show_details=True):
     """Create bag of words array from sentence"""
+    if not TENSORFLOW_AVAILABLE or words is None:
+        return np.array([])
     sentence_words = clean_up_sentence(sentence)
     bag = [0] * len(words)
     for s in sentence_words:
@@ -274,6 +322,8 @@ def bow(sentence, show_details=True):
 
 def predict_class(sentence):
     """Predict the class of the sentence"""
+    if not TENSORFLOW_AVAILABLE or chatbot_model is None:
+        return []
     p = bow(sentence, show_details=False)
     res = chatbot_model.predict(np.array([p]))[0]
     ERROR_THRESHOLD = 0.25

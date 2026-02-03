@@ -282,19 +282,31 @@ export function SimulationWizard() {
   }
 
   const pollSimulationStatus = async (jobId: string) => {
-    const maxAttempts = 600 // 10 minutes max
+    const maxAttempts = 300 // 5 minutes max (300 * 1 second)
+    const maxConsecutiveErrors = 10 // Stop after 10 consecutive errors
     let attempts = 0
+    let consecutiveErrors = 0
 
     while (attempts < maxAttempts) {
       try {
         const response = await fetch(`/api/simulation/status/${jobId}`)
 
         if (!response.ok) {
-          console.error('Status check failed:', response.status)
+          consecutiveErrors++
+          console.error(`Status check failed (${consecutiveErrors}/${maxConsecutiveErrors}):`, response.status)
+
+          // If backend is consistently failing, abort
+          if (consecutiveErrors >= maxConsecutiveErrors) {
+            throw new Error(`Backend unavailable after ${maxConsecutiveErrors} attempts. Please check if the simulation server is running.`)
+          }
+
           await new Promise(resolve => setTimeout(resolve, 1000))
           attempts++
           continue
         }
+
+        // Reset consecutive errors on success
+        consecutiveErrors = 0
 
         const status = await response.json()
 
@@ -304,10 +316,9 @@ export function SimulationWizard() {
 
           // Validate result structure
           if (!status.result || !status.result.agent_results) {
-
+            console.warn('Received incomplete results:', status.result)
             // If we have dashboard data but no agents, we can still show partial results
-            // or we might want to fail if it's critical. 
-            // For now, let's allow it but ensure the component handles missing data (which we fixed in simulation-results.tsx)
+            // The component handles missing data gracefully
           }
 
           setData(prev => ({ ...prev, results: status.result }))
@@ -320,6 +331,14 @@ export function SimulationWizard() {
           throw new Error(status.error || "Simulation failed")
         }
 
+        // Handle "not_found" status (job doesn't exist)
+        if (status.status === "not_found") {
+          consecutiveErrors++
+          if (consecutiveErrors >= 5) {
+            throw new Error("Simulation job not found. The backend may have restarted.")
+          }
+        }
+
         await new Promise(resolve => setTimeout(resolve, 1000))
         attempts++
       } catch (err) {
@@ -328,7 +347,7 @@ export function SimulationWizard() {
       }
     }
 
-    throw new Error("Simulation timeout after 10 minutes")
+    throw new Error("Simulation timeout after 5 minutes. Please try again with a simpler configuration.")
   }
 
   const handleReset = () => {

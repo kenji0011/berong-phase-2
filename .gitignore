@@ -48,3 +48,7 @@ __pycache__/
 
 # Private documents
 docs/SAFESCAPE-Quotation.html
+
+ASSESSMENT_AND_WORK_LOG.md
+build-log.txt
+runtime-error.log
