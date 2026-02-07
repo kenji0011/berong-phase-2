@@ -52,3 +52,23 @@ docs/SAFESCAPE-Quotation.html
 ASSESSMENT_AND_WORK_LOG.md
 build-log.txt
 runtime-error.log
+
+# Deployment & Scripts
+/scripts/deploy*.ps1
+/scripts/deploy*.sh
+/scripts/start-app.*
+
+# Private Deployment Documentation
+/project_documentation/
+
+# Security & Certificates
+*.pem
+*.key
+*.crt
+*.pfx
+
+# System Files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
