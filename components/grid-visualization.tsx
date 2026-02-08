@@ -1,6 +1,6 @@
 ﻿"use client"
 
-import { useRef, useEffect, useState } from "react"
+import { useRef, useEffect, useState, RefObject } from "react"
 import { Card } from "@/components/ui/card"
 
 interface GridVisualizationProps {
@@ -14,6 +14,7 @@ interface GridVisualizationProps {
   assemblyPoint?: [number, number] | null // Assembly area where agents gather after escape
   onCellClick?: (row: number, col: number) => void
   interactive?: boolean
+  canvasRef?: RefObject<HTMLCanvasElement | null>
   // New enhancement props
   showExitsAlways?: boolean // Show exits during simulation playback
   fireScale?: number // Fire sprite scale multiplier (default 1.0)
@@ -32,12 +33,14 @@ export function GridVisualization({
   assemblyPoint = null,
   onCellClick,
   interactive = false,
+  canvasRef,
   showExitsAlways = true,
   fireScale = 2.85, // Fire size (50% larger than previous 1.9)
   showLegend = false,
   highlightDoors = true
 }: GridVisualizationProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const internalCanvasRef = useRef<HTMLCanvasElement>(null)
+  const resolvedCanvasRef = canvasRef ?? internalCanvasRef
   const [hoveredCell, setHoveredCell] = useState<[number, number] | null>(null)
   const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null)
   const [fireIconImage, setFireIconImage] = useState<HTMLImageElement | null>(null)
@@ -122,7 +125,7 @@ export function GridVisualization({
   }, [])
 
   useEffect(() => {
-    const canvas = canvasRef.current
+    const canvas = resolvedCanvasRef.current
     if (!canvas) return
 
     const ctx = canvas.getContext("2d")
@@ -410,7 +413,7 @@ export function GridVisualization({
   const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!interactive || !onCellClick) return
 
-    const canvas = canvasRef.current
+    const canvas = resolvedCanvasRef.current
     if (!canvas) return
 
     const rect = canvas.getBoundingClientRect()
@@ -433,7 +436,7 @@ export function GridVisualization({
   const handleCanvasHover = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!interactive) return
 
-    const canvas = canvasRef.current
+    const canvas = resolvedCanvasRef.current
     if (!canvas) return
 
     const rect = canvas.getBoundingClientRect()
@@ -469,7 +472,7 @@ export function GridVisualization({
       <Card className="p-4 overflow-auto">
         <div className="flex justify-center">
           <canvas
-            ref={canvasRef}
+            ref={resolvedCanvasRef}
             width={canvasSize}
             height={canvasSize}
             onClick={handleCanvasClick}

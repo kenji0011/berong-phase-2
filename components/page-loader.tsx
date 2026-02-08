@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 
 export function PageLoader() {
     const pathname = usePathname();
@@ -49,27 +50,29 @@ export function PageLoader() {
 
             {/* Loader content */}
             <div className="relative z-10 flex flex-col items-center">
-                {/* Fire-themed spinner */}
+                {/* Berong Logo Spinner */}
                 <div className="relative">
-                    {/* Outer ring */}
-                    <div className="w-20 h-20 border-4 border-yellow-400/30 rounded-full"></div>
+                    {/* Outer spinning ring */}
+                    <div className="absolute -inset-4 border-4 border-yellow-400/30 rounded-full"></div>
+                    <div className="absolute -inset-4 border-4 border-transparent border-t-yellow-400 border-r-orange-500 rounded-full animate-spin"></div>
 
-                    {/* Spinning ring */}
-                    <div className="absolute top-0 left-0 w-20 h-20 border-4 border-transparent border-t-yellow-400 border-r-orange-500 rounded-full animate-spin"></div>
+                    {/* Glow effect behind logo */}
+                    <div className="absolute inset-0 bg-yellow-500/30 rounded-full blur-xl animate-pulse"></div>
 
-                    {/* Inner glow */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-yellow-500/20 rounded-full blur-md animate-pulse"></div>
-
-                    {/* Fire icon in center */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                        <svg className="w-8 h-8 text-yellow-400 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 23C8.35 23 4 19.65 4 14.5C4 11.04 6.05 7.5 8.2 4.94C8.43 4.68 8.78 4.57 9.1 4.67C9.43 4.77 9.67 5.04 9.73 5.38C10.07 7.15 10.89 8.75 12.09 10.04C12.27 9.56 12.43 9.08 12.56 8.57C13.07 6.58 13.05 4.5 12.5 2.51C12.4 2.17 12.5 1.8 12.75 1.55C13 1.3 13.37 1.2 13.71 1.3C16.24 2.05 19.35 4.89 20.72 8.04C21.91 10.82 22.01 13.81 21.04 16.37C19.6 20.2 16.2 23 12 23Z" />
-                        </svg>
+                    {/* Berong Logo */}
+                    <div className="relative w-24 h-24 rounded-full overflow-hidden shadow-2xl border-4 border-yellow-400/50">
+                        <Image
+                            src="/berong-official-logo.jpg"
+                            alt="Berong - Loading"
+                            fill
+                            className="object-cover"
+                            priority
+                        />
                     </div>
                 </div>
 
                 {/* Loading text */}
-                <div className="mt-6 text-center">
+                <div className="mt-8 text-center">
                     <p className="text-white font-semibold text-lg">Loading</p>
                     <div className="flex gap-1 justify-center mt-1">
                         <span className="w-2 h-2 bg-yellow-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>

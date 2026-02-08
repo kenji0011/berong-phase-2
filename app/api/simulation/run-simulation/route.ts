@@ -1,10 +1,37 @@
 ﻿import { NextRequest, NextResponse } from "next/server"
 
 const BACKEND_URL = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000"
-const PPO_VERSION = "500k_steps" // Options: "v1.5", "v2.0_lite", "500k_steps", "v2.0"
+const PPO_VERSION: string = "500k_steps" // Options: "v1.5", "v2.0_lite", "500k_steps", "v2.0"
 
 export async function POST(request: NextRequest) {
   try {
+    // Health check gate: ensure backend models are loaded before proceeding
+    try {
+      const healthController = new AbortController()
+      const healthTimeout = setTimeout(() => healthController.abort(), 5000)
+      const healthRes = await fetch(`${BACKEND_URL}/api/health`, {
+        signal: healthController.signal
+      })
+      clearTimeout(healthTimeout)
+
+      if (healthRes.ok) {
+        const health = await healthRes.json()
+        if (!health.unet_loaded || !health.ppo_loaded) {
+          return NextResponse.json(
+            { error: "AI models are still loading. Please wait 10-15 seconds and try again.", retry: true },
+            { status: 503 }
+          )
+        }
+      }
+    } catch (healthError: any) {
+      // Backend not reachable at all
+      console.error("Health check failed:", healthError.message)
+      return NextResponse.json(
+        { error: "Simulation server is not responding. Please ensure the backend is running and try again.", retry: true },
+        { status: 503 }
+      )
+    }
+
     const body = await request.json()
 
     // Validate required fields

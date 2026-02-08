@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import { verifyToken } from '@/lib/jwt'
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,16 +16,20 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-      // Cookie value might be URL-encoded from client-side setting
-      const decodedValue = decodeURIComponent(userCookie.value)
-      const user = JSON.parse(decodedValue)
+      // Verify JWT signature and decode user data
+      const user = await verifyToken(userCookie.value)
+      if (!user) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid session' },
+          { status: 401 }
+        )
+      }
       return NextResponse.json(
         { success: true, user },
         { status: 200 }
       )
     } catch (parseError) {
-      console.error('Cookie parse error:', parseError)
-      // Invalid cookie format
+      console.error('Cookie verification error:', parseError)
       return NextResponse.json(
         { success: false, error: 'Invalid session' },
         { status: 401 }

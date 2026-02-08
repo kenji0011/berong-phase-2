@@ -4,7 +4,7 @@ import { HeroCarouselClient } from './hero-carousel-client';
 type CarouselImage = {
   id: number;
   title: string;
-  altText: string;
+  altText: string | null;
   imageUrl: string;
   order: number;
   isActive: boolean;

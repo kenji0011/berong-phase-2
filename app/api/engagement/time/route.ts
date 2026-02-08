@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { prisma } from "@/lib/prisma"
+import { verifyToken } from '@/lib/jwt'
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +12,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
-    const userData = JSON.parse(userCookie.value)
+    const userData = await verifyToken(userCookie.value)
+    if (!userData) {
+      return NextResponse.json({ error: "Invalid session" }, { status: 401 })
+    }
     const body = await request.json()
     const { minutes } = body
 

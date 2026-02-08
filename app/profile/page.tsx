@@ -45,7 +45,7 @@ export default function ProfilePage() {
     if (user) {
       setProfile({
         name: user.name || "",
-        email: user.email || "",
+        email: user?.username || "",
         age: user.age ? user.age.toString() : "",
         role: user.role || "",
       })

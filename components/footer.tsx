@@ -40,7 +40,7 @@ const footerColumns: FooterColumn[] = [
     title: 'Quick Links',
     links: [
       { name: 'Home', url: '/' },
-      { name: 'About Us', url: '#', dialogType: 'about' },
+      { name: 'About Us', url: '/about' },
       { name: 'Privacy Policy', url: '#', dialogType: 'privacy' },
       { name: 'Terms of Service', url: '#', dialogType: 'terms' },
     ],

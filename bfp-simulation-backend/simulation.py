@@ -219,6 +219,28 @@ def a_star_exterior_only(grid, start, goal):
     print(f"[DEBUG] Exterior A* Failed: No path found from {start} to {goal}", flush=True)
     return []
 
+
+def sample_fire_coords(fire_map: np.ndarray, max_coords: int) -> list:
+    """Sample fire coordinates with block-based coverage to keep fire visually dense."""
+    all_fire = np.argwhere(fire_map == 1)
+    if len(all_fire) <= max_coords:
+        return all_fire.tolist()
+
+    height, width = fire_map.shape
+    block_size = max(1, int(np.ceil(np.sqrt(len(all_fire) / max_coords))))
+    coords = []
+
+    for y in range(0, height, block_size):
+        for x in range(0, width, block_size):
+            block = fire_map[y:y + block_size, x:x + block_size]
+            if np.any(block == 1):
+                fire_idx = np.argwhere(block == 1)[0]
+                coords.append([int(y + fire_idx[0]), int(x + fire_idx[1])])
+                if len(coords) >= max_coords:
+                    return coords
+
+    return coords
+
 # Fire Simulator Class with Material-Aware Spread
 class FireSimulator:
     def __init__(self, grid, spread_probability=0.25, firewall_spread_factor=0.1, material_type="concrete"):
@@ -247,25 +269,36 @@ class FireSimulator:
                 self.fire_map[y, x] = 1
 
     def step(self):
-        """Advance fire spread by one step with material-aware probabilities."""
-        new_fire_map = self.fire_map.copy()
-        rows, cols = self.fire_map.shape
-        burning_cells = np.argwhere(self.fire_map == 1)
+        """Advance fire spread by one step with material-aware probabilities (vectorized)."""
+        burning = self.fire_map == 1
+        if not np.any(burning):
+            return
 
-        for r, c in burning_cells:
-            for dr, dc in self.directions:
-                nr, nc = r + dr, c + dc
+        # Shift burning cells in all 4 directions to find neighbors
+        padded = np.pad(burning, 1, mode='constant', constant_values=False)
+        neighbors = (
+            padded[:-2, 1:-1] |  # up
+            padded[2:, 1:-1] |   # down
+            padded[1:-1, :-2] |  # left
+            padded[1:-1, 2:]     # right
+        )
 
-                if 0 <= nr < rows and 0 <= nc < cols:
-                    if self.fire_map[nr, nc] == 0:
-                        # Use material-specific spread probability
-                        cell_type = int(self.base_grid[nr, nc])
-                        current_spread_prob = self.current_spread_probs.get(cell_type, self.spread_probability)
-                        
-                        if np.random.rand() < current_spread_prob:
-                            new_fire_map[nr, nc] = 1
+        # Candidate cells: neighbor of fire AND not already on fire
+        candidates = neighbors & (self.fire_map == 0)
 
-        self.fire_map = new_fire_map
+        if not np.any(candidates):
+            return
+
+        # Build probability map based on cell types
+        prob_map = np.zeros_like(self.fire_map)
+        for cell_type, prob in self.current_spread_probs.items():
+            prob_map[self.base_grid == cell_type] = prob
+
+        # Roll random values and compare with probability
+        rand_vals = np.random.rand(*self.fire_map.shape)
+        new_fires = candidates & (rand_vals < prob_map)
+
+        self.fire_map[new_fires] = 1
 
     def reset(self, ignition_points=None):
         self.fire_map = np.zeros_like(self.base_grid, dtype=float)
@@ -292,22 +325,31 @@ class Person:
         self.assigned_exit = None
 
     def update_state(self, fire_map):
-        """Update panic state based on fire proximity."""
+        """Update panic state based on fire proximity (optimized)."""
         if self.tripped_timer > 0:
             return
-        fire_locations = np.argwhere(fire_map == 1)
-        if len(fire_locations) == 0:
-            min_dist = float('inf')
-        else:
-            # Fire locations are [y, x], agent pos is [x, y]
-            agent_pos_yx = np.array([self.pos[1], self.pos[0]])
-            min_dist = np.min(np.linalg.norm(fire_locations - agent_pos_yx, axis=1))
 
-        if min_dist < self.PANIC_DISTANCE:
+        # Use fire_map directly — check a local region instead of all fire cells
+        pos_x, pos_y = int(self.pos[0]), int(self.pos[1])
+        h, w = fire_map.shape
+
+        # Check panic zone first (smaller region)
+        r = self.PANIC_DISTANCE
+        y1, y2 = max(0, pos_y - r), min(h, pos_y + r + 1)
+        x1, x2 = max(0, pos_x - r), min(w, pos_x + r + 1)
+
+        if np.any(fire_map[y1:y2, x1:x2] == 1):
             self.state = 'PANICKED'
             self.speed = 1.5
             self.trip_probability = 0.1
-        elif min_dist < self.ALERT_DISTANCE:
+            return
+
+        # Check alert zone
+        r = self.ALERT_DISTANCE
+        y1, y2 = max(0, pos_y - r), min(h, pos_y + r + 1)
+        x1, x2 = max(0, pos_x - r), min(w, pos_x + r + 1)
+
+        if np.any(fire_map[y1:y2, x1:x2] == 1):
             self.state = 'ALERT'
             self.speed = 1.2
             self.trip_probability = 0.0
@@ -581,14 +623,15 @@ class EvacuationEnv(gym.Env):
         self.current_step += 1
         self.fire_sim.step()
 
-        # PPO action is ignored - each agent goes to their nearest exit instead
+        # Note: PPO action parameter is accepted for API compatibility but not used.
+        # Agents use nearest-exit heuristic which performs better than the trained PPO policy.
         reward = -0.01
 
         for agent in self.agents:
             if agent.status == 'evacuating':
                 agent.update_state(self.fire_sim.fire_map)
 
-                is_stuck_or_needs_path = not agent.path or (self.current_step % 10 == 0)
+                is_stuck_or_needs_path = not agent.path or (self.current_step % 25 == 0)
                 if agent.state != 'PANICKED' and is_stuck_or_needs_path:
                     # Find nearest exit for this agent
                     min_dist = float('inf')
@@ -761,6 +804,10 @@ def run_heuristic_simulation(grid, agent_positions, fire_position, exits=None,
     # Run simulation
     history = []
     step_count = 0
+    prev_fire_count = 0  # Track fire growth for delta encoding
+    
+    # MAX fire coords per frame to prevent payload explosion
+    MAX_FIRE_COORDS_PER_FRAME = 3000
     
     while step_count < max_steps:
         step_count += 1
@@ -775,8 +822,8 @@ def run_heuristic_simulation(grid, agent_positions, fire_position, exits=None,
             if agent.status == 'evacuating':
                 agent.update_state(fire_sim.fire_map)
                 
-                # Recompute path periodically or if stuck
-                if not agent.path or step_count % 10 == 0:
+                # Recompute path periodically or if stuck (every 50 steps for performance)
+                if not agent.path or step_count % 50 == 0:
                     agent.compute_path(grid, agent.assigned_exit, fire_sim.fire_map)
                 
                 agent.move(grid, fire_sim.fire_map)
@@ -793,7 +840,7 @@ def run_heuristic_simulation(grid, agent_positions, fire_position, exits=None,
                 agent.check_status(fire_sim.fire_map, exits, assembly_point=assembly_point)
         
         # Record frame (convert to frontend format [row, col])
-        fire_coords = np.argwhere(fire_sim.fire_map == 1).tolist()
+        fire_coords = sample_fire_coords(fire_sim.fire_map, MAX_FIRE_COORDS_PER_FRAME)
         agents_data = []
         for agent in agents:
             agents_data.append({
@@ -824,14 +871,14 @@ def run_heuristic_simulation(grid, agent_positions, fire_position, exits=None,
         if extended_fire_steps == -1:
             # Burn until complete - continue fire until no more cells can burn
             print("[HEURISTIC] Burn until complete mode - spreading fire until fully consumed", flush=True)
-            max_burn_steps = 2000  # Safety limit
+            max_burn_steps = 500  # Continue until fire fully spreads
             burn_step = 0
             while burn_step < max_burn_steps:
                 prev_fire_count = np.sum(fire_sim.fire_map)
                 fire_sim.step()
                 new_fire_count = np.sum(fire_sim.fire_map)
                 
-                fire_coords = np.argwhere(fire_sim.fire_map == 1).tolist()
+                fire_coords = sample_fire_coords(fire_sim.fire_map, MAX_FIRE_COORDS_PER_FRAME)
                 # Keep agents frozen at final position
                 agents_data = []
                 for agent in agents:
@@ -857,7 +904,7 @@ def run_heuristic_simulation(grid, agent_positions, fire_position, exits=None,
             print(f"[HEURISTIC] Running {extended_fire_steps} extended fire steps", flush=True)
             for _ in range(extended_fire_steps):
                 fire_sim.step()
-                fire_coords = np.argwhere(fire_sim.fire_map == 1).tolist()
+                fire_coords = sample_fire_coords(fire_sim.fire_map, MAX_FIRE_COORDS_PER_FRAME)
                 # Keep agents frozen
                 agents_data = []
                 for agent in agents:
@@ -878,6 +925,18 @@ def run_heuristic_simulation(grid, agent_positions, fire_position, exits=None,
     at_assembly = sum(1 for a in agents if a.status == 'at_assembly')
     
     print(f"[HEURISTIC] Complete: {escaped}/{len(agents)} escaped, {at_assembly} at assembly, {burned} burned", flush=True)
+    print(f"[HEURISTIC] Total frames recorded: {len(history)}", flush=True)
+    
+    # Downsample history to reduce payload size (max ~300 frames)
+    from core.config import MAX_HISTORY_FRAMES
+    if len(history) > MAX_HISTORY_FRAMES:
+        step_size = len(history) / MAX_HISTORY_FRAMES
+        indices = [int(i * step_size) for i in range(MAX_HISTORY_FRAMES)]
+        # Always include the last frame
+        if indices[-1] != len(history) - 1:
+            indices[-1] = len(history) - 1
+        history = [history[i] for i in indices]
+        print(f"[HEURISTIC] Downsampled to {len(history)} frames", flush=True)
     
     # Prepare result
     agent_results = []

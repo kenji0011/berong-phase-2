@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
 import { ENGAGEMENT_POINTS } from '@/lib/constants'
+import { signToken, verifyToken } from '@/lib/jwt'
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +17,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const currentUser = JSON.parse(userCookie.value)
+    const currentUser = await verifyToken(userCookie.value)
+    if (!currentUser) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid session' },
+        { status: 401 }
+      )
+    }
     
     const body = await request.json()
     const {
@@ -138,8 +145,10 @@ export async function POST(request: NextRequest) {
       maxScore,
     })
 
-    response.cookies.set('bfp_user', JSON.stringify(updatedUser), {
-      httpOnly: false,
+    const newToken = await signToken(updatedUser as Record<string, unknown>)
+
+    response.cookies.set('bfp_user', newToken, {
+      httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7,

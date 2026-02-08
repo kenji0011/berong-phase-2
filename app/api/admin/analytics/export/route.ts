@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { prisma } from "@/lib/prisma"
+import { verifyToken } from '@/lib/jwt'
 
 export async function GET() {
   try {
@@ -12,7 +13,10 @@ export async function GET() {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
-    const userData = JSON.parse(userCookie.value)
+    const userData = await verifyToken(userCookie.value)
+    if (!userData) {
+      return NextResponse.json({ error: "Invalid session" }, { status: 401 })
+    }
     if (userData.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
     }

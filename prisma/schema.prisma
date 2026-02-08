@@ -50,6 +50,7 @@ model User {
   assessmentAnswers     UserAnswer[]
   engagementLogs        EngagementLog[]
   floorPlans            FloorPlan[]
+  simulationJobs        SimulationJob[]
 
   @@map("users")
 }
@@ -80,6 +81,8 @@ model BlogPost {
   updatedAt   DateTime        @updatedAt
   author      User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
+  @@index([category])
+  @@index([authorId])
   @@map("blog_posts")
 }
 
@@ -136,6 +139,7 @@ model QuizResult {
   completedAt DateTime @default(now())
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("quiz_results")
 }
 
@@ -247,6 +251,8 @@ model UserAnswer {
   user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   question       AssessmentQuestion  @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+  @@index([questionId])
   @@map("user_answers")
 }
 
@@ -315,4 +321,26 @@ model FloorPlan {
   @@index([isPublic])
   @@index([clonedFromId])
   @@map("floor_plans")
+}
+
+// Simulation Job Tracking (migrated from SQLite)
+model SimulationJob {
+  id            String   @id @default(uuid())
+  status        String   @default("queued")  // queued, processing, complete, failed
+  result        Json?
+  error         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Link to user who started the simulation (optional)
+  userId        Int?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  // Store configuration for debugging
+  config        Json?
+
+  @@index([status])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("simulation_jobs")
 }

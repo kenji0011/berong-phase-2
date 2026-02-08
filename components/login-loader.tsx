@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '@/lib/auth-context';
-import { LogIn, Flame } from 'lucide-react';
+import Image from 'next/image';
 
 export function LoginLoader() {
     const { isAuthenticating } = useAuth();
@@ -33,10 +33,10 @@ export function LoginLoader() {
                         transition={{ duration: 0.3 }}
                         className="relative z-10 flex flex-col items-center"
                     >
-                        {/* Animated fire icon */}
+                        {/* Animated Berong logo */}
                         <motion.div
                             animate={{
-                                scale: [1, 1.15, 1],
+                                scale: [1, 1.1, 1],
                                 y: [0, -5, 0]
                             }}
                             transition={{
@@ -46,8 +46,15 @@ export function LoginLoader() {
                             }}
                             className="mb-6"
                         >
-                            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-500/30 to-red-600/30 backdrop-blur-lg flex items-center justify-center border border-orange-300/30 shadow-2xl">
-                                <Flame className="w-12 h-12 text-orange-300" />
+                            <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-orange-300/50 shadow-2xl">
+                                <div className="absolute inset-0 bg-yellow-500/30 rounded-full blur-xl animate-pulse"></div>
+                                <Image
+                                    src="/berong-official-logo.jpg"
+                                    alt="Berong - Signing In"
+                                    fill
+                                    className="object-cover"
+                                    priority
+                                />
                             </div>
                         </motion.div>
 

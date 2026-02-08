@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import DOMPurify from "dompurify";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -149,7 +150,7 @@ export function FireCodeViewer({ initialParentId = null }: FireCodeViewerProps) 
         <div className="prose max-w-none">
           <div 
             className="text-foreground"
-            dangerouslySetInnerHTML={{ __html: selectedSection.content.replace(/\n/g, '<br />') }} 
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(selectedSection.content.replace(/\n/g, '<br />')) }} 
           />
         </div>
       </div>

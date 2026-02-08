@@ -56,10 +56,12 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - CORS_ORIGINS=http://localhost:3000,http://nextjs:3000
-    volumes:
-      - simulation_jobs:/app/data
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-bfp_user}:${POSTGRES_PASSWORD:-bfp_secret_password}@postgres:5432/${POSTGRES_DB:-bfp_berong}
+    depends_on:
+      postgres:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/docs')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
       interval: 30s
       timeout: 10s
       start_period: 60s
@@ -67,8 +69,6 @@ services:
 
 volumes:
   postgres_data:
-    driver: local
-  simulation_jobs:
     driver: local
   uploads_data:
     driver: local

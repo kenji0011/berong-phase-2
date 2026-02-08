@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Slider } from "@/components/ui/slider"
-import { CheckCircle2, XCircle, RotateCcw, Clock, Users, Flame, Play, Pause, SkipBack, SkipForward, Eye, EyeOff } from "lucide-react"
+import { CheckCircle2, XCircle, RotateCcw, Clock, Users, Flame, Play, Pause, SkipBack, SkipForward, Eye, EyeOff, Download } from "lucide-react"
 import { GridVisualization } from "@/components/grid-visualization"
 
 interface SimulationResultsProps {
@@ -50,6 +50,9 @@ export function SimulationResults({ results, grid, originalImage, userExits = []
   const [isPlaying, setIsPlaying] = useState(false)
   const [playbackSpeed, setPlaybackSpeed] = useState(100) // ms per frame
   const [showWallOverlay, setShowWallOverlay] = useState(true) // Toggle for wall overlay
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const animationRef = useRef<NodeJS.Timeout | null>(null)
 
   const history = results.animation_data?.history || []
@@ -84,6 +87,79 @@ export function SimulationResults({ results, grid, originalImage, userExits = []
   const resetAnimation = () => {
     setIsPlaying(false)
     setCurrentStep(0)
+  }
+
+  const handleSaveVideo = async () => {
+    setSaveError(null)
+
+    if (!canvasRef.current) {
+      setSaveError("Canvas not ready. Please try again in a moment.")
+      return
+    }
+    if (!history.length) {
+      setSaveError("No animation frames available to export.")
+      return
+    }
+
+    const canvas = canvasRef.current
+    if (typeof canvas.captureStream !== "function") {
+      setSaveError("Video capture is not supported in this browser.")
+      return
+    }
+
+    const fps = 30
+    const stream = canvas.captureStream(fps)
+
+    const mimeTypes = [
+      "video/webm;codecs=vp9",
+      "video/webm;codecs=vp8",
+      "video/webm"
+    ]
+    const mimeType = mimeTypes.find(type => MediaRecorder.isTypeSupported(type)) || ""
+
+    const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined)
+    const chunks: BlobPart[] = []
+
+    recorder.ondataavailable = (event) => {
+      if (event.data && event.data.size > 0) {
+        chunks.push(event.data)
+      }
+    }
+
+    const nextPaint = () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+
+    setIsSaving(true)
+    setIsPlaying(false)
+
+    const originalStep = currentStep
+    setCurrentStep(0)
+    await nextPaint()
+
+    recorder.start()
+
+    for (let step = 0; step <= maxSteps; step += 1) {
+      setCurrentStep(step)
+      await nextPaint()
+    }
+
+    recorder.stop()
+
+    await new Promise<void>((resolve) => {
+      recorder.onstop = () => resolve()
+    })
+
+    const blob = new Blob(chunks, { type: recorder.mimeType || "video/webm" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `simulation-${Date.now()}.webm`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
+
+    setCurrentStep(originalStep)
+    setIsSaving(false)
   }
 
   // Get current frame data
@@ -139,6 +215,7 @@ export function SimulationResults({ results, grid, originalImage, userExits = []
                   grid={grid} // Base grid (walls)
                   originalImage={originalImage}
                   showWallOverlay={showWallOverlay}
+                  canvasRef={canvasRef}
                   agentPositions={currentFrame.agents ? currentFrame.agents.map((a: any) => a.pos) : []}
                   exits={results.exits || userExits} // Use corrected exits from backend, fallback to user exits
                   assemblyPoint={results.assembly_point || null} // Show assembly point from backend
@@ -161,7 +238,15 @@ export function SimulationResults({ results, grid, originalImage, userExits = []
                   <Button variant="outline" size="icon" onClick={() => setCurrentStep(maxSteps)}>
                     <SkipForward className="h-4 w-4" />
                   </Button>
+                  <Button variant="outline" onClick={handleSaveVideo} disabled={isSaving || maxSteps < 1}>
+                    <Download className="h-4 w-4 mr-2" />
+                    {isSaving ? "Saving..." : "Save Simulation"}
+                  </Button>
                 </div>
+
+                {saveError && (
+                  <p className="text-sm text-red-600">{saveError}</p>
+                )}
 
                 <div className="flex items-center gap-4">
                   <span className="text-sm text-muted-foreground">Speed:</span>

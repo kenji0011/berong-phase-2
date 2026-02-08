@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { loginUser } from '@/lib/auth-utils'
+import { signToken } from '@/lib/jwt'
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,14 +24,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Set secure cookie
+    // Sign user data into a JWT token for the cookie
+    const token = await signToken(result.user as Record<string, unknown>)
+
+    // Set secure cookie with JWT-signed token
     const response = NextResponse.json(
       { success: true, user: result.user },
       { status: 200 }
     )
 
-    response.cookies.set('bfp_user', JSON.stringify(result.user), {
-      httpOnly: false, // Allow JS access for client-side routing
+    response.cookies.set('bfp_user', token, {
+      httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 7 days

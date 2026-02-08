@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import DOMPurify from "dompurify"
 import { useRouter, useParams } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { Navigation } from "@/components/navigation"
@@ -240,7 +241,7 @@ export default function ModulePage() {
           <CardContent>
             {currentSectionData.content ? (
               <div className="prose prose-blue max-w-none">
-                <div dangerouslySetInnerHTML={{ __html: currentSectionData.content }} />
+                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(currentSectionData.content) }} />
               </div>
             ) : currentSectionData.quiz ? (
               <div>

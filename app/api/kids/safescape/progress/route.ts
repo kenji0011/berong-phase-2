@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { cookies } from 'next/headers';
+import { verifyToken } from '@/lib/jwt';
 
 const prisma = new PrismaClient();
 
@@ -8,11 +9,11 @@ const prisma = new PrismaClient();
 async function getUserFromSession() {
   const cookieStore = await cookies();
 
-  // Try bfp_user cookie first (main auth cookie)
+  // Try bfp_user cookie first (main auth cookie) - verify JWT signature
   const bfpUserCookie = cookieStore.get('bfp_user');
   if (bfpUserCookie?.value) {
     try {
-      const userData = JSON.parse(bfpUserCookie.value);
+      const userData = await verifyToken(bfpUserCookie.value);
       if (userData?.id) {
         return userData;
       }

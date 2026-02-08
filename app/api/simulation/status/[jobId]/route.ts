@@ -18,7 +18,7 @@ export async function GET(
 
     // Forward to Python backend with timeout
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
 
     try {
       const response = await fetch(`${BACKEND_URL}/api/status/${jobId}`, {

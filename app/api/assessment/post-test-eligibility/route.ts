@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { prisma } from "@/lib/prisma"
 import { POST_TEST_UNLOCK_THRESHOLDS } from "@/lib/constants"
+import { verifyToken } from '@/lib/jwt'
 
 export async function GET() {
   try {
@@ -12,7 +13,10 @@ export async function GET() {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
-    const userData = JSON.parse(userCookie.value)
+    const userData = await verifyToken(userCookie.value)
+    if (!userData) {
+      return NextResponse.json({ error: "Invalid session" }, { status: 401 })
+    }
 
     const user = await prisma.user.findUnique({
       where: { id: userData.id },

@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { jwtVerify } from 'jose'
 
-export function middleware(request: NextRequest) {
+function getSecret(): Uint8Array {
+  const secret = process.env.JWT_SECRET
+  if (!secret) return new TextEncoder().encode('fallback-dev-key')
+  return new TextEncoder().encode(secret)
+}
+
+export async function middleware(request: NextRequest) {
   const userCookie = request.cookies.get("bfp_user")
   const { pathname } = request.nextUrl
 
@@ -16,12 +23,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // If authenticated, check role-based permissions
+  // If authenticated, verify JWT and check role-based permissions
   if (isProtectedRoute && userCookie) {
     try {
-      // Decode and parse the cookie value
-      const decodedValue = decodeURIComponent(userCookie.value)
-      const user = JSON.parse(decodedValue)
+      // Verify JWT signature — prevents cookie tampering / role escalation
+      const { payload: user } = await jwtVerify(userCookie.value, getSecret())
 
       // Admin route - only admins can access
       if (pathname.startsWith("/admin") && user.role !== "admin") {
@@ -31,28 +37,29 @@ export function middleware(request: NextRequest) {
       }
 
       // Professional route - check permission
-      if (pathname.startsWith("/professional") && !user.permissions?.accessProfessional) {
+      const permissions = user.permissions as Record<string, boolean> | undefined
+      if (pathname.startsWith("/professional") && !permissions?.accessProfessional) {
         const url = request.nextUrl.clone()
         url.pathname = "/"
         return NextResponse.redirect(url)
       }
 
       // Adult route - check permission
-      if (pathname.startsWith("/adult") && !user.permissions?.accessAdult) {
+      if (pathname.startsWith("/adult") && !permissions?.accessAdult) {
         const url = request.nextUrl.clone()
         url.pathname = "/"
         return NextResponse.redirect(url)
       }
 
       // Kids route - check permission
-      if (pathname.startsWith("/kids") && !user.permissions?.accessKids) {
+      if (pathname.startsWith("/kids") && !permissions?.accessKids) {
         const url = request.nextUrl.clone()
         url.pathname = "/"
         return NextResponse.redirect(url)
       }
     } catch (error) {
-      console.error("Middleware auth error:", error)
-      // If cookie is invalid, redirect to auth
+      console.error("Middleware JWT verification error:", error)
+      // If JWT is invalid/tampered, redirect to auth
       const url = request.nextUrl.clone()
       url.pathname = "/auth"
       return NextResponse.redirect(url)

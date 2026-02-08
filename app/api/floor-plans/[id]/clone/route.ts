@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { cookies } from 'next/headers'
+import { verifyToken } from '@/lib/jwt'
 
 // User payload from bfp_user cookie
 interface UserPayload {
@@ -17,10 +18,11 @@ async function getCurrentUser(): Promise<{ userId: number; username: string; rol
     const userCookie = cookieStore.get('bfp_user')?.value
     if (!userCookie) return null
 
-    const decoded = JSON.parse(decodeURIComponent(userCookie)) as UserPayload
+    const decoded = await verifyToken(userCookie)
+    if (!decoded) return null
     // Handle both 'id' and 'userId' for compatibility
     return {
-      userId: decoded.userId || decoded.id,
+      userId: (decoded.userId || decoded.id) as number,
       username: decoded.username,
       role: decoded.role
     }

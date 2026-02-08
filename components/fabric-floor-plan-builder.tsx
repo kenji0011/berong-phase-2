@@ -188,7 +188,7 @@ export function FabricFloorPlanBuilder({ onExport, processing = false }: FabricF
 
     // Handle object moving (snap to grid)
     const handleObjectMoving = (e: fabric.TEvent<fabric.TPointerEvent>) => {
-        const obj = e.target
+        const obj = (e as any).target
         if (!obj) return
 
         obj.set({
@@ -199,7 +199,7 @@ export function FabricFloorPlanBuilder({ onExport, processing = false }: FabricF
 
     // Handle object scaling (snap dimensions)
     const handleObjectScaling = (e: fabric.TEvent<fabric.TPointerEvent>) => {
-        const obj = e.target
+        const obj = (e as any).target
         if (!obj || !(obj instanceof fabric.Rect)) return
 
         const newWidth = snapToGrid(obj.getScaledWidth())
@@ -239,7 +239,7 @@ export function FabricFloorPlanBuilder({ onExport, processing = false }: FabricF
         if (!canvas || activeTool === "select") return
 
         // Don't add if clicking on an existing object
-        if (e.target) return
+        if ((e as any).target) return
 
         const pointer = canvas.getViewportPoint(e.e)
         const x = snapToGrid(pointer.x)

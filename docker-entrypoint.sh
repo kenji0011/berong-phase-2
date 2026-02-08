@@ -7,9 +7,9 @@ echo "🔥 BFP Berong - Starting up..."
 echo "⏳ Waiting for database..."
 sleep 3
 
-# Push database schema (creates tables if they don't exist)
-echo "📦 Pushing database schema..."
-npx prisma db push --skip-generate
+# Apply Prisma migrations (production-safe)
+echo "📦 Applying database migrations..."
+npx prisma migrate deploy
 
 # Generate Prisma client
 echo "📦 Generating Prisma client..."

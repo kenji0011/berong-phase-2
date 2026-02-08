@@ -9,7 +9,7 @@ import { ImageViewerModal } from "@/components/image-viewer-modal"
 type CarouselImage = {
     id: number;
     title: string;
-    altText: string;
+    altText: string | null;
     imageUrl: string;
     order: number;
     isActive: boolean;
@@ -37,7 +37,7 @@ export function HeroCarouselClient({ images }: HeroCarouselClientProps) {
                             <div className="relative w-full h-64 sm:h-80 md:h-96 overflow-hidden rounded-lg shadow-lg group/slide">
                                 <Image
                                     src={image.imageUrl}
-                                    alt={image.altText}
+                                    alt={image.altText ?? image.title}
                                     fill
                                     style={{ objectFit: 'cover' }}
                                     className="transition-opacity duration-500 ease-in-out"
@@ -80,7 +80,7 @@ export function HeroCarouselClient({ images }: HeroCarouselClientProps) {
                     onClose={() => setIsViewerOpen(false)}
                     imageUrl={selectedImage.imageUrl}
                     imageTitle={selectedImage.title}
-                    imageAlt={selectedImage.altText}
+                    imageAlt={selectedImage.altText ?? selectedImage.title}
                 />
             )}
         </div>

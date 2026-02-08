@@ -69,6 +69,7 @@ export function SimulationWizard() {
   })
   const [error, setError] = useState<string | null>(null)
   const [processing, setProcessing] = useState(false)
+  const [pollingInfo, setPollingInfo] = useState({ elapsedSeconds: 0, lastStatus: "starting" })
 
   // Persist state to localStorage
   useEffect(() => {
@@ -255,7 +256,7 @@ export function SimulationWizard() {
           fire_position: data.config.firePosition,
           agent_positions: data.config.agentPositions,
           assembly_point: assemblyForBackend,
-          extended_fire_steps: data.config.burnUntilComplete ? -1 : 0, // -1 = burn until complete
+          extended_fire_steps: data.config.burnUntilComplete ? 500 : 0, // Continue fire until building fully burned
           material_type: data.config.materialType || "concrete"
         })
       })
@@ -282,43 +283,49 @@ export function SimulationWizard() {
   }
 
   const pollSimulationStatus = async (jobId: string) => {
-    const maxAttempts = 300 // 5 minutes max (300 * 1 second)
-    const maxConsecutiveErrors = 10 // Stop after 10 consecutive errors
-    let attempts = 0
+    const maxDurationMs = 5 * 60 * 1000 // 5 minutes max
+    const maxConsecutiveErrors = 15 // More lenient - backend may be CPU-busy
     let consecutiveErrors = 0
+    const startTime = Date.now()
 
-    while (attempts < maxAttempts) {
+    setPollingInfo({ elapsedSeconds: 0, lastStatus: "processing" })
+
+    // Exponential backoff: start at 2s, increase to max 8s
+    let pollInterval = 2000
+    const maxPollInterval = 8000
+
+    while (Date.now() - startTime < maxDurationMs) {
+      const elapsedSec = Math.round((Date.now() - startTime) / 1000)
+
       try {
         const response = await fetch(`/api/simulation/status/${jobId}`)
 
         if (!response.ok) {
           consecutiveErrors++
-          console.error(`Status check failed (${consecutiveErrors}/${maxConsecutiveErrors}):`, response.status)
+          console.warn(`Status check failed (${consecutiveErrors}/${maxConsecutiveErrors}):`, response.status)
+          setPollingInfo({ elapsedSeconds: elapsedSec, lastStatus: "server busy, retrying..." })
 
-          // If backend is consistently failing, abort
           if (consecutiveErrors >= maxConsecutiveErrors) {
             throw new Error(`Backend unavailable after ${maxConsecutiveErrors} attempts. Please check if the simulation server is running.`)
           }
 
-          await new Promise(resolve => setTimeout(resolve, 1000))
-          attempts++
+          // Back off more aggressively on errors
+          await new Promise(resolve => setTimeout(resolve, Math.min(pollInterval * 2, 10000)))
           continue
         }
 
         // Reset consecutive errors on success
         consecutiveErrors = 0
+        // Reset interval on success
+        pollInterval = 2000
 
         const status = await response.json()
 
+        setPollingInfo({ elapsedSeconds: elapsedSec, lastStatus: status.status || "processing" })
 
         if (status.status === "complete") {
-
-
-          // Validate result structure
           if (!status.result || !status.result.agent_results) {
             console.warn('Received incomplete results:', status.result)
-            // If we have dashboard data but no agents, we can still show partial results
-            // The component handles missing data gracefully
           }
 
           setData(prev => ({ ...prev, results: status.result }))
@@ -331,7 +338,6 @@ export function SimulationWizard() {
           throw new Error(status.error || "Simulation failed")
         }
 
-        // Handle "not_found" status (job doesn't exist)
         if (status.status === "not_found") {
           consecutiveErrors++
           if (consecutiveErrors >= 5) {
@@ -339,8 +345,9 @@ export function SimulationWizard() {
           }
         }
 
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        attempts++
+        // Exponential backoff: increase interval gradually
+        await new Promise(resolve => setTimeout(resolve, pollInterval))
+        pollInterval = Math.min(pollInterval * 1.3, maxPollInterval)
       } catch (err) {
         console.error('Poll error:', err)
         throw err
@@ -568,8 +575,27 @@ export function SimulationWizard() {
             <p className="text-muted-foreground mb-4">
               AI is calculating optimal evacuation routes
             </p>
+            <div className="text-sm text-muted-foreground space-y-1">
+              <p>⏱️ Elapsed: {pollingInfo.elapsedSeconds}s</p>
+              <p>📊 Status: {pollingInfo.lastStatus}</p>
+              {pollingInfo.elapsedSeconds > 20 && pollingInfo.elapsedSeconds <= 60 && (
+                <p className="text-amber-600 mt-2">
+                  ⚠️ Simulation is computing fire spread and agent movement...
+                </p>
+              )}
+              {pollingInfo.elapsedSeconds > 60 && pollingInfo.elapsedSeconds <= 180 && (
+                <p className="text-amber-600 mt-2">
+                  ⚠️ Large simulations may take 1-3 minutes. Please wait...
+                </p>
+              )}
+              {pollingInfo.elapsedSeconds > 180 && (
+                <p className="text-amber-600 mt-2">
+                  ⚠️ Simulation is taking longer than usual. It will timeout at 5 minutes.
+                </p>
+              )}
+            </div>
             {data.jobId && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground mt-4">
                 Job ID: {data.jobId.substring(0, 8)}...
               </p>
             )}

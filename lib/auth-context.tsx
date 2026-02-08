@@ -182,14 +182,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(userWithPermissions)
       localStorage.setItem('user', JSON.stringify(userWithPermissions))
 
-      // Set cookie for middleware with proper attributes for cross-tab/production compatibility
-      const isSecure = window.location.protocol === 'https:'
-      const cookieValue = encodeURIComponent(JSON.stringify(userWithPermissions))
-      // Cookie settings: SameSite=Lax allows the cookie to be sent on same-site navigations
-      // Secure flag is only added for HTTPS connections
-      // Path=/ ensures cookie is available site-wide
-      document.cookie = `bfp_user=${cookieValue}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax${isSecure ? '; Secure' : ''}`
-
       return { success: true }
     } catch (error: any) {
       console.error('Registration error:', error)
@@ -225,14 +217,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(userWithPermissions)
       localStorage.setItem('user', JSON.stringify(userWithPermissions))
 
-      // Set cookie for middleware with proper attributes for cross-tab/production compatibility  
-      const isSecure = window.location.protocol === 'https:'
-      const cookieValue = encodeURIComponent(JSON.stringify(userWithPermissions))
-      // Cookie settings: SameSite=Lax allows the cookie to be sent on same-site navigations
-      // Secure flag is only added for HTTPS connections
-      // Path=/ ensures cookie is available site-wide
-      document.cookie = `bfp_user=${cookieValue}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax${isSecure ? '; Secure' : ''}`
-
       return { success: true }
     } catch (error: any) {
       console.error('Login error:', error)
@@ -246,11 +230,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoggingOut(true)
 
     // Show loading screen for 1.5 seconds before clearing session
-    setTimeout(() => {
+    setTimeout(async () => {
+      // Clear httpOnly cookie via server-side API
+      try {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          credentials: 'include',
+        })
+      } catch (error) {
+        console.error('Logout API error:', error)
+      }
+
       setUser(null)
       localStorage.removeItem('user')
-      // Clear cookie
-      document.cookie = 'bfp_user=; path=/; max-age=0'
       setIsLoggingOut(false)
       router.push('/')
     }, 1500)

@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '@/lib/auth-context';
-import { LogOut } from 'lucide-react';
+import Image from 'next/image';
 
 export function LogoutLoader() {
     const { isLoggingOut } = useAuth();
@@ -33,11 +33,11 @@ export function LogoutLoader() {
                         transition={{ duration: 0.3 }}
                         className="relative z-10 flex flex-col items-center"
                     >
-                        {/* Animated logout icon */}
+                        {/* Animated Berong logo */}
                         <motion.div
                             animate={{
                                 scale: [1, 1.1, 1],
-                                rotate: [0, -10, 10, -10, 0]
+                                rotate: [0, -5, 5, -5, 0]
                             }}
                             transition={{
                                 duration: 1,
@@ -46,8 +46,15 @@ export function LogoutLoader() {
                             }}
                             className="mb-6"
                         >
-                            <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-lg flex items-center justify-center border border-white/20 shadow-2xl">
-                                <LogOut className="w-10 h-10 text-white" />
+                            <div className="relative w-20 h-20 rounded-full overflow-hidden border-4 border-white/30 shadow-2xl">
+                                <div className="absolute inset-0 bg-white/20 rounded-full blur-xl animate-pulse"></div>
+                                <Image
+                                    src="/berong-official-logo.jpg"
+                                    alt="Berong - Logging Out"
+                                    fill
+                                    className="object-cover"
+                                    priority
+                                />
                             </div>
                         </motion.div>
 

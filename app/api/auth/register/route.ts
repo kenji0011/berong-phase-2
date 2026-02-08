@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { registerUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/prisma'
 import { ENGAGEMENT_POINTS } from '@/lib/constants'
+import { signToken } from '@/lib/jwt'
 
 export async function POST(request: NextRequest) {
   try {
@@ -134,8 +135,10 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     )
     
-    response.cookies.set('bfp_user', JSON.stringify(result.user), {
-      httpOnly: false, // Allow JS access for client-side routing
+    const token = await signToken(result.user as Record<string, unknown>)
+
+    response.cookies.set('bfp_user', token, {
+      httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 7 days

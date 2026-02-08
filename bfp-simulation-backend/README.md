@@ -81,7 +81,6 @@ Response: {
 - **inference.py** - Image processing and grid extraction
 - **simulation.py** - Fire simulation, agents, and environment
 - **models/** - Pre-trained AI models
-- **jobs.db** - SQLite database for job tracking
 
 ## Testing
 
