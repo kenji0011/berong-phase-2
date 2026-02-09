@@ -10,7 +10,7 @@
     "seed": "npx ts-node prisma/seed.ts",
     "seed:assessment": "npx ts-node prisma/seed-assessment.ts",
     "seed:all": "npm run seed && npm run seed:assessment",
-    "dev:full": "concurrently --kill-others-on-fail \"pnpm dev\" \"cd bfp-simulation-backend && .\\.venv\\Scripts\\python.exe -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload\""
+    "dev:full": "concurrently --kill-others-on-fail \"pnpm dev\" \"cd bfp-simulation-backend && .\\.venv\\Scripts\\python.exe -m uvicorn main:app --host 0.0.0.0 --port 8001 --reload\""
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
