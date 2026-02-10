@@ -131,6 +131,8 @@ services:
       - PYTHONUNBUFFERED=1
       - CORS_ORIGINS=${CORS_ORIGINS:-https://bfpscberong.app,https://www.bfpscberong.app,http://nextjs:3000}
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - MPLCONFIGDIR=/tmp/matplotlib
     depends_on:
       postgres:
         condition: service_healthy

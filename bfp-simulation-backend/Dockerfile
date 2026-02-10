@@ -27,9 +27,9 @@ RUN python -c "import nltk; nltk.download('punkt'); nltk.download('wordnet'); nl
 COPY . .
 
 # Create non-root user for security
-RUN groupadd -r appuser && useradd -r -g appuser appuser && \
+RUN groupadd -r appuser && useradd -r -g appuser -m appuser && \
     mkdir -p /app/data && \
-    chown -R appuser:appuser /app
+    chown -R appuser:appuser /app /home/appuser
 
 # Switch to non-root user
 USER appuser
