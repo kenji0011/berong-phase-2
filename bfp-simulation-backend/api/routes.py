@@ -10,6 +10,28 @@ from services.simulation_service import create_job_id, run_simulation_task, _sim
 
 router = APIRouter()
 
+# File upload constraints
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
+ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif", "image/jpg"}
+
+
+async def _validate_image_upload(file: UploadFile) -> None:
+    """Validate uploaded file is a safe image within size limits."""
+    if file.content_type not in ALLOWED_IMAGE_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid file type '{file.content_type}'. Allowed: {', '.join(ALLOWED_IMAGE_TYPES)}",
+        )
+    # Read content to check size
+    content = await file.read()
+    if len(content) > MAX_UPLOAD_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail=f"File too large ({len(content)} bytes). Maximum: {MAX_UPLOAD_SIZE} bytes (10 MB).",
+        )
+    # Reset file position for downstream processing
+    await file.seek(0)
+
 
 @router.get("/api/health")
 async def health_check():
@@ -44,11 +66,13 @@ async def process_image_endpoint(
     threshold: float = 0.5,
     invert_mask: bool | None = None,
 ):
+    await _validate_image_upload(file)
     return process_image(file, threshold, invert_mask)
 
 
 @router.post("/api/process-image-gemini")
 async def process_image_gemini_endpoint(file: UploadFile = File(...)):
+    await _validate_image_upload(file)
     return process_image_gemini(file)
 
 

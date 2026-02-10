@@ -1,9 +1,10 @@
-# BFP SafeScape - Production Deployment Guide
+# BFP SafeScape - Production Deployment Guide (GCP)
 
-> **Last Updated:** February 10, 2026
-> **Domain:** bfpscberong.app
-> **Provider:** DigitalOcean
-> **Budget:** $200 (Feb 11 – Apr 21, 2026)
+> **Last Updated:** February 10, 2026  
+> **Domain:** bfpscberong.app  
+> **Provider:** Google Cloud Platform (Compute Engine)  
+> **Budget:** $200 (Feb 11 – Apr 21, 2026)  
+> **Previous Provider:** DigitalOcean (COMPROMISED — DDoS attack, malicious software installed)
 
 ---
 
@@ -11,15 +12,17 @@
 
 1. [Budget & VM Specification](#1-budget--vm-specification)
 2. [Architecture Overview](#2-architecture-overview)
-3. [Pre-Deployment Checklist](#3-pre-deployment-checklist)
-4. [DNS Configuration (Name.com)](#4-dns-configuration-namecom)
-5. [Droplet Creation & Initial Setup](#5-droplet-creation--initial-setup)
-6. [Application Deployment](#6-application-deployment)
-7. [SSL Certificate (Let's Encrypt)](#7-ssl-certificate-lets-encrypt)
-8. [Post-Deployment Verification](#8-post-deployment-verification)
-9. [Monitoring & Maintenance](#9-monitoring--maintenance)
-10. [Troubleshooting](#10-troubleshooting)
-11. [Cost Breakdown](#11-cost-breakdown)
+3. [Security Hardening (Post-Compromise)](#3-security-hardening-post-compromise)
+4. [GCP Project Setup](#4-gcp-project-setup)
+5. [VM Creation & Firewall](#5-vm-creation--firewall)
+6. [Initial Server Setup](#6-initial-server-setup)
+7. [DNS Configuration (Name.com)](#7-dns-configuration-namecom)
+8. [Application Deployment](#8-application-deployment)
+9. [SSL Certificate (Let's Encrypt)](#9-ssl-certificate-lets-encrypt)
+10. [Post-Deployment Verification](#10-post-deployment-verification)
+11. [Monitoring & Maintenance](#11-monitoring--maintenance)
+12. [Troubleshooting](#12-troubleshooting)
+13. [Cost Breakdown](#13-cost-breakdown)
 
 ---
 
@@ -29,49 +32,36 @@
 
 | Item | Monthly Cost | 2.3 Months (Feb 11 – Apr 21) |
 |------|-------------|-------------------------------|
-| DigitalOcean Droplet (SGP1) | $28/mo | $64.40 |
-| DigitalOcean Droplet (NYC1) | $24/mo | $55.20 |
-| Domain (bfpscberong.app) | Already owned | $0 |
-| SSL Certificate (Let's Encrypt) | Free | $0 |
-| **Total (Asia/SGP1)** | | **~$65** |
-| **Total (America/NYC1)** | | **~$56** |
-| **Remaining Budget** | | **$135 – $144** |
+| e2-standard-2 VM (2 vCPU, 8GB RAM) | ~$49.92 | ~$114.82 |
+| 30GB Balanced Persistent Disk | ~$3.00 | ~$6.90 |
+| Static External IP | $0 (while attached) | $0 |
+| Network Egress (~5GB/mo) | ~$0.60 | ~$1.38 |
+| **Total** | **~$53.52** | **~$123.10** |
+| **Remaining Budget** | | **~$76.90** |
 
-### Recommended VM: DigitalOcean Droplet
+> **Region:** asia-southeast1 (Singapore) — lowest latency for Philippines  
+> **Headroom:** ~$77 buffer for unexpected egress or debugging
 
-| Spec | Value |
-|------|-------|
-| **Plan** | Basic (Regular Intel) |
-| **vCPUs** | 2 |
-| **RAM** | 4 GB |
-| **Storage** | 80 GB SSD |
-| **Transfer** | 4 TB/month |
-| **OS** | Ubuntu 22.04 LTS |
-| **Region** | **SGP1 (Singapore)** — recommended for Philippine users (~30ms latency) |
-| **Monthly Cost** | ~$28 (SGP) / ~$24 (NYC) |
-| **Swap** | 2 GB (configured post-creation) |
+### VM Specifications
 
-### Why Singapore over America?
+| Resource | Allocation |
+|----------|------------|
+| vCPUs | 2 |
+| RAM | 8 GB |
+| Disk | 30 GB Balanced SSD |
+| OS | Ubuntu 22.04 LTS |
+| Region | asia-southeast1-b |
 
-| Factor | SGP1 (Singapore) | NYC1 (New York) |
-|--------|-------------------|-----------------|
-| Latency to Philippines | ~30–50ms | ~200–250ms |
-| Monthly cost | ~$28 | ~$24 |
-| Extra cost over 2.3 months | +$9.20 | baseline |
-| **Recommendation** | **Better UX for 100 PH users** | Cheaper, higher latency |
+### Docker Resource Limits (8GB RAM)
 
-> **Verdict:** Use **SGP1** — the ~$9 premium across 2.3 months is worth the 5x better latency for Philippine users. Total spend stays well under the $200 budget.
-
-### Resource Limits (Docker Containers on 4GB Droplet)
-
-| Container | Memory Limit | CPU Limit | Purpose |
-|-----------|-------------|-----------|---------|
-| nginx | 64 MB | 0.15 | Reverse proxy, SSL, rate limiting |
-| postgres | 384 MB | 0.50 | PostgreSQL 15 database |
-| nextjs | 1 GB | 1.00 | Next.js 15 application |
-| python-backend | 2 GB | 1.50 | FastAPI + AI/ML simulation |
-| OS + swap | ~600 MB + 2 GB swap | — | Ubuntu 22.04 overhead |
-| **Total** | **~3.45 GB + 2 GB swap** | **3.15** | Fits 4 GB droplet |
+| Container | Memory Limit | CPU Limit |
+|-----------|-------------|-----------|
+| Nginx | 128 MB | 0.25 |
+| PostgreSQL | 512 MB | 0.5 |
+| Next.js | 2 GB | 1.5 |
+| Python Backend | 3 GB | 1.5 |
+| **Total Allocated** | **5.6 GB** | **3.75** |
+| **OS/Docker Overhead** | ~2.4 GB | — |
 
 ---
 
@@ -81,552 +71,539 @@
 Internet
     │
     ▼
-┌─────────────────────────────────┐
-│  bfpscberong.app (DNS → DO IP) │
-└───────────┬─────────────────────┘
-            │ :443 (HTTPS)
-            ▼
-┌───────────────────────────────────────────────┐
-│  nginx (bfp-nginx)                            │
-│  - SSL termination (Let's Encrypt)            │
-│  - Rate limiting (auth, API, simulation)      │
-│  - Gzip compression                           │
-│  - Security headers (HSTS, CSP, X-Frame)      │
-│  - Reverse proxy                              │
-├───────────┬───────────────────────────────────┤
-│           │                                   │
-│     ┌─────▼──────┐      ┌──────────────────┐  │
-│     │  Next.js   │      │  Python Backend  │  │
-│     │  :3000     │─────▶│  :8000           │  │
-│     │  (SSR/API) │      │  (FastAPI + ML)  │  │
-│     └─────┬──────┘      └────────┬─────────┘  │
-│           │                      │            │
-│     ┌─────▼──────────────────────▼─────────┐  │
-│     │  PostgreSQL :5432                    │  │
-│     │  (shared database)                   │  │
-│     └──────────────────────────────────────┘  │
-└───────────────────────────────────────────────┘
-          Docker Network: bfp-network-prod
+[GCP Firewall] ── Only ports 80, 443, 22
+    │
+    ▼
+[Nginx :80/:443] ── SSL termination, rate limiting, security headers
+    │
+    ├──► [Next.js :3000] ── SSR frontend + API routes
+    │         │
+    │         └──► [PostgreSQL :5432] ── Database (internal only)
+    │
+    └──► [Python Backend :8000] ── AI/ML simulation (internal only)
+              │
+              └──► [PostgreSQL :5432]
+```
+
+All services run in Docker containers on a single VM.  
+PostgreSQL is **never** exposed externally — only accessible within the Docker network.
+
+---
+
+## 3. Security Hardening (Post-Compromise)
+
+### What Happened on DigitalOcean
+
+The previous DigitalOcean droplet was compromised and used in a DDoS attack (92,774 pps). Malicious software was installed. Root causes identified:
+
+1. **PostgreSQL exposed on port 5432** with default credentials (`bfp_user`/`bfp_secret_password`)
+2. **Admin API routes had NO server-side authentication** — anyone could list users, change roles, upload files
+3. **Deploy scripts committed to git** with hardcoded production passwords
+4. **Default credential fallbacks** in Docker Compose and Python config
+
+### Security Fixes Applied
+
+| Fix | Status |
+|-----|--------|
+| All 15 admin API routes now require JWT + admin role verification | ✅ |
+| PostgreSQL only uses `expose` (never `ports`) — no external access | ✅ |
+| All default credential fallbacks removed from Docker Compose | ✅ |
+| Python backend exits on startup if `DATABASE_URL` not set | ✅ |
+| Deploy scripts with hardcoded secrets deleted | ✅ |
+| FastAPI docs/OpenAPI disabled in production | ✅ |
+| File upload validation (10MB limit, MIME type check) on Python backend | ✅ |
+| Path traversal prevention in file-utils.ts | ✅ |
+| Password minimum increased from 6 to 8 characters | ✅ |
+| Nginx `server_tokens off` hides version info | ✅ |
+| Rate limiting on auth, API, and simulation endpoints | ✅ |
+
+### GCP-Specific Security (Applied During Setup)
+
+- **VPC Firewall:** Only ports 22 (SSH), 80, 443 open
+- **OS Login:** Use GCP's managed SSH instead of password auth
+- **No root SSH:** Disabled by default on GCP
+- **Shielded VM:** Secure Boot + vTPM + Integrity Monitoring enabled
+- **Automatic security updates:** Configured via `unattended-upgrades`
+- **fail2ban:** Installed to block brute-force SSH attempts
+
+---
+
+## 4. GCP Project Setup
+
+### Prerequisites
+
+- Google Cloud account with billing enabled
+- `gcloud` CLI installed ([install guide](https://cloud.google.com/sdk/docs/install))
+- Domain `bfpscberong.app` registered on Name.com
+
+### Create GCP Project
+
+```bash
+# Authenticate
+gcloud auth login
+
+# Create project (or use existing)
+gcloud projects create bfp-safescape --name="BFP SafeScape"
+gcloud config set project bfp-safescape
+
+# Enable billing (link to billing account via Console)
+# https://console.cloud.google.com/billing
+
+# Enable Compute Engine API
+gcloud services enable compute.googleapis.com
 ```
 
 ---
 
-## 3. Pre-Deployment Checklist
+## 5. VM Creation & Firewall
 
-Before deploying, ensure these are completed:
-
-- [x] All configs updated for production (localhost → docker hostnames)
-- [x] CORS origins set to `https://bfpscberong.app`
-- [x] JWT fallback throws error in production (no dev key)
-- [x] nginx CSP includes Facebook SDK origin
-- [x] `/backend/` debug proxy disabled in nginx
-- [x] Docker resource limits optimized for 4GB droplet
-- [x] `.env.production.example` template created
-- [x] Code pushed to GitHub
-- [ ] DNS A records pointing to droplet IP
-- [ ] Droplet created and secured
-- [ ] SSL certificate obtained
-
----
-
-## 4. DNS Configuration (Name.com)
-
-### Step 1: Get Droplet IP
-
-After creating the droplet (Part 5), note the IPv4 address.
-
-### Step 2: Configure DNS Records
-
-1. Log in to [Name.com](https://www.name.com/)
-2. Go to **My Domains** → **bfpscberong.app**
-3. Click **Manage DNS Records**
-4. Delete any existing A/CNAME records for `@` and `www`
-5. Add these records:
-
-| Type | Host | Answer | TTL |
-|------|------|--------|-----|
-| **A** | `@` | `YOUR_DROPLET_IP` | 300 |
-| **A** | `www` | `YOUR_DROPLET_IP` | 300 |
-
-6. DNS propagation: 5–30 minutes (up to 48 hours worst case)
-
-### Verify DNS
+### Create the VM
 
 ```bash
-# From your local machine
-nslookup bfpscberong.app
-dig bfpscberong.app +short
+# Reserve a static external IP
+gcloud compute addresses create bfp-static-ip \
+  --region=asia-southeast1
+
+# Note the IP address
+gcloud compute addresses describe bfp-static-ip \
+  --region=asia-southeast1 --format="value(address)"
+
+# Create the VM
+gcloud compute instances create bfp-safescape \
+  --zone=asia-southeast1-b \
+  --machine-type=e2-standard-2 \
+  --image-family=ubuntu-2204-lts \
+  --image-project=ubuntu-os-cloud \
+  --boot-disk-size=30GB \
+  --boot-disk-type=pd-balanced \
+  --address=bfp-static-ip \
+  --tags=http-server,https-server \
+  --metadata=enable-oslogin=TRUE \
+  --shielded-secure-boot \
+  --shielded-vtpm \
+  --shielded-integrity-monitoring
+```
+
+### Configure Firewall Rules
+
+```bash
+# Allow HTTP (for Let's Encrypt challenge, redirects to HTTPS)
+gcloud compute firewall-rules create allow-http \
+  --direction=INGRESS \
+  --priority=1000 \
+  --network=default \
+  --action=ALLOW \
+  --rules=tcp:80 \
+  --source-ranges=0.0.0.0/0 \
+  --target-tags=http-server
+
+# Allow HTTPS
+gcloud compute firewall-rules create allow-https \
+  --direction=INGRESS \
+  --priority=1000 \
+  --network=default \
+  --action=ALLOW \
+  --rules=tcp:443 \
+  --source-ranges=0.0.0.0/0 \
+  --target-tags=https-server
+
+# SSH is allowed by default via GCP's default-allow-ssh rule
+# Verify no other ports are open:
+gcloud compute firewall-rules list --format="table(name,direction,allowed,sourceRanges)"
+```
+
+> **CRITICAL:** Do NOT open port 5432, 3000, or 8000. These are Docker-internal only.
+
+### Deny All Other Ingress (Defense in Depth)
+
+```bash
+# Block all other incoming traffic with low priority
+gcloud compute firewall-rules create deny-all-other \
+  --direction=INGRESS \
+  --priority=65534 \
+  --network=default \
+  --action=DENY \
+  --rules=all \
+  --source-ranges=0.0.0.0/0 \
+  --target-tags=http-server
 ```
 
 ---
 
-## 5. Droplet Creation & Initial Setup
+## 6. Initial Server Setup
 
-### Step 1: Create the Droplet
-
-1. Go to [DigitalOcean](https://cloud.digitalocean.com/) → **Create** → **Droplets**
-2. Select:
-   - **Region:** Singapore (SGP1)
-   - **Image:** Ubuntu 22.04 (LTS) x64
-   - **Size:** Basic → Regular Intel → **4 GB / 2 vCPUs / 80 GB SSD ($28/mo)**
-   - **Authentication:** SSH Key (recommended) or Password
-   - **Hostname:** `bfp-safescape-prod`
-3. Click **Create Droplet**
-4. Note the **IPv4 address**
-
-### Step 2: Initial Server Security
+### SSH into the VM
 
 ```bash
-# SSH into the droplet
-ssh root@YOUR_DROPLET_IP
+gcloud compute ssh bfp-safescape --zone=asia-southeast1-b
+```
 
+### Install Docker & Docker Compose
+
+```bash
 # Update system
-apt update && apt upgrade -y
+sudo apt update && sudo apt upgrade -y
 
-# Create a non-root user
-adduser deploy
-usermod -aG sudo deploy
-
-# Copy SSH keys to new user
-rsync --archive --chown=deploy:deploy ~/.ssh /home/deploy
-
-# Configure firewall
-ufw allow OpenSSH
-ufw allow 80/tcp
-ufw allow 443/tcp
-ufw enable
-
-# Install fail2ban for brute force protection
-apt install -y fail2ban
-systemctl enable fail2ban
-systemctl start fail2ban
-
-# Set timezone (Philippines)
-timedatectl set-timezone Asia/Manila
-```
-
-### Step 3: Configure Swap (Critical for 4GB Droplet)
-
-```bash
-# Create 2GB swap file
-fallocate -l 2G /swapfile
-chmod 600 /swapfile
-mkswap /swapfile
-swapon /swapfile
-
-# Make swap permanent
-echo '/swapfile none swap sw 0 0' | tee -a /etc/fstab
-
-# Optimize swap behavior
-echo 'vm.swappiness=10' | tee -a /etc/sysctl.conf
-echo 'vm.vfs_cache_pressure=50' | tee -a /etc/sysctl.conf
-sysctl -p
-
-# Verify
-free -h
-```
-
-### Step 4: Install Docker & Docker Compose
-
-```bash
 # Install Docker
-curl -fsSL https://get.docker.com -o get-docker.sh
-sh get-docker.sh
-rm get-docker.sh
+curl -fsSL https://get.docker.com | sudo sh
+sudo usermod -aG docker $USER
 
-# Add deploy user to docker group
-usermod -aG docker deploy
+# Install Docker Compose V2 plugin
+sudo apt install -y docker-compose-plugin
 
 # Verify
 docker --version
 docker compose version
 
-# Switch to deploy user for all remaining steps
-su - deploy
+# Log out and back in for group changes
+exit
+```
+
+### Install Security Tools
+
+```bash
+gcloud compute ssh bfp-safescape --zone=asia-southeast1-b
+
+# fail2ban — blocks brute-force SSH attempts
+sudo apt install -y fail2ban
+sudo systemctl enable fail2ban
+sudo systemctl start fail2ban
+
+# Automatic security updates
+sudo apt install -y unattended-upgrades
+sudo dpkg-reconfigure --priority=low unattended-upgrades
+
+# Verify fail2ban is running
+sudo fail2ban-client status
+```
+
+### Install Certbot
+
+```bash
+sudo apt install -y certbot
 ```
 
 ---
 
-## 6. Application Deployment
+## 7. DNS Configuration (Name.com)
 
-### Step 1: Clone Repository
+Point your domain to the GCP static IP:
+
+| Type | Host | Value | TTL |
+|------|------|-------|-----|
+| A | @ | `<STATIC_IP>` | 300 |
+| A | www | `<STATIC_IP>` | 300 |
+
+Replace `<STATIC_IP>` with the IP from step 5.
+
+### Verify DNS Propagation
 
 ```bash
-# As deploy user
-cd /home/deploy
+dig bfpscberong.app +short
+dig www.bfpscberong.app +short
+```
+
+Wait until both return your static IP before proceeding.
+
+---
+
+## 8. Application Deployment
+
+### Clone Repository
+
+```bash
+cd ~
 git clone https://github.com/Toneejake/berong-safescape.git
 cd berong-safescape
 ```
 
-### Step 2: Create Production .env File
+### Create Production Environment File
 
 ```bash
-# Copy the production template
-cp .env.production.example .env
+# CRITICAL: Generate STRONG, UNIQUE credentials
+# NEVER reuse the compromised DigitalOcean credentials!
 
-# Generate secrets
-JWT_SECRET=$(openssl rand -base64 32)
-DB_PASSWORD=$(openssl rand -base64 24)
-
-# Edit the .env file with your secrets
-nano .env
-```
-
-**Fill in these values in `.env`:**
-
-```env
+cat > .env << 'EOF'
+# === DATABASE ===
 POSTGRES_USER=bfp_prod_user
-POSTGRES_PASSWORD=<paste DB_PASSWORD here>
-POSTGRES_DB=bfp_berong
-JWT_SECRET=<paste JWT_SECRET here>
-DOMAIN=bfpscberong.app
+POSTGRES_PASSWORD=<GENERATE-A-32-CHAR-RANDOM-PASSWORD>
+POSTGRES_DB=bfp_berong_prod
+
+# === AUTH ===
+JWT_SECRET=<GENERATE-A-64-CHAR-RANDOM-SECRET>
+
+# === API KEYS ===
+GEMINI_API_KEY=<YOUR-NEW-GEMINI-API-KEY>
+
+# === CORS (production domain) ===
 CORS_ORIGINS=https://bfpscberong.app,https://www.bfpscberong.app,http://nextjs:3000
-BACKEND_URL=http://python-backend:8000
-GEMINI_API_KEY=<your Gemini API key if you have one>
+EOF
+
+chmod 600 .env
 ```
 
-### Step 3: Prepare SSL Directory
+**Generate secure passwords:**
 
 ```bash
-# Create certbot directories
+# Database password (32 chars)
+openssl rand -base64 32
+
+# JWT secret (64 chars)
+openssl rand -base64 64
+```
+
+> ⚠️ **CRITICAL:** You MUST rotate the Gemini API key. The old one was exposed in the compromised environment. Revoke it in Google AI Studio and generate a new one.
+
+### Create SSL Certificate Directories
+
+```bash
 mkdir -p certbot/conf certbot/www
-
-# Create temporary self-signed cert for initial nginx start
-mkdir -p certbot/conf/live/bfpscberong.app
-openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
-  -keyout certbot/conf/live/bfpscberong.app/privkey.pem \
-  -out certbot/conf/live/bfpscberong.app/fullchain.pem \
-  -subj '/CN=bfpscberong.app'
 ```
 
-### Step 4: Build and Start Services
+### Build and Deploy
 
 ```bash
-# Build all images (first build takes ~10-15 min)
-docker compose -f docker-compose.prod.yml build
+# Build and start all containers
+docker compose -f docker-compose.prod.yml up -d --build
 
-# Start all services
-docker compose -f docker-compose.prod.yml up -d
+# Wait for containers to be healthy
+watch docker compose -f docker-compose.prod.yml ps
 
-# Check status
-docker compose -f docker-compose.prod.yml ps
+# Run database migrations
+docker exec -it bfp-nextjs npx prisma migrate deploy
 
-# Wait for health checks
-sleep 30
-docker ps --format "table {{.Names}}\t{{.Status}}"
-```
-
-### Step 5: Run Database Migrations
-
-```bash
-# Run Prisma migrations
-docker exec bfp-nextjs npx prisma migrate deploy
-
-# (Optional) Seed initial data
-docker exec bfp-nextjs npx prisma db seed
+# Seed production data (first deploy only)
+docker exec -it bfp-nextjs npx prisma db seed
 ```
 
 ---
 
-## 7. SSL Certificate (Let's Encrypt)
+## 9. SSL Certificate (Let's Encrypt)
 
-### Step 1: Stop nginx temporarily
+### Obtain Certificate
 
 ```bash
+# Stop nginx temporarily
 docker compose -f docker-compose.prod.yml stop nginx
-```
 
-### Step 2: Obtain SSL Certificate
-
-```bash
-# Install certbot
-sudo apt install -y certbot
-
-# Obtain certificate (standalone mode)
+# Get certificate using standalone mode
 sudo certbot certonly --standalone \
   -d bfpscberong.app \
   -d www.bfpscberong.app \
-  --non-interactive \
+  --email your-email@example.com \
   --agree-tos \
-  --email your-email@example.com
+  --no-eff-email
 
 # Copy certs to project directory
-sudo cp -rL /etc/letsencrypt/live/bfpscberong.app/ certbot/conf/live/bfpscberong.app/
-sudo cp -rL /etc/letsencrypt/archive/bfpscberong.app/ certbot/conf/archive/bfpscberong.app/
-sudo chown -R deploy:deploy certbot/
+sudo cp -rL /etc/letsencrypt/live ~/berong-safescape/certbot/conf/live
+sudo cp -rL /etc/letsencrypt/archive ~/berong-safescape/certbot/conf/archive
+sudo chown -R $USER:$USER ~/berong-safescape/certbot/
+
+# Restart nginx
+docker compose -f docker-compose.prod.yml up -d nginx
 ```
 
-### Step 3: Restart nginx
+### Auto-Renewal Cron Job
 
 ```bash
-docker compose -f docker-compose.prod.yml start nginx
-
-# Verify SSL
-curl -I https://bfpscberong.app
-```
-
-### Step 4: Auto-Renewal Cron Job
-
-```bash
-# Add auto-renewal cron (runs twice daily)
-sudo crontab -e
-
-# Add this line:
-0 3,15 * * * certbot renew --quiet --deploy-hook "cp -rL /etc/letsencrypt/live/bfpscberong.app/ /home/deploy/berong-safescape/certbot/conf/live/bfpscberong.app/ && docker exec bfp-nginx nginx -s reload"
+# Add renewal cron (runs twice daily)
+(crontab -l 2>/dev/null; echo "0 3,15 * * * certbot renew --quiet --deploy-hook 'docker compose -f ~/berong-safescape/docker-compose.prod.yml restart nginx'") | crontab -
 ```
 
 ---
 
-## 8. Post-Deployment Verification
+## 10. Post-Deployment Verification
 
 ### Health Checks
 
 ```bash
-# Container health
-docker ps --format "table {{.Names}}\t{{.Status}}"
+# Check all containers are running
+docker compose -f docker-compose.prod.yml ps
 
-# Expected output:
-# bfp-nginx            Up X minutes (healthy)
-# bfp-nextjs           Up X minutes (healthy)
-# bfp-python-backend   Up X minutes (healthy)
-# bfp-postgres         Up X minutes (healthy)
+# Test HTTPS
+curl -I https://bfpscberong.app
 
-# Nginx config test
-docker exec bfp-nginx nginx -t
+# Test API health
+curl https://bfpscberong.app/api/auth/me
 
-# Application health
-curl -k https://bfpscberong.app
-curl -k https://bfpscberong.app/api/auth/login  # Should return method not allowed (GET)
-docker exec bfp-python-backend python -c "import urllib.request; print(urllib.request.urlopen('http://localhost:8000/api/health').read())"
+# Test that PostgreSQL is NOT externally accessible
+# (This should FAIL/timeout — that's CORRECT)
+nc -z -w 3 <STATIC_IP> 5432 && echo "DANGER: Postgres exposed!" || echo "OK: Postgres is internal-only"
+
+# Test that Python backend is NOT externally accessible
+nc -z -w 3 <STATIC_IP> 8000 && echo "DANGER: Backend exposed!" || echo "OK: Backend is internal-only"
+
+# Test admin API requires auth (should return 401)
+curl -s https://bfpscberong.app/api/admin/users | head -20
 ```
 
-### Functional Tests
+### Security Verification Checklist
 
-1. **Homepage loads:** Visit `https://bfpscberong.app`
-2. **Auth works:** Register a new user, login, logout
-3. **Admin access:** Login as admin, navigate to Kids/Adult/Professional sections
-4. **Simulation works:** Upload floor plan, configure, run simulation
-5. **Chatbot works:** Open chatbot, ask a fire safety question
-6. **SSL valid:** Check browser padlock icon (green/locked)
+- [ ] `curl -I https://bfpscberong.app` shows `server: nginx` (no version number)
+- [ ] Accessing `/api/admin/users` without auth returns `{"error":"Not authenticated"}`
+- [ ] PostgreSQL port 5432 is not reachable from outside
+- [ ] Python backend port 8000 is not reachable from outside
+- [ ] `sudo fail2ban-client status sshd` shows fail2ban active
+- [ ] `gcloud compute firewall-rules list` shows only 22, 80, 443
 
-### Security Verification
+### Set Budget Alert
 
 ```bash
-# Check security headers
-curl -I https://bfpscberong.app | grep -E "Strict-Transport|X-Frame|X-Content|Content-Security"
-
-# Check no dev endpoints exposed
-curl -k https://bfpscberong.app/backend/docs  # Should return 404 (disabled)
-
-# Check rate limiting works
-for i in {1..10}; do curl -s -o /dev/null -w "%{http_code}\n" https://bfpscberong.app/api/auth/login -X POST; done
-# Should see 429 after 5 requests
+# In GCP Console: Billing → Budgets & Alerts → Create Budget
+# Set amount: $200
+# Alert thresholds: 50% ($100), 80% ($160), 100% ($200)
 ```
 
 ---
 
-## 9. Monitoring & Maintenance
+## 11. Monitoring & Maintenance
 
-### Daily Monitoring (Makefile shortcuts)
+### View Logs
 
 ```bash
-# Check container status
-make prod-ps
+# All containers
+docker compose -f docker-compose.prod.yml logs -f --tail=100
 
-# Resource usage
-make stats
-
-# Health check
-make health
-
-# View logs
-make prod-logs-nginx    # Nginx access/error logs
-make prod-logs-nextjs   # Application logs
-make prod-logs-python   # Backend/ML logs
+# Specific container
+docker compose -f docker-compose.prod.yml logs -f nextjs
+docker compose -f docker-compose.prod.yml logs -f python-backend
+docker compose -f docker-compose.prod.yml logs -f postgres
+docker compose -f docker-compose.prod.yml logs -f nginx
 ```
 
-### Database Backup (Weekly recommended)
+### Database Backup
 
 ```bash
-# Manual backup
-make db-backup-prod
+# Create backup
+docker exec bfp-postgres pg_dump -U $POSTGRES_USER $POSTGRES_DB | gzip > backup_$(date +%Y%m%d_%H%M%S).sql.gz
 
-# Automated daily backup via cron
-sudo crontab -e
-# Add:
-0 2 * * * cd /home/deploy/berong-safescape && docker exec bfp-postgres pg_dump -U bfp_prod_user bfp_berong > /home/deploy/backups/bfp-$(date +\%Y\%m\%d).sql && find /home/deploy/backups/ -mtime +7 -delete
+# Auto-backup cron (daily at 2 AM)
+mkdir -p ~/backups
+(crontab -l 2>/dev/null; echo "0 2 * * * cd ~/berong-safescape && docker exec bfp-postgres pg_dump -U bfp_prod_user bfp_berong_prod | gzip > ~/backups/backup_\$(date +\%Y\%m\%d).sql.gz") | crontab -
 ```
 
-### Updating the Application
+### Update Application
 
 ```bash
-cd /home/deploy/berong-safescape
-
-# Pull latest code
+cd ~/berong-safescape
 git pull origin main
-
-# Rebuild and restart (Next.js only — most common)
-make deploy-nextjs
-
-# Or full rebuild of everything
-make deploy-all
-
-# If database schema changed
-docker exec bfp-nextjs npx prisma migrate deploy
+docker compose -f docker-compose.prod.yml up -d --build
+docker exec -it bfp-nextjs npx prisma migrate deploy
 ```
 
-### Server Maintenance
+### Monitor Resource Usage
 
 ```bash
-# Check disk usage
+# Docker stats (live)
+docker stats
+
+# Disk space
 df -h
 
-# Check memory/swap usage
+# Memory
 free -h
-
-# Docker cleanup (remove unused images)
-make prune
-
-# Update system packages (monthly)
-sudo apt update && sudo apt upgrade -y
 ```
 
 ---
 
-## 10. Troubleshooting
+## 12. Troubleshooting
 
-### Container won't start
+### Container Won't Start
 
 ```bash
-# Check logs
-docker compose -f docker-compose.prod.yml logs --tail 50 <service_name>
+# Check logs for the failing container
+docker compose -f docker-compose.prod.yml logs <service-name>
 
-# Common issue: memory limit exceeded
-# Solution: Check swap is active
-free -h
-swapon --show
+# Common issues:
+# - DATABASE_URL not set → Python backend crashes on startup (by design)
+# - JWT_SECRET not set → Next.js throws in production (by design)
+# - .env file missing → all services fail
 ```
 
-### 502 Bad Gateway
+### SSL Certificate Issues
 
 ```bash
-# nginx can't reach Next.js — check if nextjs container is running
-docker ps | grep bfp-nextjs
+# Check certificate status
+sudo certbot certificates
 
-# If not running, check logs
-docker logs bfp-nextjs --tail 50
-
-# Restart
-make prod-restart-nextjs
+# Force renewal
+sudo certbot renew --force-renewal
+docker compose -f docker-compose.prod.yml restart nginx
 ```
 
-### Database connection refused
+### Database Connection Issues
 
 ```bash
-# Check postgres container
-docker logs bfp-postgres --tail 20
+# Check if postgres is healthy
+docker exec bfp-postgres pg_isready
 
-# Verify connection from nextjs
-docker exec bfp-nextjs sh -c 'wget -q -O- http://localhost:3000 || echo "App not ready"'
+# Connect to database directly
+docker exec -it bfp-postgres psql -U bfp_prod_user -d bfp_berong_prod
 ```
 
-### SSL certificate expired
+### High Memory Usage
 
 ```bash
-# Manually renew
-sudo certbot renew
+# Check which container is using most memory
+docker stats --no-stream
 
-# Copy renewed certs
-sudo cp -rL /etc/letsencrypt/live/bfpscberong.app/ /home/deploy/berong-safescape/certbot/conf/live/bfpscberong.app/
-sudo chown -R deploy:deploy /home/deploy/berong-safescape/certbot/
-
-# Reload nginx
-make nginx-reload
-```
-
-### Simulation 429 errors
-
-```bash
-# Check nginx rate limiting logs
-docker logs bfp-nginx 2>&1 | grep "limiting" | tail -20
-
-# Reload nginx with updated config
-make nginx-reload
+# If Python backend is OOM, restart it
+docker compose -f docker-compose.prod.yml restart python-backend
 ```
 
 ---
 
-## 11. Cost Breakdown
+## 13. Cost Breakdown
 
-### Monthly Costs
+### Monthly Estimate (asia-southeast1)
 
-| Item | Cost |
-|------|------|
-| DigitalOcean Droplet (4GB/2vCPU SGP1) | $28/mo |
-| Let's Encrypt SSL | Free |
-| Domain (bfpscberong.app) | Already paid |
-| **Monthly Total** | **$28** |
+| Resource | Quantity | Unit Price | Monthly Cost |
+|----------|----------|------------|-------------|
+| e2-standard-2 sustained use | 730 hrs | ~$0.0684/hr | ~$49.92 |
+| Balanced PD (30GB) | 30 GB | ~$0.10/GB | ~$3.00 |
+| Static IP (attached) | 1 | $0.00 | $0.00 |
+| Egress (5GB/mo estimate) | 5 GB | ~$0.12/GB | ~$0.60 |
+| **Monthly Total** | | | **~$53.52** |
 
-### Total Projected Cost (Feb 11 – Apr 21, 2026)
+### Budget Timeline
 
-| Period | Days | Cost |
-|--------|------|------|
-| Feb 11 – Feb 28 | 17 days | ~$16.27 |
-| March 1 – Mar 31 | 31 days | $28.00 |
-| Apr 1 – Apr 21 | 21 days | ~$19.06 |
-| **Total** | **~70 days** | **~$63.33** |
-| **Remaining Budget** | | **~$136.67** |
+| Period | Duration | Cost | Running Total |
+|--------|----------|------|---------------|
+| Feb 11 – Feb 28 | 17 days | ~$30.35 | $30.35 |
+| Mar 1 – Mar 31 | 31 days | ~$53.52 | $83.87 |
+| Apr 1 – Apr 21 | 21 days | ~$36.27 | **$120.14** |
+| **Remaining Budget** | | | **$79.86** |
 
-### If Using NYC1 (America) Instead
-
-| Period | Days | Cost |
-|--------|------|------|
-| **Total** | **~70 days** | **~$54.19** |
-| **Remaining Budget** | | **~$145.81** |
+> With sustained use discount (~30%), actual cost will be even lower.  
+> Budget has significant headroom for unexpected costs.
 
 ---
 
-## Quick Reference Commands
+## Credential Rotation Checklist
 
-```bash
-# Deploy updates
-git pull origin main && make deploy-nextjs
+After the DigitalOcean compromise, these credentials MUST be rotated:
 
-# Full rebuild
-make deploy-all
-
-# View logs
-make prod-logs
-
-# Backup database
-make db-backup-prod
-
-# Check status
-make prod-ps && make health
-
-# Restart everything
-make prod-restart
-
-# Nginx reload (config changes)
-make nginx-reload
-
-# Shell into containers
-make shell-nextjs
-make shell-python
-make shell-db
-```
+- [ ] **PostgreSQL password** — Generate new 32+ char password (NEVER reuse `bfp_secret_password` or `StrongPassw0rd_2026_BFP!`)
+- [ ] **JWT secret** — Generate new 64+ char secret (NEVER reuse `dev-secret-key` or `super_secret_production_key_2026`)
+- [ ] **Gemini API key** — Revoke the old key in Google AI Studio, generate new one
+- [ ] **GitHub** — Verify no secrets were pushed to the repo; check commit history
+- [ ] **SSH** — Use GCP OS Login (no manual SSH keys to manage)
 
 ---
 
-## Files Modified for Production
+## Emergency Procedures
 
-| File | Change |
-|------|--------|
-| `middleware.ts` | JWT fallback throws error in production |
-| `app/api/simulation/*/route.ts` (3 files) | Backend URL fallback → `python-backend:8000` |
-| `bfp-simulation-backend/core/config.py` | DB fallback → `postgres:5432`, CORS → production domain |
-| `docker-compose.prod.yml` | CORS production defaults, resource limits for 4GB droplet |
-| `docker-compose.ssl.yml` | CORS fixed, healthcheck fixed, DATABASE_URL added |
-| `nginx/nginx-ssl.conf` | CSP updated, `/backend/` disabled, `http2 on` directive |
-| `.env.production.example` | Complete production template with all required vars |
-| `Makefile` | Comprehensive dev/prod/deploy/nginx/db commands |
+### If Compromise is Suspected
+
+1. **Immediately:** `gcloud compute instances stop bfp-safescape --zone=asia-southeast1-b`
+2. Take a snapshot: `gcloud compute disks snapshot bfp-safescape --zone=asia-southeast1-b`
+3. Review GCP Audit Logs: Console → Logging → Resource type: `gce_instance`
+4. Check for unauthorized firewall rules: `gcloud compute firewall-rules list`
+5. Review failed SSH attempts: `sudo journalctl -u sshd | grep Failed`
+6. If confirmed: Delete VM, create new from scratch, restore DB from backup
+
+### If Budget Running Low
+
+1. Check billing: Console → Billing → Reports
+2. Set budget alert: Console → Billing → Budgets → $200 with alerts at 50%, 80%, 100%
+3. If needed, can downgrade to e2-medium (1 vCPU, 4GB, ~$25/mo) temporarily

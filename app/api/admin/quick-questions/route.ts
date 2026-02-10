@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { verifyToken } from '@/lib/jwt'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
+    // Verify admin authentication
+    const auth = await requireAdmin()
+    if (auth instanceof NextResponse) return auth
+
     // Get all quick questions ordered by category and order
     const quickQuestions = await prisma.quickQuestion.findMany({
       orderBy: [
@@ -26,6 +30,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify admin authentication
+    const auth = await requireAdmin()
+    if (auth instanceof NextResponse) return auth
+
     const body = await request.json()
 
     if (!body.questionText || !body.responseText || !body.category) {

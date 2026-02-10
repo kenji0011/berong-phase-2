@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export async function POST(request: NextRequest) {
     try {
+        // Verify admin authentication
+        const auth = await requireAdmin()
+        if (auth instanceof NextResponse) return auth
+
         const { imageIds } = await request.json()
 
         if (!Array.isArray(imageIds) || imageIds.length === 0) {

@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { NotificationService } from '@/lib/notification-service'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify admin authentication
+    const auth = await requireAdmin()
+    if (auth instanceof NextResponse) return auth
+
     const body = await request.json()
 
     if (!body.title || !body.excerpt || !body.content || !body.authorId) {

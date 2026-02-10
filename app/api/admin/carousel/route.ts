@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
+    // Verify admin authentication
+    const auth = await requireAdmin()
+    if (auth instanceof NextResponse) return auth
+
     const carouselImages = await prisma.carouselImage.findMany({
       orderBy: { order: 'asc' }
     })
@@ -29,6 +34,10 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify admin authentication
+    const auth = await requireAdmin()
+    if (auth instanceof NextResponse) return auth
+
     const body = await request.json()
 
     if (!body.title || !body.alt || !body.url) {

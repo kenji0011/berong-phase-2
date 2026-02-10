@@ -25,7 +25,13 @@ export async function deleteUploadedFile(fileUrl: string | null | undefined): Pr
     try {
         const uploadsDir = path.join(process.cwd(), 'public');
         const cleanUrl = fileUrl.split('?')[0];
-        const filePath = path.join(uploadsDir, cleanUrl);
+        const filePath = path.resolve(uploadsDir, cleanUrl);
+
+        // Prevent path traversal attacks — resolved path must stay within public/
+        if (!filePath.startsWith(path.resolve(uploadsDir))) {
+            console.error(`Path traversal attempt blocked: ${fileUrl}`);
+            return false;
+        }
 
         if (fs.existsSync(filePath)) {
             await fs.promises.unlink(filePath);

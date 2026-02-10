@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/admin-auth';
 
 /**
  * Image Upload API
  * 
  * Converts uploaded images to Base64 data URLs for storage in the database.
- * This approach works with DigitalOcean App Platform where filesystem is ephemeral.
+ * This approach works with containerized deployments where filesystem is ephemeral.
  */
 
 // Increase body size limit for large image uploads
@@ -18,6 +19,10 @@ export const config = {
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify admin authentication
+    const auth = await requireAdmin();
+    if (auth instanceof NextResponse) return auth;
+
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
 

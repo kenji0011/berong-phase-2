@@ -38,8 +38,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 64M
-          cpus: '0.15'
+          memory: 128M
+          cpus: '0.25'
 
   # PostgreSQL Database
   postgres:
@@ -70,7 +70,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 512M
           cpus: '0.5'
 
   # Next.js Frontend Application
@@ -91,7 +91,7 @@ services:
       - BACKEND_URL=http://python-backend:8000
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - JWT_SECRET=${JWT_SECRET}
-      - NODE_OPTIONS=--max-old-space-size=768
+      - NODE_OPTIONS=--max-old-space-size=1536
     volumes:
       - uploads_data:/app/public/uploads
     expose:
@@ -112,8 +112,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
-          cpus: '1'
+          memory: 2G
+          cpus: '1.5'
 
   # Python FastAPI Backend (AI/ML Simulation)
   python-backend:
@@ -149,7 +149,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: 3G
           cpus: '1.5'
 
 volumes:

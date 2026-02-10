@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    // Verify admin authentication
+    const auth = await requireAdmin()
+    if (auth instanceof NextResponse) return auth
+
     const { id: idParam } = await params
     const id = parseInt(idParam)
     if (isNaN(id)) {
@@ -51,6 +56,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    // Verify admin authentication
+    const auth = await requireAdmin()
+    if (auth instanceof NextResponse) return auth
+
     const { id: idParam } = await params
     const id = parseInt(idParam)
     if (isNaN(id)) {

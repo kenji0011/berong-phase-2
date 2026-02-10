@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { NotificationService } from '@/lib/notification-service'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,6 +39,10 @@ function extractYouTubeId(input: string): string {
 
 export async function GET() {
   try {
+    // Verify admin authentication
+    const auth = await requireAdmin()
+    if (auth instanceof NextResponse) return auth
+
     const videos = await prisma.video.findMany({
       orderBy: { createdAt: 'desc' }
     })
@@ -65,6 +70,10 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify admin authentication
+    const auth = await requireAdmin()
+    if (auth instanceof NextResponse) return auth
+
     const body = await request.json()
 
     if (!body.title || !body.youtubeId || !body.category) {

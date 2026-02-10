@@ -9,10 +9,10 @@ MAX_HISTORY_FRAMES = 300  # Downsample animation to this many frames max
 
 PYTHON_VERSION = sys.version_info
 
-DATABASE_URL = os.environ.get(
-    "DATABASE_URL",
-    "postgresql://bfp_user:bfp_secret_password@postgres:5432/bfp_berong",
-)
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if not DATABASE_URL:
+    print("FATAL: DATABASE_URL environment variable is not set!", file=sys.stderr)
+    sys.exit(1)
 
 CORS_ORIGINS_ENV = os.environ.get(
     "CORS_ORIGINS",
