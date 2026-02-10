@@ -20,13 +20,13 @@ export function PermissionGuard({
   const { user, isAuthenticated } = useAuth();
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
 
-  // Function to check if user has permission
+  // Function to check if user has permission (admin has all permissions)
   const hasRequiredPermission = (): boolean => {
     if (!isAuthenticated || !user) {
       return false;
     }
     
-    return user.permissions[requiredPermission];
+    return user.role === 'admin' || user.permissions[requiredPermission];
   };
 
   // Handler for clicks on guarded elements

@@ -40,7 +40,7 @@ interface KidsModule {
 export default function ModulePage() {
   const router = useRouter()
   const params = useParams()
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated, isLoading } = useAuth()
   const [loading, setLoading] = useState(true)
   const [module, setModule] = useState<KidsModule | null>(null)
   const [currentSection, setCurrentSection] = useState(0)
@@ -49,19 +49,21 @@ export default function ModulePage() {
   const [quizScore, setQuizScore] = useState(0)
 
   useEffect(() => {
+    if (isLoading) return
+
     if (!isAuthenticated) {
       router.push("/auth")
       return
     }
 
-    if (!user?.permissions.accessKids) {
+    if (!user?.permissions.accessKids && user?.role !== 'admin') {
       router.push("/")
       return
     }
 
     loadModule()
     setLoading(false)
-  }, [isAuthenticated, user, router, params.id])
+  }, [isAuthenticated, user, router, params.id, isLoading])
 
   const loadModule = async () => {
     try {

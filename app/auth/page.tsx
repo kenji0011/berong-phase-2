@@ -87,12 +87,18 @@ function AuthContent() {
     const result = await login(loginData.username, loginData.password)
 
     if (result.success) {
-      // Redirect based on user role
-      const redirectPath = getRedirectPath()
+      // Determine redirect from the returned user (not stale React state)
+      let redirectPath = '/'
+      if (result.user) {
+        if (result.user.role === 'admin') redirectPath = '/admin'
+        else if (result.user.role === 'professional') redirectPath = '/professional'
+        else if (result.user.role === 'adult') redirectPath = '/adult'
+        else if (result.user.role === 'kid') redirectPath = '/kids'
+      }
       // Small delay to ensure cookie is fully set before middleware checks it
-      // This fixes a race condition where navigation happens before cookie propagation
       await new Promise(resolve => setTimeout(resolve, 100))
-      router.push(redirectPath)
+      // Use full page navigation to clear Next.js router cache
+      window.location.href = redirectPath
     } else {
       setError(result.error || "Invalid username or password")
     }
@@ -126,7 +132,8 @@ function AuthContent() {
     if (result.success) {
       // Redirect based on user role
       const redirectPath = getRedirectPath()
-      router.push(redirectPath)
+      // Use full page navigation to clear Next.js router cache
+      window.location.href = redirectPath
     } else {
       setError(result.error || "Registration failed. Username may already be taken.")
     }

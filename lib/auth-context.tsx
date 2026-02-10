@@ -33,7 +33,7 @@ export interface User {
 
 interface AuthContextType {
   user: User | null
-  login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>
+  login: (username: string, password: string) => Promise<{ success: boolean; error?: string; user?: User }>
   register: (username: string, password: string, name: string, age: number) => Promise<{ success: boolean; error?: string }>
   logout: () => void
   isLoading: boolean
@@ -115,10 +115,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (storedUser) {
         try {
           const parsedUser = JSON.parse(storedUser)
-          // Ensure permissions exist
-          if (!parsedUser.permissions) {
-            parsedUser.permissions = determinePermissions(parsedUser.role)
-          }
+          // Always re-compute permissions from role to ensure they're correct
+          // (handles stale localStorage from older code versions)
+          parsedUser.permissions = determinePermissions(parsedUser.role)
           setUser(parsedUser)
           setIsLoading(false)
           return
@@ -191,7 +190,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const login = async (username: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const login = async (username: string, password: string): Promise<{ success: boolean; error?: string; user?: User }> => {
     setIsAuthenticating(true)
     try {
       const response = await fetch('/api/auth/login', {
@@ -217,7 +216,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(userWithPermissions)
       localStorage.setItem('user', JSON.stringify(userWithPermissions))
 
-      return { success: true }
+      return { success: true, user: userWithPermissions }
     } catch (error: any) {
       console.error('Login error:', error)
       return { success: false, error: 'Network error. Please try again.' }

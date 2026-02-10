@@ -69,7 +69,7 @@ interface KnowledgeData {
 }
 
 export default function AnalyticsDashboard() {
-  const { user } = useAuth()
+  const { user, isLoading: authLoading } = useAuth()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -81,12 +81,14 @@ export default function AnalyticsDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
 
   useEffect(() => {
+    if (authLoading) return
+
     if (user?.role !== "admin") {
       router.push("/")
       return
     }
     fetchAllData()
-  }, [user, router])
+  }, [user, router, authLoading])
 
   const fetchAllData = async (refresh = false) => {
     try {

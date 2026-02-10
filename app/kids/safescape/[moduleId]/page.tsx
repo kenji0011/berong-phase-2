@@ -21,16 +21,18 @@ export default function SafeScapeModulePage() {
   const router = useRouter();
   const params = useParams();
   const moduleId = params.moduleId as string;
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (isLoading) return;
+
     if (!isAuthenticated) {
       router.push("/auth");
       return;
     }
 
-    if (!user?.permissions.accessKids) {
+    if (!user?.permissions.accessKids && user?.role !== 'admin') {
       router.push("/");
       return;
     }
@@ -43,7 +45,7 @@ export default function SafeScapeModulePage() {
     }
 
     setLoading(false);
-  }, [isAuthenticated, user, router, moduleId]);
+  }, [isAuthenticated, user, router, moduleId, isLoading]);
 
   // Listen for progress updates from iframe to sync with API
   useEffect(() => {

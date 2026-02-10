@@ -284,15 +284,17 @@ export function SimulationWizard() {
 
   const pollSimulationStatus = async (jobId: string) => {
     const maxDurationMs = 5 * 60 * 1000 // 5 minutes max
-    const maxConsecutiveErrors = 15 // More lenient - backend may be CPU-busy
-    let consecutiveErrors = 0
+    const maxFatalErrors = 8 // Real errors (not 429s)
+    let fatalErrors = 0
+    let notFoundCount = 0
     const startTime = Date.now()
 
     setPollingInfo({ elapsedSeconds: 0, lastStatus: "processing" })
 
-    // Exponential backoff: start at 2s, increase to max 8s
+    // Exponential backoff: start at 2s, increase up to max 8s
     let pollInterval = 2000
     const maxPollInterval = 8000
+    const backoffFactor = 1.4
 
     while (Date.now() - startTime < maxDurationMs) {
       const elapsedSec = Math.round((Date.now() - startTime) / 1000)
@@ -300,24 +302,34 @@ export function SimulationWizard() {
       try {
         const response = await fetch(`/api/simulation/status/${jobId}`)
 
-        if (!response.ok) {
-          consecutiveErrors++
-          console.warn(`Status check failed (${consecutiveErrors}/${maxConsecutiveErrors}):`, response.status)
-          setPollingInfo({ elapsedSeconds: elapsedSec, lastStatus: "server busy, retrying..." })
-
-          if (consecutiveErrors >= maxConsecutiveErrors) {
-            throw new Error(`Backend unavailable after ${maxConsecutiveErrors} attempts. Please check if the simulation server is running.`)
-          }
-
-          // Back off more aggressively on errors
-          await new Promise(resolve => setTimeout(resolve, Math.min(pollInterval * 2, 10000)))
+        if (response.status === 429) {
+          // Rate limited — back off significantly but DON'T count as fatal
+          const retryAfter = response.headers.get('Retry-After')
+          const backoffMs = retryAfter ? parseInt(retryAfter) * 1000 : Math.min(pollInterval * 3, 15000)
+          console.warn(`Rate limited (429), backing off ${backoffMs}ms`)
+          setPollingInfo({ elapsedSeconds: elapsedSec, lastStatus: "rate limited, backing off..." })
+          pollInterval = Math.min(backoffMs, 15000)
+          await new Promise(resolve => setTimeout(resolve, pollInterval))
           continue
         }
 
-        // Reset consecutive errors on success
-        consecutiveErrors = 0
-        // Reset interval on success
-        pollInterval = 2000
+        if (!response.ok) {
+          fatalErrors++
+          console.warn(`Status check failed (${fatalErrors}/${maxFatalErrors}):`, response.status)
+          setPollingInfo({ elapsedSeconds: elapsedSec, lastStatus: "server busy, retrying..." })
+
+          if (fatalErrors >= maxFatalErrors) {
+            throw new Error(`Backend unavailable after ${maxFatalErrors} attempts. Please check if the simulation server is running.`)
+          }
+
+          // Back off on errors
+          pollInterval = Math.min(pollInterval * 2, 15000)
+          await new Promise(resolve => setTimeout(resolve, pollInterval))
+          continue
+        }
+
+        // Successful response — reset fatal error count but keep backoff building
+        fatalErrors = 0
 
         const status = await response.json()
 
@@ -339,15 +351,15 @@ export function SimulationWizard() {
         }
 
         if (status.status === "not_found") {
-          consecutiveErrors++
-          if (consecutiveErrors >= 5) {
+          notFoundCount++
+          if (notFoundCount >= 5) {
             throw new Error("Simulation job not found. The backend may have restarted.")
           }
         }
 
-        // Exponential backoff: increase interval gradually
+        // Gradual backoff — interval grows with each poll, never resets
         await new Promise(resolve => setTimeout(resolve, pollInterval))
-        pollInterval = Math.min(pollInterval * 1.3, maxPollInterval)
+        pollInterval = Math.min(pollInterval * backoffFactor, maxPollInterval)
       } catch (err) {
         console.error('Poll error:', err)
         throw err

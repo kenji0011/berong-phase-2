@@ -21,7 +21,7 @@ import { LoadingOverlay } from "@/components/ui/loading-overlay"
 
 export default function AdminPage() {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated, isLoading } = useAuth()
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submittingMessage, setSubmittingMessage] = useState("")
@@ -114,6 +114,8 @@ export default function AdminPage() {
   };
 
   useEffect(() => {
+    if (isLoading) return
+
     if (!isAuthenticated) {
       router.push("/auth")
       return
@@ -132,7 +134,7 @@ export default function AdminPage() {
     loadQuickQuestions()
     loadFireCodeSections()
     setLoading(false)
-  }, [isAuthenticated, user, router])
+  }, [isAuthenticated, user, router, isLoading])
 
   const loadCarouselImages = async () => {
     try {

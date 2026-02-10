@@ -9,6 +9,7 @@ import Image from "next/image"
 import { motion, AnimatePresence } from "motion/react"
 import { useAuth } from "@/lib/auth-context"
 import Link from "next/link"
+import ReactMarkdown from "react-markdown"
 
 interface Message {
   id: string
@@ -343,10 +344,25 @@ export function Chatbot() {
                 {messages.map((message) => (
                   <div key={message.id} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
                     <div
-                      className={`max-w-[80%] rounded-lg p-3 ${message.sender === "user" ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"
+                      className={`max-w-[85%] rounded-lg p-3 ${message.sender === "user" ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"
                         }`}
                     >
-                      <p className="text-sm">{message.text}</p>
+                      {message.sender === "bot" ? (
+                        <div className="text-sm prose prose-sm prose-neutral dark:prose-invert max-w-none
+                          [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1 [&>li]:my-0.5
+                          [&>ul]:pl-4 [&>ol]:pl-4 [&>ul]:list-disc [&>ol]:list-decimal
+                          [&>h1]:text-base [&>h1]:font-bold [&>h1]:mt-2 [&>h1]:mb-1
+                          [&>h2]:text-sm [&>h2]:font-bold [&>h2]:mt-2 [&>h2]:mb-1
+                          [&>h3]:text-sm [&>h3]:font-semibold [&>h3]:mt-1.5 [&>h3]:mb-0.5
+                          [&>strong]:font-semibold [&>em]:italic
+                          [&>code]:bg-black/10 [&>code]:px-1 [&>code]:rounded [&>code]:text-xs
+                          [&>blockquote]:border-l-2 [&>blockquote]:border-primary [&>blockquote]:pl-2 [&>blockquote]:italic
+                        ">
+                          <ReactMarkdown>{message.text}</ReactMarkdown>
+                        </div>
+                      ) : (
+                        <p className="text-sm">{message.text}</p>
+                      )}
                     </div>
                   </div>
                 ))}

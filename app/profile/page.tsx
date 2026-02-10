@@ -15,7 +15,7 @@ import { Shield, User, Key, CheckCircle, AlertCircle } from "lucide-react"
 
 export default function ProfilePage() {
   const router = useRouter()
-  const { user, isAuthenticated, logout } = useAuth()
+  const { user, isAuthenticated, isLoading, logout } = useAuth()
   const [loading, setLoading] = useState(true)
   const [success, setSuccess] = useState("")
   const [error, setError] = useState("")
@@ -36,6 +36,8 @@ export default function ProfilePage() {
   })
 
   useEffect(() => {
+    if (isLoading) return
+
     if (!isAuthenticated) {
       router.push("/auth")
       return
@@ -52,7 +54,7 @@ export default function ProfilePage() {
     }
 
     setLoading(false)
-  }, [isAuthenticated, user, router])
+  }, [isAuthenticated, user, router, isLoading])
 
   const handleUpdateProfile = async () => {
     if (!profile.name || !profile.email || !profile.age) {

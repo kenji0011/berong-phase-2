@@ -26,7 +26,7 @@ export default function KidsDashboardPage() {
       return
     }
 
-    if (!user?.permissions.accessKids) {
+    if (!user?.permissions.accessKids && user?.role !== 'admin') {
       router.push("/")
       return
     }

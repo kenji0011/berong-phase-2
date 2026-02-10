@@ -24,8 +24,8 @@ export function ProtectedRoute({
 
   useEffect(() => {
     if (!isLoading && isAuthenticated && user) {
-      // Check if user has the required permission
-      const permissionGranted = user.permissions[requiredPermission];
+      // Check if user has the required permission (admin has all permissions)
+      const permissionGranted = user.role === 'admin' || user.permissions[requiredPermission];
       setHasPermission(permissionGranted);
 
       if (!permissionGranted) {

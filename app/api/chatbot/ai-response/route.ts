@@ -29,12 +29,22 @@ export async function POST(request: NextRequest) {
             model: 'gemini-2.0-flash',
             contents: message,
             config: {
-                // System instruction to restrict topics
-                systemInstruction: getFireSafetySystemPrompt(),
+                // System instruction to restrict topics and format responses
+                systemInstruction: getFireSafetySystemPrompt() + `
+
+## Response Formatting
+Always format your responses using markdown for better readability:
+- Use **bold** for important terms and key points
+- Use bullet points (- or *) for lists
+- Use numbered lists (1. 2. 3.) for step-by-step instructions
+- Use line breaks between sections for clarity
+- Keep paragraphs short and focused
+- Use emoji sparingly for friendliness (🔥 🧯 🚒)
+`,
                 // Lower temperature = more consistent, less creative
                 temperature: 0.3,
                 // Limit response length for concise answers
-                maxOutputTokens: 500,
+                maxOutputTokens: 800,
             }
         });
 

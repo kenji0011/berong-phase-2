@@ -60,7 +60,7 @@ export function FeaturedCards() {
       <div className="md:hidden space-y-3">
         {mockFeaturedCards.map((card) => (
           <PermissionGuard key={card.id} requiredPermission={card.requiredPermission} targetPath={card.link}>
-            <Link href={card.link}>
+            <Link href={card.link} prefetch={false}>
               <Card className="overflow-hidden hover:shadow-lg transition-all active:scale-[0.98]">
                 <CardContent className="p-0">
                   <div className="flex items-center gap-4">
@@ -105,7 +105,7 @@ export function FeaturedCards() {
                   <div className="text-white">
                     <h3 className="text-xl font-bold mb-2 drop-shadow-lg">{card.title}</h3>
                     <p className="text-sm text-gray-200 mb-3 line-clamp-2">{card.description}</p>
-                    <Link href={card.link}>
+                    <Link href={card.link} prefetch={false}>
                       <Button
                         variant="secondary"
                         size="sm"

@@ -22,17 +22,19 @@ interface ProgressData {
 
 export default function SafeScapeHubPage() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [progressData, setProgressData] = useState<ProgressData | null>(null);
 
   useEffect(() => {
+    if (isLoading) return;
+
     if (!isAuthenticated) {
       router.push("/auth");
       return;
     }
 
-    if (!user?.permissions.accessKids) {
+    if (!user?.permissions.accessKids && user?.role !== 'admin') {
       router.push("/");
       return;
     }
@@ -40,7 +42,7 @@ export default function SafeScapeHubPage() {
     // Fetch user progress
     fetchProgress();
     setLoading(false);
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, router, isLoading]);
 
   const fetchProgress = async () => {
     try {

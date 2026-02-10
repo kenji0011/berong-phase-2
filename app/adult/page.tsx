@@ -33,7 +33,7 @@ export default function AdultPage() {
       return
     }
 
-    if (!user.permissions.accessAdult) {
+    if (!user.permissions.accessAdult && user.role !== 'admin') {
       router.push("/")
       return
     }

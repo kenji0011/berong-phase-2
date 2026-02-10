@@ -59,7 +59,7 @@ const quizQuestions: QuizQuestion[] = [
 
 export default function QuizPage() {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated, isLoading } = useAuth()
   const [loading, setLoading] = useState(true)
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
@@ -68,18 +68,20 @@ export default function QuizPage() {
   const [quizComplete, setQuizComplete] = useState(false)
 
   useEffect(() => {
+    if (isLoading) return
+
     if (!isAuthenticated) {
       router.push("/auth")
       return
     }
 
-    if (!user?.permissions.accessKids) {
+    if (!user?.permissions.accessKids && user?.role !== 'admin') {
       router.push("/")
       return
     }
 
     setLoading(false)
-  }, [isAuthenticated, user, router])
+  }, [isAuthenticated, user, router, isLoading])
 
   const handleAnswerSelect = (answerIndex: number) => {
     if (showResult) return

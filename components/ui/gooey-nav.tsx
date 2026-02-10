@@ -103,6 +103,7 @@ export default function GooeyNav({
                         >
                             <Link
                                 href={item.href}
+                                prefetch={false}
                                 onClick={(e) => handleClick(e, index)}
                             >
                                 {item.label}

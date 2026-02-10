@@ -29,11 +29,17 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
     deploy:
       resources:
         limits:
-          memory: 128M
-          cpus: '0.25'
+          memory: 64M
+          cpus: '0.15'
 
   # PostgreSQL Database
   postgres:
@@ -59,10 +65,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    security_opt:
+      - no-new-privileges:true
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 384M
           cpus: '0.5'
 
   # Next.js Frontend Application
@@ -83,7 +91,7 @@ services:
       - BACKEND_URL=http://python-backend:8000
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - JWT_SECRET=${JWT_SECRET}
-      - NODE_OPTIONS=--max-old-space-size=1536
+      - NODE_OPTIONS=--max-old-space-size=768
     volumes:
       - uploads_data:/app/public/uploads
     expose:
@@ -97,10 +105,14 @@ services:
       timeout: 10s
       start_period: 120s
       retries: 5
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: 1G
           cpus: '1'
 
   # Python FastAPI Backend (AI/ML Simulation)
@@ -117,7 +129,7 @@ services:
         max-file: "5"
     environment:
       - PYTHONUNBUFFERED=1
-      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost,http://nextjs:3000}
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://bfpscberong.app,https://www.bfpscberong.app,http://nextjs:3000}
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
     depends_on:
       postgres:
@@ -130,11 +142,15 @@ services:
       timeout: 10s
       start_period: 120s
       retries: 3
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp
     deploy:
       resources:
         limits:
-          memory: 3G
-          cpus: '2'
+          memory: 2G
+          cpus: '1.5'
 
 volumes:
   postgres_data:

@@ -15,7 +15,7 @@ export function usePermissionCheck(requiredPermission: 'accessKids' | 'accessAdu
 
   useEffect(() => {
     if (!isLoading && isAuthenticated && user) {
-      const permissionGranted = user.permissions[requiredPermission];
+      const permissionGranted = user.role === 'admin' || user.permissions[requiredPermission];
       setHasPermission(permissionGranted);
       
       // If permission is denied, automatically show the dialog

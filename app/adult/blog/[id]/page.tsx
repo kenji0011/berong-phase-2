@@ -13,18 +13,20 @@ import { logEngagement } from "@/lib/engagement-tracker"
 export default function BlogPostPage() {
   const router = useRouter()
   const params = useParams()
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated, isLoading } = useAuth()
   const [loading, setLoading] = useState(true)
   const [blog, setBlog] = useState<BlogPost | null>(null)
   const hasTracked = useRef(false)
 
   useEffect(() => {
+    if (isLoading) return
+
     if (!isAuthenticated) {
       router.push("/auth")
       return
     }
 
-    if (!user?.permissions.accessAdult) {
+    if (!user?.permissions.accessAdult && user?.role !== 'admin') {
       router.push("/")
       return
     }
@@ -49,7 +51,7 @@ export default function BlogPostPage() {
     if (params.id) {
       loadBlog()
     }
-  }, [isAuthenticated, user, router, params.id])
+  }, [isAuthenticated, user, router, params.id, isLoading])
 
   // Track reading engagement when blog is loaded
   useEffect(() => {

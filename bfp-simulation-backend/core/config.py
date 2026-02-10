@@ -11,11 +11,11 @@ PYTHON_VERSION = sys.version_info
 
 DATABASE_URL = os.environ.get(
     "DATABASE_URL",
-    "postgresql://bfp_user:bfp_secret_password@localhost:5432/bfp_berong",
+    "postgresql://bfp_user:bfp_secret_password@postgres:5432/bfp_berong",
 )
 
 CORS_ORIGINS_ENV = os.environ.get(
     "CORS_ORIGINS",
-    "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001",
+    "https://bfpscberong.app,https://www.bfpscberong.app,http://nextjs:3000",
 )
 CORS_ORIGINS = [origin.strip() for origin in CORS_ORIGINS_ENV.split(",")]

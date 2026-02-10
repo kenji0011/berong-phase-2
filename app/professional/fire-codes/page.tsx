@@ -11,22 +11,24 @@ import { FireCodeViewer } from "@/components/ui/fire-code-viewer";
 
 export default function FireCodesPage() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (isLoading) return;
+
     if (!isAuthenticated) {
       router.push("/auth");
       return;
     }
 
-    if (!user?.permissions.accessProfessional) {
+    if (!user?.permissions.accessProfessional && user?.role !== 'admin') {
       router.push("/");
       return;
     }
 
     setLoading(false);
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, router, isLoading]);
 
   if (loading) {
     return (

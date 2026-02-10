@@ -16,7 +16,7 @@ export default function KidsPage() {
       return
     }
 
-    if (!user?.permissions.accessKids) {
+    if (!user?.permissions.accessKids && user?.role !== 'admin') {
       router.push("/")
       return
     }

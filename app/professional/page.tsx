@@ -20,7 +20,7 @@ import { logEngagement } from "@/lib/engagement-tracker"
 
 export default function ProfessionalPage() {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated, isLoading } = useAuth()
   const [loading, setLoading] = useState(true)
   const [videos, setVideos] = useState<VideoContent[]>([])
   const [searchQuery, setSearchQuery] = useState("")
@@ -40,12 +40,14 @@ export default function ProfessionalPage() {
   }
 
   useEffect(() => {
+    if (isLoading) return
+
     if (!isAuthenticated) {
       router.push("/auth")
       return
     }
 
-    if (!user?.permissions.accessProfessional) {
+    if (!user?.permissions.accessProfessional && user?.role !== 'admin') {
       router.push("/")
       return
     }
@@ -67,7 +69,7 @@ export default function ProfessionalPage() {
 
     loadVideos()
     setLoading(false)
-  }, [isAuthenticated, user, router])
+  }, [isAuthenticated, user, router, isLoading])
 
   const filteredVideos = videos.filter(
     (video) =>

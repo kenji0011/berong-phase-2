@@ -1,0 +1,31 @@
+# Hadolint configuration for Dockerfile linting
+# https://github.com/hadolint/hadolint
+
+failure-threshold: warning
+
+ignored:
+  # Ignore specific rules if needed
+  # - DL3008  # Pin versions in apt-get install (can be too strict for some cases)
+
+trustedRegistries:
+  - docker.io
+  - gcr.io
+  - registry.hub.docker.com
+  - node
+  - python
+  - postgres
+  - nginx
+  - certbot
+
+# Override severity levels if needed
+override:
+  error:
+    - DL3001  # For deleting APT cache
+    - DL3008  # Pin versions in apt-get
+  warning:
+    - DL3009  # Delete APT cache
+    - DL3015  # Avoid additional packages
+  info:
+    - DL3018  # Pin versions in apk
+  style:
+    - DL3025  # Use JSON notation for CMD and ENTRYPOINT

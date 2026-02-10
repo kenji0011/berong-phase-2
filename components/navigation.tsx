@@ -69,13 +69,14 @@ export function Navigation() {
               {/* Branding - Compact on mobile */}
               <div className="min-w-0">
                 {/* Full branding on desktop, abbreviated on mobile */}
-                <h1 className="text-white font-bold leading-tight">
-                  <span className="hidden lg:inline text-xs xl:text-sm">BUREAU OF FIRE PROTECTION STA CRUZ LAGUNA</span>
-                  <span className="hidden sm:inline lg:hidden text-xs">BFP STA CRUZ</span>
-                  <span className="sm:hidden text-xs">BFP</span>
+                <p className="text-white font-bold text-[10px] xl:text-xs">Berong E-Learning</p>
+                <h1 className="text-yellow-400 font-semibold leading-tight text-[10px] xl:text-xs hidden sm:block">
+                  Fire Safety Education Platform
                 </h1>
-                <p className="text-yellow-400 font-semibold text-xs">Berong E-Learning</p>
-                <p className="text-gray-300 text-xs hidden xl:block">Fire Safety Education Platform</p>
+                <p className="text-gray-300 text-[9px] xl:text-xs hidden sm:block">
+                  <span className="hidden xl:inline">BUREAU OF FIRE PROTECTION STA CRUZ LAGUNA</span>
+                  <span className="xl:hidden">BFP Sta. Cruz</span>
+                </p>
               </div>
             </Link>
 

@@ -24,6 +24,12 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
     deploy:
       resources:
         limits:
@@ -57,6 +63,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    security_opt:
+      - no-new-privileges:true
     deploy:
       resources:
         limits:
@@ -90,6 +98,10 @@ services:
       timeout: 10s
       start_period: 120s
       retries: 5
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp
     deploy:
       resources:
         limits:
@@ -105,17 +117,22 @@ services:
     restart: unless-stopped
     environment:
       - PYTHONUNBUFFERED=1
-      - CORS_ORIGINS=${CORS_ORIGINS:-https://bfpscberong.app,https://www.bfpscberong.app,http://localhost,http://nextjs:3000}
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://bfpscberong.app,https://www.bfpscberong.app,http://nextjs:3000}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
     volumes:
       - simulation_jobs:/app/data
     expose:
       - "8000"
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/docs')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
       interval: 30s
       timeout: 10s
       start_period: 120s
       retries: 3
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp
     deploy:
       resources:
         limits:

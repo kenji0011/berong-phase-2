@@ -1,0 +1,158 @@
+name: Docker Security Scan
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - '**/Dockerfile'
+      - '**/docker-compose*.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - '**/Dockerfile'
+      - '**/docker-compose*.yml'
+  schedule:
+    # Run weekly on Mondays at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  hadolint:
+    name: Dockerfile Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Hadolint on Next.js Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          failure-threshold: warning
+
+      - name: Run Hadolint on Python Backend Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: bfp-simulation-backend/Dockerfile
+          failure-threshold: warning
+
+  trivy-scan:
+    name: Vulnerability Scanning
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Next.js image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          tags: bfp-nextjs:scan
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Trivy scan on Next.js image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: bfp-nextjs:scan
+          format: 'sarif'
+          output: 'trivy-nextjs-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-nextjs-results.sarif'
+          category: 'trivy-nextjs'
+
+      - name: Build Python Backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./bfp-simulation-backend
+          file: ./bfp-simulation-backend/Dockerfile
+          tags: bfp-python-backend:scan
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Trivy scan on Python Backend image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: bfp-python-backend:scan
+          format: 'sarif'
+          output: 'trivy-python-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-python-results.sarif'
+          category: 'trivy-python'
+
+      - name: Generate vulnerability summary
+        run: |
+          echo "## 🔒 Docker Security Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next.js Image" >> $GITHUB_STEP_SUMMARY
+          docker run --rm aquasec/trivy:latest image --severity HIGH,CRITICAL bfp-nextjs:scan >> $GITHUB_STEP_SUMMARY || true
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Python Backend Image" >> $GITHUB_STEP_SUMMARY
+          docker run --rm aquasec/trivy:latest image --severity HIGH,CRITICAL bfp-python-backend:scan >> $GITHUB_STEP_SUMMARY || true
+
+  docker-bench:
+    name: Docker Best Practices Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Docker Bench for Security
+        run: |
+          docker run --rm -v $(pwd):/project \
+            cytopia/docker-lint:latest \
+            /project/Dockerfile
+
+          docker run --rm -v $(pwd)/bfp-simulation-backend:/project \
+            cytopia/docker-lint:latest \
+            /project/Dockerfile
+
+  image-size-check:
+    name: Image Size Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and analyze Next.js image size
+        run: |
+          docker build -t bfp-nextjs:size-check .
+          echo "## 📦 Docker Image Sizes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next.js Application" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          docker images bfp-nextjs:size-check --format "Size: {{.Size}}" >> $GITHUB_STEP_SUMMARY
+          docker history bfp-nextjs:size-check --human --no-trunc >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Build and analyze Python Backend image size
+        run: |
+          docker build -t bfp-python-backend:size-check ./bfp-simulation-backend
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Python Backend" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          docker images bfp-python-backend:size-check --format "Size: {{.Size}}" >> $GITHUB_STEP_SUMMARY
+          docker history bfp-python-backend:size-check --human --no-trunc >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

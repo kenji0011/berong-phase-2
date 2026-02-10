@@ -29,7 +29,7 @@ const cardPairs = [
 
 export default function MemoryGamePage() {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated, isLoading } = useAuth()
   const [loading, setLoading] = useState(true)
   const [cards, setCards] = useState<MemoryCard[]>([])
   const [flippedCards, setFlippedCards] = useState<number[]>([])
@@ -38,19 +38,21 @@ export default function MemoryGamePage() {
   const [gameComplete, setGameComplete] = useState(false)
 
   useEffect(() => {
+    if (isLoading) return
+
     if (!isAuthenticated) {
       router.push("/auth")
       return
     }
 
-    if (!user?.permissions.accessKids) {
+    if (!user?.permissions.accessKids && user?.role !== 'admin') {
       router.push("/")
       return
     }
 
     initializeGame()
     setLoading(false)
-  }, [isAuthenticated, user, router])
+  }, [isAuthenticated, user, router, isLoading])
 
   const initializeGame = () => {
     const duplicatedCards = [...cardPairs, ...cardPairs]
