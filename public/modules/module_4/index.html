@@ -5,6 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SafeScape | Module 4: Get Low & Go</title>
+    <script>
+        // Suppress Tailwind CDN warning
+        console.warn = (function (originalWarn) {
+            return function (...args) {
+                if (args[0] && args[0].includes && args[0].includes('cdn.tailwindcss.com')) return;
+                originalWarn.apply(console, args);
+            };
+        })(console.warn);
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/shared.css">
@@ -466,7 +475,10 @@
         ];
 
         // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Wait for progress to load from API before checking locks
+            await SafeScapeProgress.whenReady();
+
             if (!SafeScapeProgress.isModuleUnlocked(moduleNum)) {
                 window.location.href = '../index.html';
                 return;
@@ -681,6 +693,10 @@
             const allCorrect = localState.tfAnswers.every((ans, idx) => tfQuestions[idx].answer === ans);
             const result = document.getElementById('check-result');
             const btn = document.getElementById('btn-next');
+
+            // Calculate and save score
+            const correctCount = localState.tfAnswers.filter((ans, idx) => tfQuestions[idx].answer === ans).length;
+            SafeScapeProgress.submitQuizResult(moduleNum, correctCount, 5);
 
             if (allCorrect) {
                 result.innerHTML = "<span class='text-green-400'><i class='fa-solid fa-check mr-2'></i>All correct! You understand smoke behavior!</span>";

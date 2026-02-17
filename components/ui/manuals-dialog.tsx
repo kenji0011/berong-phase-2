@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Download, BookOpen } from "lucide-react";
+import { FileText, Download, BookOpen, Eye } from "lucide-react";
 
 interface Manual {
   id: string;
@@ -70,10 +70,14 @@ export function ManualsDialog({ children }: { children: React.ReactNode }) {
     }
   ];
 
+  const handleView = (filename: string) => {
+    window.open(`/modules/bfp_manuals/${filename}`, '_blank');
+  };
+
   const handleDownload = (filename: string) => {
     // Create a temporary link to trigger the download
     const link = document.createElement('a');
-    link.href = `/adult/BFP Manuals/${filename}`;
+    link.href = `/modules/bfp_manuals/${filename}`;
     link.download = filename;
     document.body.appendChild(link);
     link.click();
@@ -96,12 +100,12 @@ export function ManualsDialog({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           <p className="text-muted-foreground">
             Access comprehensive manuals covering firefighting operations, emergency response protocols, and safety procedures.
           </p>
-          
+
           <div className="grid gap-4">
             {manuals.map((manual) => (
               <Card key={manual.id} className="hover:shadow-md transition-shadow">
@@ -117,15 +121,24 @@ export function ManualsDialog({ children }: { children: React.ReactNode }) {
                         {manual.category}
                       </Badge>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDownload(manual.filename)}
-                      className="sm:ml-0 flex-shrink-0"
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      Download
-                    </Button>
+                    <div className="flex gap-2 sm:ml-0 flex-shrink-0">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleView(manual.filename)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDownload(manual.filename)}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Download
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -134,5 +147,5 @@ export function ManualsDialog({ children }: { children: React.ReactNode }) {
         </div>
       </DialogContent>
     </Dialog>
- );
+  );
 }

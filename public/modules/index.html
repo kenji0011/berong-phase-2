@@ -1,13 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SafeScape | Fire Safety Course for Kids</title>
+    <script>
+        // Suppress Tailwind CDN warning
+        console.warn = (function (originalWarn) {
+            return function (...args) {
+                if (args[0] && args[0].includes && args[0].includes('cdn.tailwindcss.com')) return;
+                originalWarn.apply(console, args);
+            };
+        })(console.warn);
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/shared.css">
 </head>
+
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen">
 
     <!-- NAVIGATION -->
@@ -30,24 +41,26 @@
             <div class="inline-block bg-orange-500/20 text-orange-400 px-4 py-2 rounded-full text-sm font-mono mb-4">
                 <i class="fa-solid fa-fire mr-2"></i> FIRE SAFETY TRAINING COURSE
             </div>
-            
-            <h1 class="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-red-500 to-yellow-500">
+
+            <h1
+                class="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-red-500 to-yellow-500">
                 Become a Fire Safety Hero!
             </h1>
-            
+
             <p class="text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
-                Complete 5 exciting modules to learn how to protect yourself, your family, and your friends from fire hazards.
+                Complete 5 exciting modules to learn how to protect yourself, your family, and your friends from fire
+                hazards.
             </p>
 
-            <!-- Student Name Input -->
+            <!-- Student Name Display -->
             <div class="max-w-md mx-auto mt-8">
-                <label class="block text-sm text-slate-400 mb-2">Enter Your Hero Name:</label>
-                <div class="flex gap-2">
-                    <input type="text" id="student-name" placeholder="Your Name" 
-                           class="flex-1 bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500">
-                    <button onclick="saveStudentName()" class="ss-btn ss-btn-primary">
-                        <i class="fa-solid fa-check"></i> Save
-                    </button>
+                <p class="text-sm text-slate-400 mb-2">Welcome, Fire Safety Hero:</p>
+                <div class="bg-slate-800/50 border border-slate-700/50 rounded-lg px-6 py-4 inline-block min-w-[300px]">
+                    <h2
+                        class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400">
+                        <i class="fa-solid fa-user-astronaut mr-3 text-white"></i><span id="student-name-display">Future
+                            Hero</span>
+                    </h2>
                 </div>
             </div>
 
@@ -70,7 +83,7 @@
             </h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="modules-grid">
-                
+
                 <!-- Module 1 -->
                 <div class="ss-module-card" data-module="1" id="card-1">
                     <div class="ss-card-overlay">
@@ -83,7 +96,8 @@
                     </div>
                     <div class="ss-card-body">
                         <p class="ss-card-description">
-                            Learn what fire needs to burn with the Fire Triangle. Understand why matches and lighters are tools for grown-ups only.
+                            Learn what fire needs to burn with the Fire Triangle. Understand why matches and lighters
+                            are tools for grown-ups only.
                         </p>
                         <div class="mt-4 flex items-center gap-2 text-sm">
                             <i class="fa-solid fa-gamepad text-blue-400"></i>
@@ -110,7 +124,8 @@
                     </div>
                     <div class="ss-card-body">
                         <p class="ss-card-description">
-                            Master the fire drill! Learn to recognize alarms, find the Red Box, and lead your classmates to safety.
+                            Master the fire drill! Learn to recognize alarms, find the Red Box, and lead your classmates
+                            to safety.
                         </p>
                         <div class="mt-4 flex items-center gap-2 text-sm">
                             <i class="fa-solid fa-music text-green-400"></i>
@@ -137,7 +152,8 @@
                     </div>
                     <div class="ss-card-body">
                         <p class="ss-card-description">
-                            Create your family escape plan with two ways out. Learn to check doors and find your meeting spot.
+                            Create your family escape plan with two ways out. Learn to check doors and find your meeting
+                            spot.
                         </p>
                         <div class="mt-4 flex items-center gap-2 text-sm">
                             <i class="fa-solid fa-dungeon text-purple-400"></i>
@@ -164,7 +180,8 @@
                     </div>
                     <div class="ss-card-body">
                         <p class="ss-card-description">
-                            Discover why smoke is dangerous and learn the life-saving crawling technique to escape safely.
+                            Discover why smoke is dangerous and learn the life-saving crawling technique to escape
+                            safely.
                         </p>
                         <div class="mt-4 flex items-center gap-2 text-sm">
                             <i class="fa-solid fa-cloud text-gray-400"></i>
@@ -191,7 +208,8 @@
                     </div>
                     <div class="ss-card-body">
                         <p class="ss-card-description">
-                            Master Stop, Drop & Roll! Take the final exam and earn your official Fire Safety Hero Certificate!
+                            Master Stop, Drop & Roll! Take the final exam and earn your official Fire Safety Hero
+                            Certificate!
                         </p>
                         <div class="mt-4 flex items-center gap-2 text-sm">
                             <i class="fa-solid fa-certificate text-yellow-400"></i>
@@ -219,9 +237,9 @@
                     </div>
                     <div class="ss-card-footer">
                         <span class="ss-card-status completed">Earned!</span>
-                        <a href="module_5/index.html#final-exam" class="ss-btn ss-btn-success">
+                        <button onclick="showCertificate()" class="ss-btn ss-btn-success">
                             <i class="fa-solid fa-certificate"></i> View Certificate
-                        </a>
+                        </button>
                     </div>
                 </div>
 
@@ -236,6 +254,101 @@
         </section>
 
     </main>
+
+    <!-- CERTIFICATE MODAL -->
+    <div id="cert-modal"
+        class="hidden fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="relative w-full max-w-4xl bg-white rounded-lg shadow-2xl overflow-hidden animate-bounce-in">
+            <!-- Close Button -->
+            <button onclick="closeCertificate()"
+                class="absolute top-4 right-4 z-20 bg-red-600 hover:bg-red-700 text-white rounded-full p-2 w-10 h-10 flex items-center justify-center transition-colors shadow-lg">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <!-- Certificate Container -->
+            <div class="relative w-full aspect-[16/9] select-none">
+                <img src="../fire_safety_certificate.png" alt="Certificate Template"
+                    class="absolute inset-0 w-full h-full object-contain bg-[#fdfbf7]">
+
+                <!-- Dynamic Text Overlays -->
+                <div class="absolute inset-x-0 top-[48%] -translate-y-1/2 text-center">
+                    <h2 id="cert-student-name"
+                        class="font-serif text-[2.5cqw] md:text-3xl font-bold text-[#1a365d] uppercase tracking-wider">
+                        Future Hero</h2>
+                </div>
+
+                <div class="absolute bottom-[14%] left-[22%] -translate-x-1/2 text-center w-[20%]">
+                    <p id="cert-date" class="font-serif text-[1.2cqw] md:text-lg text-slate-800 font-bold"></p>
+                </div>
+
+                <!-- Score (Optional display area) -->
+                <div class="absolute top-[15%] right-[10%] -translate-x-1/2 rotate-12 bg-yellow-400/90 text-red-700 font-bold rounded-full w-[10cqw] h-[10cqw] flex items-center justify-center shadow-lg border-4 border-white/50 hidden"
+                    id="cert-score-badge">
+                    <div class="text-center leading-tight">
+                        <span class="block text-[1.5cqw]">SCORE</span>
+                        <span class="block text-[2.5cqw]" id="cert-score-val">15</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="bg-slate-50 p-4 border-t border-slate-200 flex justify-between items-center">
+                <div class="text-slate-500 text-xs md:text-sm">
+                    Verified SafeScape Certificate • <span id="cert-id" class="font-mono">ID: -----</span>
+                </div>
+                <button onclick="window.print()"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full font-bold transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-print"></i> Print / Save PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Styles -->
+    <style>
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #cert-modal,
+            #cert-modal * {
+                visibility: visible;
+            }
+
+            #cert-modal {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background: white;
+                padding: 0;
+                display: block !important;
+            }
+
+            #cert-modal .bg-slate-50,
+            #cert-modal button {
+                display: none;
+            }
+        }
+
+        .animate-bounce-in {
+            animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
 
     <footer class="bg-slate-950 text-slate-500 py-8 text-center text-sm border-t border-slate-800">
         <p>SafeScape Intelligent Fire Safety Course for Kids</p>
@@ -252,10 +365,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Check if user is authenticated (has userId in URL)
             if (SafeScapeProgress.isAuthenticated()) {
-                // Use name from URL params
-                const userName = SafeScapeProgress.getUserNameFromUrl();
-                if (userName && userName !== 'Future Hero') {
-                    document.getElementById('student-name').value = userName;
+                const userName = SafeScapeProgress.getUserName();
+                if (userName) {
+                    const nameDisplay = document.getElementById('student-name-display');
+                    if (nameDisplay) nameDisplay.textContent = userName;
                     SafeScapeProgress.setStudentName(userName);
                 }
             } else {
@@ -270,25 +383,18 @@
         function loadStudentName() {
             const name = SafeScapeProgress.getStudentName();
             if (name && name !== 'Future Hero') {
-                document.getElementById('student-name').value = name;
-            }
-        }
-
-        function saveStudentName() {
-            const name = document.getElementById('student-name').value.trim();
-            if (name) {
-                SafeScapeProgress.setStudentName(name);
-                showToast('success', `Welcome, ${name}!`);
+                const nameDisplay = document.getElementById('student-name-display');
+                if (nameDisplay) nameDisplay.textContent = name;
             }
         }
 
         function updateUI() {
             const progress = SafeScapeProgress.getProgress();
-            
+
             // Update overall progress
-            const completedCount = [1,2,3,4,5].filter(n => progress[`module${n}`]?.completed).length;
+            const completedCount = [1, 2, 3, 4, 5].filter(n => progress[`module${n}`]?.completed).length;
             const overallPercent = Math.round((completedCount / 5) * 100);
-            
+
             document.getElementById('overall-progress').textContent = `${overallPercent}%`;
             document.getElementById('progress-fill').style.width = `${overallPercent}%`;
             document.getElementById('progress-text').textContent = `${completedCount} of 5 modules completed`;
@@ -299,7 +405,7 @@
                 const card = document.getElementById(`card-${i}`);
                 const status = document.getElementById(`status-${i}`);
                 const btn = document.getElementById(`btn-${i}`);
-                
+
                 // Build module URL with user params
                 const params = new URLSearchParams(window.location.search);
                 const userParams = params.toString() ? `?${params.toString()}` : '';
@@ -344,16 +450,42 @@
             }
         }
 
+        function showCertificate() {
+            const progress = SafeScapeProgress.getProgress();
+            const studentName = SafeScapeProgress.getStudentName() || "Future Hero";
+            const date = new Date().toLocaleDateString();
+            const score = progress.module5?.sections?.finalExamScore || 15;
+
+            document.getElementById('cert-student-name').textContent = studentName;
+            document.getElementById('cert-date').textContent = date;
+
+            // Generate a fake ID for "authenticity"
+            const id = Math.random().toString(36).substr(2, 9).toUpperCase();
+            document.getElementById('cert-id').textContent = `ID: ${id}`;
+
+            // Optional: Show score badge if excellent
+            if (score === 15) {
+                document.getElementById('cert-score-badge').classList.remove('hidden');
+                document.getElementById('cert-score-val').textContent = score;
+            }
+
+            document.getElementById('cert-modal').classList.remove('hidden');
+        }
+
+        function closeCertificate() {
+            document.getElementById('cert-modal').classList.add('hidden');
+        }
+
         function showToast(type, message) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `ss-toast ${type}`;
-            
+
             const icon = type === 'success' ? 'fa-check-circle' : 'fa-info-circle';
             toast.innerHTML = `<i class="fa-solid ${icon}"></i> ${message}`;
-            
+
             container.appendChild(toast);
-            
+
             setTimeout(() => {
                 toast.style.animation = 'slideIn 0.3s ease-out reverse';
                 setTimeout(() => toast.remove(), 300);
@@ -361,4 +493,5 @@
         }
     </script>
 </body>
+
 </html>

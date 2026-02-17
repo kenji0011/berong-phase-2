@@ -11,11 +11,11 @@ interface PermissionGuardProps {
   fallbackPath?: string;
 }
 
-export function PermissionGuard({ 
-  requiredPermission, 
-  children, 
-  targetPath = '', 
-  fallbackPath = '/' 
+export function PermissionGuard({
+  requiredPermission,
+  children,
+  targetPath = '',
+  fallbackPath = '/'
 }: PermissionGuardProps) {
   const { user, isAuthenticated } = useAuth();
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
@@ -25,7 +25,7 @@ export function PermissionGuard({
     if (!isAuthenticated || !user) {
       return false;
     }
-    
+
     return user.role === 'admin' || user.permissions[requiredPermission];
   };
 
@@ -45,7 +45,7 @@ export function PermissionGuard({
   // Wrap the children with a div that has the click handler
   return (
     <>
-      <div onClick={handleClick} onKeyDown={handleClick}>
+      <div className="w-full" onClick={handleClick} onKeyDown={handleClick}>
         {children}
       </div>
       <PermissionDialog

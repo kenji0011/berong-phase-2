@@ -1,102 +1,122 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import { cookies } from 'next/headers';
+import { verifyToken } from '@/lib/jwt';
 
-export async function GET() {
-  try {
-    // For now, return the sample modules structure
-    // In a real implementation, this would come from the database
-    const modules = [
-      {
-        id: 1,
-        title: "Module 1: Welcome to the Fire Station!",
-        description: "Introduction to fire safety and meeting our heroes",
-        dayNumber: 1,
-        content: "Learn about fire safety basics and meet firefighter Berong!",
-        isActive: true,
-        progress: 0,
-        isLocked: false,
-        isCompleted: false,
-        sections: [
-          { id: 1, title: "1.1 Introduction to Fire Safety", completed: false },
-          { id: 2, title: "1.2 Your Community Heroes", completed: false },
-          { id: 3, title: "1.3 The Super Sniffer: Smoke Alarms", completed: false },
-          { id: 4, title: "1.4 Mission: Smoke Alarm Hunt", completed: false },
-          { id: 5, title: "1.5 Module 1 Quiz", completed: false }
-        ]
-      },
-      {
-        id: 2,
-        title: "Module 2: The Proactive Protector",
-        description: "Kitchen safety and home hazard prevention",
-        dayNumber: 2,
-        content: "Learn about kitchen safety and electrical hazards",
-        isActive: true,
-        progress: 0,
-        isLocked: true,
-        isCompleted: false,
-        sections: [
-          { id: 1, title: "2.1 Kitchen Safety 101", completed: false },
-          { id: 2, title: "2.2 Video: Coco's Kitchen Mishap", completed: false },
-          { id: 3, title: "2.3 The Plug Patrol: Electrical Safety", completed: false },
-          { id: 4, title: "2.4 Mission: Home Hazard Checklist", completed: false },
-          { id: 5, title: "2.5 Module 2 Quiz", completed: false }
-        ]
-      },
-      {
-        id: 3,
-        title: "Module 3: The Action Plan",
-        description: "Emergency response and escape planning",
-        dayNumber: 3,
-        content: "Learn how to create and practice escape plans",
-        isActive: true,
-        progress: 0,
-        isLocked: true,
-        isCompleted: false,
-        sections: [
-          { id: 1, title: "3.1 Your Great Escape Plan", completed: false },
-          { id: 2, title: "3.2 Video: Get Low and Go!", completed: false },
-          { id: 3, title: "3.3 Mission: Draw Your Escape Plan", completed: false },
-          { id: 4, title: "3.4 Module 3 Quiz", completed: false }
-        ]
-      },
-      {
-        id: 4,
-        title: "Module 4: Community Champion",
-        description: "Community safety and emergency procedures",
-        dayNumber: 4,
-        content: "Learn about community safety and emergency calls",
-        isActive: true,
-        progress: 0,
-        isLocked: true,
-        isCompleted: false,
-        sections: [
-          { id: 1, title: "4.1 How to Call for Help", completed: false },
-          { id: 2, title: "4.2 Fire Extinguishers", completed: false },
-          { id: 3, title: "4.3 Video: The P.A.S.S. Method", completed: false },
-          { id: 4, title: "4.4 Module 4 Quiz", completed: false }
-        ]
-      },
-      {
-        id: 5,
-        title: "Final Certification",
-        description: "Junior Fire Marshal certification exam",
-        dayNumber: 5,
-        content: "Complete your journey to become a certified Junior Fire Marshal!",
-        isActive: true,
-        progress: 0,
-        isLocked: true,
-        isCompleted: false,
-        sections: [
-          { id: 1, title: "Final Exam", completed: false }
-        ]
+const prisma = new PrismaClient();
+
+// Helper to get user from cookies - consistent with other kids APIs
+async function getUserFromSession() {
+  const cookieStore = await cookies();
+  const bfpUserCookie = cookieStore.get('bfp_user');
+
+  if (bfpUserCookie?.value) {
+    try {
+      const userData = await verifyToken(bfpUserCookie.value);
+      if (userData?.id) {
+        return userData;
       }
-    ]
+    } catch {
+      // Token invalid
+    }
+  }
+  return null;
+}
 
-    return NextResponse.json(modules)
+export async function GET(request: NextRequest) {
+  try {
+    const user = await getUserFromSession();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    // 1. Fetch all active modules from DB
+    const kidsModules = await prisma.kidsModule.findMany({
+      where: { isActive: true },
+      orderBy: { dayNumber: 'asc' },
+    });
+
+    // 2. Fetch user's progress
+    const progressRecords = await prisma.safeScapeProgress.findMany({
+      where: { userId: user.id },
+    });
+
+    // 3. Map to dashboard format
+    // Logic: Module 1 is unlocked. Subsequent modules unlocked if prev is completed.
+
+    // Create a map for quick progress lookup
+    const progressMap = new Map();
+    progressRecords.forEach(p => {
+      progressMap.set(p.moduleNum, p);
+    });
+
+    const modules = kidsModules.map((mod, index) => {
+      const userProgress = progressMap.get(mod.dayNumber);
+      const isCompleted = userProgress?.completed || false;
+
+      // Calculate active progress % (rough estimate based on sectionData if active but not complete)
+      let progressPercent = 0;
+      if (isCompleted) {
+        progressPercent = 100;
+      } else if (userProgress?.sectionData) {
+        try {
+          const sections = JSON.parse(userProgress.sectionData as string);
+          const total = Object.keys(sections).length;
+          // Simple heuristic: count true values. 
+          // Note: total sections might vary per module, but this gives *some* feedback
+          const completedCount = Object.values(sections).filter(v => v === true).length;
+          if (total > 0) {
+            progressPercent = Math.round((completedCount / Math.max(total, 4)) * 100); // Assume ~4 sections avg
+          }
+        } catch { }
+      }
+
+      // Locking logic
+      let isLocked = true;
+      if (mod.dayNumber === 1) {
+        isLocked = false;
+      } else {
+        // Check if previous module (index-1) is completed
+        const prevModuleNum = kidsModules[index - 1].dayNumber;
+        const prevProgress = progressMap.get(prevModuleNum);
+        if (prevProgress?.completed) {
+          isLocked = false;
+        }
+      }
+
+      // Add emojis based on title keywords (fallback since DB doesn't have emoji field yet)
+      let emoji = "📚";
+      if (mod.title.toLowerCase().includes("welcome")) emoji = "🚒";
+      if (mod.title.toLowerCase().includes("kitchen")) emoji = "🍳";
+      if (mod.title.toLowerCase().includes("escape")) emoji = "🚪";
+      if (mod.title.toLowerCase().includes("community")) emoji = "🧯";
+      if (mod.title.toLowerCase().includes("hero")) emoji = "🎖️";
+
+      return {
+        id: mod.id,
+        title: mod.title,
+        description: mod.description || "",
+        dayNumber: mod.dayNumber,
+        emoji: emoji,
+        isLocked: isLocked,
+        isCompleted: isCompleted,
+        progress: progressPercent,
+        // Helper link for frontend
+        href: `/kids/safescape/${mod.dayNumber}`
+      };
+    });
+
+    return NextResponse.json(modules);
+
   } catch (error) {
-    console.error('Error fetching kids modules:', error)
+    console.error('Error fetching kids modules:', error);
     return NextResponse.json(
       { error: 'Failed to fetch modules' },
       { status: 500 }
-    )
+    );
   }
 }

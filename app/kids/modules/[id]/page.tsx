@@ -214,10 +214,10 @@ export default function ModulePage() {
                   key={section.id}
                   onClick={() => setCurrentSection(index)}
                   className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${index === currentSection
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : section.completed
-                        ? 'border-green-500 bg-green-50 text-green-700'
-                        : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    : section.completed
+                      ? 'border-green-500 bg-green-50 text-green-700'
+                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
                     }`}
                 >
                   {section.completed ? (
@@ -275,8 +275,8 @@ export default function ModulePage() {
                                 key={oIndex}
                                 onClick={() => handleQuizAnswer(qIndex, oIndex)}
                                 className={`w-full text-left p-3 rounded border-2 transition-all ${quizAnswers[qIndex] === oIndex
-                                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                                    : 'border-gray-200 hover:border-gray-300'
+                                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                                  : 'border-gray-200 hover:border-gray-300'
                                   }`}
                               >
                                 {option}

@@ -1,6 +1,6 @@
 "use client"
 
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
@@ -22,7 +22,8 @@ export function ImageViewerModal({
 }: ImageViewerModalProps) {
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 border-none">
+            <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 border-none" aria-describedby={undefined}>
+                <DialogTitle className="sr-only">{imageTitle}</DialogTitle>
                 <div className="relative w-full h-[90vh] bg-black">
                     <Image
                         src={imageUrl}

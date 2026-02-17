@@ -44,67 +44,23 @@ export default function ModulesPage() {
     loadModules()
   }, [isAuthenticated, user, router, isLoading])
 
-  const loadModules = () => {
-    // Create module data - in production this would come from database/API
-    const moduleData: KidsModule[] = [
-      {
-        id: 1,
-        title: "Module 1: Welcome to Fire Safety! 🚒",
-        description: "Introduction to fire safety and smoke alarms",
-        dayNumber: 1,
-        emoji: "🚨",
-        isLocked: false,
-        isCompleted: false,
-        progress: 0
-      },
-      {
-        id: 2,
-        title: "Module 2: Kitchen Safety 🍳",
-        description: "Learn about kitchen and electrical hazards",
-        dayNumber: 2,
-        emoji: "🍳",
-        isLocked: true,
-        isCompleted: false,
-        progress: 0
-      },
-      {
-        id: 3,
-        title: "Module 3: Escape Plans 🚪",
-        description: "Create and practice your family escape plan",
-        dayNumber: 3,
-        emoji: "🚪",
-        isLocked: true,
-        isCompleted: false,
-        progress: 0
-      },
-      {
-        id: 4,
-        title: "Module 4: Community Safety 🧯",
-        description: "Learn how to call for help and use fire extinguishers",
-        dayNumber: 4,
-        emoji: "🧯",
-        isLocked: true,
-        isCompleted: false,
-        progress: 0
-      },
-      {
-        id: 5,
-        title: "Final Certification Exam 🏆",
-        description: "Become a certified Junior Fire Marshal!",
-        dayNumber: 5,
-        emoji: "🎖️",
-        isLocked: true,
-        isCompleted: false,
-        progress: 0
+  const loadModules = async () => {
+    try {
+      const response = await fetch('/api/kids/modules')
+      if (response.ok) {
+        const data = await response.json()
+        setModules(data)
+
+        // Calculate overall progress from the data
+        const completedCount = data.filter((m: KidsModule) => m.isCompleted).length
+        const totalCount = data.length
+        if (totalCount > 0) {
+          setOverallProgress((completedCount / totalCount) * 100)
+        }
       }
-    ]
-
-    setModules(moduleData)
-
-    // Calculate overall progress
-    const completedCount = moduleData.filter(m => m.isCompleted).length
-    const totalCount = moduleData.length
-    setOverallProgress((completedCount / totalCount) * 100)
+    } catch (error) {
+      console.error("Failed to load modules", error)
+    }
   }
 
   if (isLoading) {
@@ -186,10 +142,10 @@ export default function ModulesPage() {
             <Card
               key={module.id}
               className={`overflow-hidden transition-all hover:shadow-xl ${module.isCompleted
-                  ? 'border-4 border-green-500 bg-green-50'
-                  : module.isLocked
-                    ? 'border-4 border-gray-300 bg-gray-50 opacity-70'
-                    : 'border-4 border-blue-400 bg-white hover:border-blue-600'
+                ? 'border-4 border-green-500 bg-green-50'
+                : module.isLocked
+                  ? 'border-4 border-gray-300 bg-gray-50 opacity-70'
+                  : 'border-4 border-blue-400 bg-white hover:border-blue-600'
                 }`}
             >
               <CardContent className="p-6">
@@ -241,7 +197,7 @@ export default function ModulesPage() {
                     {/* Action Button */}
                     <div className="mt-4">
                       {module.isCompleted ? (
-                        <Link href={`/kids/modules/${module.id}`}>
+                        <Link href={`/kids/safescape/${module.dayNumber}`}>
                           <Button variant="outline" className="font-bold">
                             Review Module
                           </Button>
@@ -252,7 +208,7 @@ export default function ModulesPage() {
                           Complete Previous Modules
                         </Button>
                       ) : (
-                        <Link href={`/kids/modules/${module.id}`}>
+                        <Link href={`/kids/safescape/${module.dayNumber}`}>
                           <Button className="bg-blue-600 hover:bg-blue-700 font-bold text-lg px-8">
                             {module.progress > 0 ? 'Continue Learning' : 'Start Module'}
                             <BookOpen className="h-5 w-5 ml-2" />

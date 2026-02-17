@@ -5,6 +5,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SafeScape | Module 3: The Escape Plan</title>
+    <script>
+        // Suppress Tailwind CDN warning
+        console.warn = (function (originalWarn) {
+            return function (...args) {
+                if (args[0] && args[0].includes && args[0].includes('cdn.tailwindcss.com')) return;
+                originalWarn.apply(console, args);
+            };
+        })(console.warn);
+    </script>
+    <script>
+        // Suppress Tailwind CDN warning
+        console.warn = (function (originalWarn) {
+            return function (...args) {
+                if (args[0] && args[0].includes && args[0].includes('cdn.tailwindcss.com')) return;
+                originalWarn.apply(console, args);
+            };
+        })(console.warn);
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/shared.css">
@@ -163,7 +181,7 @@
                         </p>
                     </div>
 
-                    <button onclick="markContentRead()" class="ss-btn ss-btn-secondary mt-4">
+                    <button id="btn-content-read" onclick="markContentRead()" class="ss-btn ss-btn-secondary mt-4">
                         <i class="fa-solid fa-check"></i> I understand the escape plan
                     </button>
                 </div>
@@ -353,12 +371,21 @@
         };
 
         // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Wait for progress to load from API before checking locks
+            if (SafeScapeProgress.isAuthenticated()) {
+                await SafeScapeProgress.initializeFromAPI();
+            }
+
             if (!SafeScapeProgress.isModuleUnlocked(moduleNum)) {
                 window.location.href = '../index.html';
                 return;
             }
             loadProgress();
+
+            // Listen for updates from API sync
+            window.addEventListener('safescape-progress-update', loadProgress);
+
             updateNavigation();
             updateSectionStates();
             initGame();
@@ -372,15 +399,11 @@
                 localState = { ...localState, ...moduleData.sections };
             }
             updateModuleProgress();
-        }
-
-        function saveLocalProgress() {
-            Object.keys(localState).forEach(key => {
-                SafeScapeProgress.completeSection(moduleNum, key, localState[key]);
-            });
-            updateModuleProgress();
             updateSectionStates();
         }
+
+        // REMOVED: saveLocalProgress loop
+        // logic is now reactive via SafeScapeProgress events
 
         function updateModuleProgress() {
             const keys = ['videoWatched', 'scannerInteracted', 'labyrinthEscaped', 'integrityPassed', 'quizPassed'];
@@ -391,7 +414,15 @@
 
         function updateSectionStates() {
             if (localState.videoWatched) document.getElementById('section-video').classList.add('completed');
-            if (localState.scannerInteracted) document.getElementById('section-content').classList.add('completed');
+            if (localState.scannerInteracted) {
+                document.getElementById('section-content').classList.add('completed');
+                const btn = document.getElementById('btn-content-read');
+                if (btn) {
+                    btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Completed';
+                    btn.className = "ss-btn ss-btn-success mt-4 cursor-default";
+                    btn.onclick = null;
+                }
+            }
             if (localState.labyrinthEscaped && localState.integrityPassed) document.getElementById('section-game').classList.add('completed');
             if (localState.quizPassed) document.getElementById('final-quiz').classList.add('completed');
         }
@@ -416,16 +447,14 @@
 
         function onVideoPlay() {
             if (!localState.videoWatched) {
-                localState.videoWatched = true;
-                saveLocalProgress();
+                SafeScapeProgress.completeSection(moduleNum, 'videoWatched', true);
                 showToast('success', 'Video started!');
             }
         }
 
         function markContentRead() {
             if (!localState.scannerInteracted) {
-                localState.scannerInteracted = true;
-                saveLocalProgress();
+                SafeScapeProgress.completeSection(moduleNum, 'scannerInteracted', true);
                 showToast('success', 'Escape plan understood!');
             }
         }
@@ -636,8 +665,7 @@
         function handleWindowCollision() {
             log("Window Found! Climbing out...");
             if (!localState.labyrinthEscaped) {
-                localState.labyrinthEscaped = true;
-                saveLocalProgress();
+                SafeScapeProgress.completeSection(moduleNum, 'labyrinthEscaped', true);
             }
             gameWin();
         }
@@ -645,8 +673,7 @@
         function gameWin() {
             gameState = 'won';
             if (!localState.labyrinthEscaped) {
-                localState.labyrinthEscaped = true;
-                saveLocalProgress();
+                SafeScapeProgress.completeSection(moduleNum, 'labyrinthEscaped', true);
             }
             document.getElementById('integrity-modal').classList.remove('hidden');
         }
@@ -657,8 +684,7 @@
                 document.getElementById('completion-msg').classList.remove('hidden');
                 log("SUCCESS: Integrity verified.");
                 if (!localState.integrityPassed) {
-                    localState.integrityPassed = true;
-                    saveLocalProgress();
+                    SafeScapeProgress.completeSection(moduleNum, 'integrityPassed', true);
                     showToast('success', 'Integrity test passed!');
                 }
             } else {
@@ -744,7 +770,10 @@
             }
             answeredCount++;
             if (answeredCount === quizData.length) {
-                setTimeout(showQuizResult, 1000);
+                setTimeout(() => {
+                    showQuizResult();
+                    SafeScapeProgress.submitQuizResult(moduleNum, correctCount, 5);
+                }, 1000);
             }
         }
 
@@ -767,8 +796,7 @@
                 nextBtn.classList.remove('hidden');
 
                 if (!localState.quizPassed) {
-                    localState.quizPassed = true;
-                    saveLocalProgress();
+                    SafeScapeProgress.completeSection(moduleNum, 'quizPassed', true);
                     showToast('success', '🎉 Module 3 complete! Module 4 unlocked!');
                 }
             } else {

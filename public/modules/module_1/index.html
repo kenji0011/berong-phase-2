@@ -5,6 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SafeScape | Module 1: Fire is a Tool</title>
+    <script>
+        // Suppress Tailwind CDN warning
+        console.warn = (function (originalWarn) {
+            return function (...args) {
+                if (args[0] && args[0].includes && args[0].includes('cdn.tailwindcss.com')) return;
+                originalWarn.apply(console, args);
+            };
+        })(console.warn);
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/shared.css">
@@ -110,7 +119,7 @@
                 <i class="fa-solid fa-shield-cat"></i>
                 <h1>SafeScape <span>| Module 1</span></h1>
             </a>
-            
+
             <!-- Module Progress Indicators -->
             <div class="ss-module-indicators">
                 <a href="index.html" class="ss-module-dot current" title="Module 1">1</a>
@@ -161,7 +170,8 @@
         </section>
 
         <!-- PART 2: THE SCIENCE (SECTION 1.1) -->
-        <section id="section-1-1" class="fade-in ss-section grid grid-cols-1 md:grid-cols-2 gap-12 items-center" style="animation-delay: 0.3s;">
+        <section id="section-1-1" class="fade-in ss-section grid grid-cols-1 md:grid-cols-2 gap-12 items-center"
+            style="animation-delay: 0.3s;">
             <div class="ss-section-badge"><i class="fa-solid fa-check"></i></div>
 
             <!-- 1.1 Text Content -->
@@ -205,8 +215,9 @@
                         </li>
                     </ul>
                 </div>
-                
-                <button onclick="completeSection('section1Read')" class="ss-btn ss-btn-secondary mt-4">
+
+                <button id="btn-section1" onclick="completeSection('section1Read')"
+                    class="ss-btn ss-btn-secondary mt-4">
                     <i class="fa-solid fa-check"></i> I understand the Fire Triangle
                 </button>
             </div>
@@ -225,7 +236,7 @@
             class="fade-in ss-section bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-8 md:p-12 border border-slate-700 shadow-2xl relative overflow-hidden"
             style="animation-delay: 0.4s;">
             <div class="ss-section-badge"><i class="fa-solid fa-check"></i></div>
-            
+
             <!-- Background Decoration -->
             <i
                 class="fa-solid fa-triangle-exclamation absolute -top-10 -right-10 text-9xl text-slate-800 opacity-50 rotate-12"></i>
@@ -252,8 +263,9 @@
                             Because they create heat, they can easily start a dangerous fire if they fall into the wrong
                             hands.
                         </p>
-                        
-                        <button onclick="completeSection('section2Read')" class="ss-btn ss-btn-secondary mt-4">
+
+                        <button id="btn-section2" onclick="completeSection('section2Read')"
+                            class="ss-btn ss-btn-secondary mt-4">
                             <i class="fa-solid fa-check"></i> I understand the rules
                         </button>
                     </div>
@@ -276,10 +288,11 @@
         </section>
 
         <!-- PART 4: THE SIMULATION (GAME) -->
-        <section id="section-game" class="fade-in ss-section bg-slate-800 rounded-2xl p-8 shadow-2xl border border-slate-700"
+        <section id="section-game"
+            class="fade-in ss-section bg-slate-800 rounded-2xl p-8 shadow-2xl border border-slate-700"
             style="animation-delay: 0.5s;">
             <div class="ss-section-badge"><i class="fa-solid fa-check"></i></div>
-            
+
             <div class="text-center mb-8">
                 <h2 class="text-3xl font-bold text-white"><i class="fa-solid fa-flask text-purple-400 mr-2"></i> The
                     Element Mixer Lab</h2>
@@ -345,7 +358,8 @@
             <div class="bg-green-900/30 border border-green-500 rounded-2xl p-8 max-w-xl mx-auto">
                 <i class="fa-solid fa-circle-check text-6xl text-green-500 mb-4"></i>
                 <h2 class="text-3xl font-bold text-white mb-2">Module 1 Complete!</h2>
-                <p class="text-slate-300 mb-6">Great job! You've learned about the Fire Triangle and why fire tools are for grown-ups only.</p>
+                <p class="text-slate-300 mb-6">Great job! You've learned about the Fire Triangle and why fire tools are
+                    for grown-ups only.</p>
                 <a href="../module_2/index.html" id="next-module-btn" class="ss-btn ss-btn-primary text-lg">
                     Continue to Module 2 <i class="fa-solid fa-arrow-right ml-2"></i>
                 </a>
@@ -378,6 +392,10 @@
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
             loadProgress();
+
+            // Listen for updates from API sync
+            window.addEventListener('safescape-progress-update', loadProgress);
+
             updateNavigation();
             updateSectionStates();
         });
@@ -389,37 +407,29 @@
                 localState = { ...localState, ...moduleData.sections };
             }
             updateModuleProgress();
+            updateSectionStates();
         }
 
-        function saveLocalProgress() {
-            Object.keys(localState).forEach(key => {
-                SafeScapeProgress.completeSection(moduleNum, key, localState[key]);
-            });
-            updateModuleProgress();
-            updateSectionStates();
-            checkModuleComplete();
-        }
+        // REMOVED: saveLocalProgress loop to prevent API race conditions
+        // logic is now reactive via SafeScapeProgress events
 
         function updateModuleProgress() {
             const completed = Object.values(localState).filter(v => v === true).length;
             const total = Object.keys(localState).length;
             const percent = Math.round((completed / total) * 100);
             document.getElementById('module-progress').textContent = `${percent}%`;
+            checkModuleComplete(); // Check completion on update
         }
 
         // --- SECTION COMPLETION ---
         function completeSection(sectionKey) {
-            if (!localState[sectionKey]) {
-                localState[sectionKey] = true;
-                saveLocalProgress();
-                showToast('success', 'Section completed!');
-            }
+            SafeScapeProgress.completeSection(moduleNum, sectionKey, true);
+            showToast('success', 'Section completed!');
         }
 
         function onVideoPlay() {
             if (!localState.videoWatched) {
-                localState.videoWatched = true;
-                saveLocalProgress();
+                SafeScapeProgress.completeSection(moduleNum, 'videoWatched', true);
                 showToast('success', 'Video started! Keep watching.');
             }
         }
@@ -431,9 +441,21 @@
             }
             if (localState.section1Read) {
                 document.getElementById('section-1-1').classList.add('completed');
+                const btn = document.getElementById('btn-section1');
+                if (btn) {
+                    btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Completed';
+                    btn.className = "ss-btn ss-btn-success mt-4 cursor-default";
+                    btn.onclick = null;
+                }
             }
             if (localState.section2Read) {
                 document.getElementById('section-1-2').classList.add('completed');
+                const btn = document.getElementById('btn-section2');
+                if (btn) {
+                    btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Completed';
+                    btn.className = "ss-btn ss-btn-success mt-4 cursor-default";
+                    btn.onclick = null;
+                }
             }
             if (localState.elementMixerCompleted) {
                 document.getElementById('section-game').classList.add('completed');
@@ -449,25 +471,25 @@
         // --- NAVIGATION UPDATE ---
         function updateNavigation() {
             const progress = SafeScapeProgress.getProgress();
-            
+
             for (let i = 2; i <= 5; i++) {
                 const navDot = document.getElementById(`nav-${i}`);
-                const connector = document.getElementById(`conn-${i-1}-${i}`);
+                const connector = document.getElementById(`conn-${i - 1}-${i}`);
                 const moduleData = progress[`module${i}`];
-                
+
                 if (moduleData?.unlocked) {
                     navDot.classList.remove('locked');
                     navDot.classList.add('unlocked');
                     navDot.href = `../module_${i}/index.html`;
-                    
+
                     if (moduleData?.completed) {
                         navDot.classList.add('completed');
                         navDot.innerHTML = '<i class="fa-solid fa-check"></i>';
                     }
                 }
-                
+
                 // Update connector
-                if (progress[`module${i-1}`]?.completed && connector) {
+                if (progress[`module${i - 1}`]?.completed && connector) {
                     connector.classList.add('active');
                 }
             }
@@ -543,11 +565,11 @@
                 statusEl.className = "text-orange-500 font-bold animate-pulse";
                 pit.classList.add('border-orange-500');
                 pit.classList.remove('border-slate-600');
-                
+
+                // Mark game as completed
                 // Mark game as completed
                 if (!localState.elementMixerCompleted) {
-                    localState.elementMixerCompleted = true;
-                    saveLocalProgress();
+                    SafeScapeProgress.completeSection(moduleNum, 'elementMixerCompleted', true);
                     showToast('success', '🎉 Element Mixer completed! Module 1 done!');
                 }
             } else {

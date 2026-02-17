@@ -205,16 +205,16 @@ export default function KidsDashboardPage() {
         difficulty: "easy",
         category: "activities"
       },
-      {
-        id: "activity-3",
-        title: "Post-Test Assessment",
-        description: "Completed enough activities? Take the post-test to see how much you've learned!",
-        type: "activity",
-        emoji: "🏆",
-        href: "/assessment/post-test",
-        difficulty: "medium",
-        category: "activities"
-      },
+      // {
+      //   id: "activity-3",
+      //   title: "Post-Test Assessment",
+      //   description: "Completed enough activities? Take the post-test to see how much you've learned!",
+      //   type: "activity",
+      //   emoji: "🏆",
+      //   href: "/assessment/post-test",
+      //   difficulty: "medium",
+      //   category: "activities"
+      // },
     ]
 
     setAllContent(content)

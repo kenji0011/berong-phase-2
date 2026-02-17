@@ -7,6 +7,7 @@ import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Calendar, User, Flame, AlertCircle } from "lucide-react"
 import type { BlogPost } from "@/lib/mock-data"
+import { ImageViewerModal } from "@/components/image-viewer-modal"
 import Link from "next/link"
 import { logEngagement } from "@/lib/engagement-tracker"
 
@@ -16,6 +17,7 @@ export default function BlogPostPage() {
   const { user, isAuthenticated, isLoading } = useAuth()
   const [loading, setLoading] = useState(true)
   const [blog, setBlog] = useState<BlogPost | null>(null)
+  const [isViewerOpen, setIsViewerOpen] = useState(false)
   const hasTracked = useRef(false)
 
   useEffect(() => {
@@ -108,12 +110,11 @@ export default function BlogPostPage() {
 
         {/* Top Navigation */}
         <div className="mb-8">
-          <Link
-            href="/adult"
-            className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors group"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-            Back to Safety Articles
+          <Link href="/adult">
+            <Button variant="outline" className="pl-2 gap-2 bg-white text-slate-700 hover:text-orange-700 hover:bg-orange-50 hover:border-orange-200 transition-all group shadow-sm">
+              <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform text-slate-500 group-hover:text-orange-500" />
+              Back to Safety Articles
+            </Button>
           </Link>
         </div>
 
@@ -155,15 +156,23 @@ export default function BlogPostPage() {
 
           {/* Hero Image */}
           {blog.imageUrl && (
-            <div className="relative w-full aspect-video mb-12 rounded-2xl overflow-hidden shadow-xl ring-1 ring-gray-900/5">
+            <div
+              className="relative w-full aspect-video mb-12 rounded-2xl overflow-hidden shadow-xl ring-1 ring-gray-900/5 cursor-pointer group"
+              onClick={() => setIsViewerOpen(true)}
+            >
               <img
                 src={blog.imageUrl || "/placeholder.svg"}
                 alt={blog.title}
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-700 ease-out"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                 onError={(e) => {
                   e.currentTarget.src = `/placeholder.svg?height=600&width=1200&query=${encodeURIComponent(blog.title)}`
                 }}
               />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                <div className="opacity-0 group-hover:opacity-100 bg-black/50 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm transition-opacity">
+                  Click to expand
+                </div>
+              </div>
             </div>
           )}
 
@@ -192,6 +201,17 @@ export default function BlogPostPage() {
 
         </article>
       </main>
+
+      {/* Image Viewer Modal */}
+      {blog.imageUrl && (
+        <ImageViewerModal
+          isOpen={isViewerOpen}
+          onClose={() => setIsViewerOpen(false)}
+          imageUrl={blog.imageUrl}
+          imageTitle={blog.title}
+          imageAlt={blog.title}
+        />
+      )}
     </div>
   )
 }

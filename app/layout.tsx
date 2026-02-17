@@ -18,7 +18,10 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Berong E-Learning for BFP Sta Cruz",
   description: "Educational platform for fire safety training and awareness",
-  generator: 'v0.app'
+  generator: 'v0.app',
+  icons: {
+    icon: '/berong-official-logo.jpg',
+  },
 }
 
 export default function RootLayout({
@@ -29,6 +32,27 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="antialiased relative min-h-screen">
+        {/* Suppress Next.js Fast Refresh logs in development to reduce console noise */}
+        {process.env.NODE_ENV === 'development' && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function() {
+                  const originalLog = console.log;
+                  console.log = function(...args) {
+                    if (args.length > 0 && typeof args[0] === 'string' && args[0].includes('[Fast Refresh]')) return;
+                    originalLog.apply(console, args);
+                  };
+                  const originalDebug = console.debug;
+                  console.debug = function(...args) {
+                    if (args.length > 0 && typeof args[0] === 'string' && args[0].includes('[Fast Refresh]')) return;
+                    originalDebug.apply(console, args);
+                  };
+                })();
+              `,
+            }}
+          />
+        )}
         {/* Page Loader for transitions */}
         <Suspense fallback={null}>
           <PageLoader />

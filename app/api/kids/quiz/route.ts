@@ -1,37 +1,84 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import { cookies } from 'next/headers';
+import { verifyToken } from '@/lib/jwt';
+
+const prisma = new PrismaClient();
+
+// Helper to get user from cookies
+async function getUserFromSession() {
+  const cookieStore = await cookies();
+  const bfpUserCookie = cookieStore.get('bfp_user');
+  if (bfpUserCookie?.value) {
+    try {
+      const userData = await verifyToken(bfpUserCookie.value);
+      if (userData?.id) return userData;
+    } catch { }
+  }
+  const sessionCookie = cookieStore.get('session');
+  if (sessionCookie?.value) {
+    try {
+      const session = JSON.parse(sessionCookie.value);
+      if (session?.user?.id) return session.user;
+    } catch { }
+  }
+  return null;
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const user = await getUserFromSession();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-    if (!body.userId || !body.moduleId || !body.sectionId || !body.answers) {
+    const body = await request.json();
+    const { quizType, score, maxScore } = body;
+
+    if (!quizType || score === undefined) {
       return NextResponse.json(
-        { error: 'User ID, module ID, section ID, and answers are required' },
+        { error: 'Quiz type and score are required' },
         { status: 400 }
-      )
+      );
     }
 
-    // For now, we'll simulate quiz grading
-    // In a real implementation, this would compare answers with correct answers from database
-    const quizResult = {
-      userId: body.userId,
-      moduleId: body.moduleId,
-      sectionId: body.sectionId,
-      score: Math.floor(Math.random() * 40) + 60, // Random score between 60-100
-      maxScore: 100,
-      answers: body.answers,
-      completedAt: new Date().toISOString()
-    }
+    const quizResult = await prisma.quizResult.create({
+      data: {
+        userId: user.id,
+        quizType,
+        score,
+        maxScore: maxScore || 100,
+        completedAt: new Date(),
+      },
+    });
+
+    // Also Log Engagement
+    const POINTS = 10;
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: user.id },
+        data: { engagementPoints: { increment: POINTS } },
+      }),
+      prisma.engagementLog.create({
+        data: {
+          userId: user.id,
+          eventType: 'quiz',
+          points: POINTS,
+          eventData: { quizType, score },
+        },
+      }),
+    ]);
 
     return NextResponse.json({
+      success: true,
       message: 'Quiz submitted successfully',
       result: quizResult
-    })
+    });
   } catch (error) {
-    console.error('Error submitting quiz:', error)
+    console.error('Error submitting quiz:', error);
     return NextResponse.json(
       { error: 'Failed to submit quiz' },
       { status: 500 }
-    )
+    );
   }
 }

@@ -5,6 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SafeScape | Module 5: Ultimate Defense</title>
+    <script>
+        // Suppress Tailwind CDN warning
+        console.warn = (function (originalWarn) {
+            return function (...args) {
+                if (args[0] && args[0].includes && args[0].includes('cdn.tailwindcss.com')) return;
+                originalWarn.apply(console, args);
+            };
+        })(console.warn);
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/shared.css">
@@ -697,9 +706,9 @@
             sdrCompleted: false,
             sdrTrapCompleted: false,
             hazardHuntCompleted: false,
-            examScore: 0,
-            examPassed: false,
-            certificateEarned: false
+            finalExamScore: 0,
+            finalExamPassed: false,
+            certified: false
         };
         let hazardsFound = 0;
 
@@ -773,7 +782,10 @@
         }
 
         // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Wait for progress to load from API before checking locks
+            await SafeScapeProgress.whenReady();
+
             if (!SafeScapeProgress.isModuleUnlocked(moduleNum)) {
                 window.location.href = '../index.html';
                 return;
@@ -807,7 +819,7 @@
             if (localState.sdrCompleted) completed++;
             if (localState.sdrTrapCompleted) completed++;
             if (localState.hazardHuntCompleted) completed++;
-            if (localState.examPassed) completed++;
+            if (localState.finalExamPassed) completed++;
             const percent = Math.round((completed / total) * 100);
             document.getElementById('module-progress').textContent = `${percent}%`;
         }
@@ -817,7 +829,7 @@
             if (localState.sdrCompleted) document.getElementById('section-sdr').classList.add('completed');
             if (localState.sdrTrapCompleted) document.getElementById('section-sdr-trap').classList.add('completed');
             if (localState.hazardHuntCompleted) document.getElementById('section-hazard').classList.add('completed');
-            if (localState.examPassed) document.getElementById('final-exam').classList.add('completed');
+            if (localState.finalExamPassed) document.getElementById('final-exam').classList.add('completed');
         }
 
         function onVideoPlay() {
@@ -1206,7 +1218,7 @@
             });
         }
 
-        function submitFinalExam() {
+        async function submitFinalExam() {
             let score = 0;
             let answered = 0;
 
@@ -1223,7 +1235,13 @@
                 return;
             }
 
-            localState.examScore = score;
+            localState.finalExamScore = score;
+
+            // Save to DB
+            const saved = await SafeScapeProgress.submitQuizResult(moduleNum, score, 15);
+            if (!saved) {
+                showToast('error', 'Connection error: Progress saved locally only.');
+            }
 
             const resultDiv = document.getElementById('exam-result');
             const icon = document.getElementById('result-icon');
@@ -1240,9 +1258,9 @@
                 desc.innerText = `You scored ${score}/15. You have proven yourself as a Fire Safety Hero!`;
                 document.getElementById('btn-view-cert').classList.remove('hidden');
 
-                if (!localState.examPassed) {
-                    localState.examPassed = true;
-                    localState.certificateEarned = true;
+                if (!localState.finalExamPassed) {
+                    localState.finalExamPassed = true;
+                    localState.certified = true;
                     saveLocalProgress();
                     SafeScapeProgress.awardCertificate(score);
                     showToast('success', '🎉 Certificate earned! Congratulations!');
@@ -1259,7 +1277,7 @@
         function showCertificate() {
             const progress = SafeScapeProgress.getProgress();
             const studentName = progress.studentName || 'Future Hero';
-            const score = progress.certificate?.score || localState.examScore;
+            const score = progress.certificate?.score || localState.finalExamScore;
             const date = progress.certificate?.earnedDate || new Date().toLocaleDateString();
 
             document.getElementById('cert-name').textContent = studentName;

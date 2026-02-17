@@ -5,25 +5,6 @@
  */
 
 const SafeScapeProgress = (function () {
-    const STORAGE_KEY = 'safescape_progress';
-    const API_ENDPOINT = '/api/kids/safescape/progress';
-
-    // Get userId from URL params (passed from Next.js wrapper)
-    function getUserIdFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-        return params.get('userId');
-    }
-
-    function getUserNameFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-        return params.get('userName') || 'Future Hero';
-    }
-
-    // Check if we're in an authenticated session (userId present)
-    function isAuthenticated() {
-        return !!getUserIdFromUrl();
-    }
-
     // Default progress structure
     const defaultProgress = {
         studentName: '',
@@ -89,27 +70,54 @@ const SafeScapeProgress = (function () {
         lastAccessed: null
     };
 
+    // In-memory storage (replacing localStorage)
+    let _currentProgress = JSON.parse(JSON.stringify(defaultProgress));
+
+    // Promise that resolves when API initialization is complete
+    let _readyResolve;
+    let _readyPromise = new Promise(resolve => { _readyResolve = resolve; });
+
+    const API_ENDPOINT = window.location.origin + '/api/kids/safescape/progress';
+
+    // Auth helpers: Persist in sessionStorage to survive navigation (links between modules don't pass params)
+    function getUserId() {
+        const params = new URLSearchParams(window.location.search);
+        const urlId = params.get('userId');
+        if (urlId) {
+            try { sessionStorage.setItem('safescape_userId', urlId); } catch (e) { }
+            return urlId;
+        }
+        try { return sessionStorage.getItem('safescape_userId'); } catch (e) { return null; }
+    }
+
+    function getUserName() {
+        const params = new URLSearchParams(window.location.search);
+        const urlName = params.get('userName');
+        if (urlName) {
+            try { sessionStorage.setItem('safescape_userName', urlName); } catch (e) { }
+            return urlName || 'Future Hero';
+        }
+        try { return sessionStorage.getItem('safescape_userName') || 'Future Hero'; } catch (e) { return 'Future Hero'; }
+    }
+
+    // Check if we're in an authenticated session
+    function isAuthenticated() {
+        return !!getUserId();
+    }
+
     // --- Core Functions ---
 
     function getProgress() {
-        try {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                const parsed = JSON.parse(stored);
-                // Merge with defaults to handle any missing fields from updates
-                return deepMerge(defaultProgress, parsed);
-            }
-        } catch (e) {
-            console.error('SafeScape: Error reading progress', e);
-        }
-        return JSON.parse(JSON.stringify(defaultProgress));
+        return deepMerge(defaultProgress, _currentProgress);
     }
 
     function saveProgress(progress) {
         try {
             progress.lastAccessed = new Date().toISOString();
             progress.overallProgress = calculateOverallProgress(progress);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+
+            // Update in-memory state
+            _currentProgress = progress;
 
             // Dispatch custom event for reactivity
             window.dispatchEvent(new CustomEvent('safescape-progress-update', { detail: progress }));
@@ -127,9 +135,20 @@ const SafeScapeProgress = (function () {
     }
 
     function resetProgress() {
-        localStorage.removeItem(STORAGE_KEY);
-        window.dispatchEvent(new CustomEvent('safescape-progress-update', { detail: defaultProgress }));
-        return JSON.parse(JSON.stringify(defaultProgress));
+        _currentProgress = JSON.parse(JSON.stringify(defaultProgress));
+
+        // Reset on server if authenticated
+        if (isAuthenticated()) {
+            fetch(API_ENDPOINT, { method: 'DELETE' })
+                .then(res => {
+                    if (res.ok) console.log('SafeScape: Remote progress reset');
+                    else console.error('SafeScape: Failed to reset remote progress');
+                })
+                .catch(e => console.error('SafeScape: Error resetting remote progress', e));
+        }
+
+        window.dispatchEvent(new CustomEvent('safescape-progress-update', { detail: _currentProgress }));
+        return _currentProgress;
     }
 
     // --- API Sync Functions ---
@@ -140,6 +159,17 @@ const SafeScapeProgress = (function () {
         }
 
         try {
+            // Notify parent window regardless of local fetch result
+            // This ensures the parent (SafeScape app) can handle the sync even if iframe auth/cookies fail
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'SAFESCAPE_SECTION_COMPLETE',
+                    moduleNum,
+                    sectionData,
+                    completed
+                }, '*');
+            }
+
             const response = await fetch(API_ENDPOINT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -148,15 +178,6 @@ const SafeScapeProgress = (function () {
             });
 
             if (response.ok) {
-                // Notify parent window
-                if (window.parent !== window) {
-                    window.parent.postMessage({
-                        type: 'SAFESCAPE_SECTION_COMPLETE',
-                        moduleNum,
-                        sectionData,
-                        completed
-                    }, '*');
-                }
                 return true;
             } else {
                 console.error('SafeScape: API sync failed', response.status);
@@ -164,6 +185,35 @@ const SafeScapeProgress = (function () {
             }
         } catch (e) {
             console.error('SafeScape: API sync error', e);
+            return false;
+        }
+    }
+
+    async function submitQuizResult(moduleNum, score, maxScore = 100) {
+        if (!isAuthenticated()) return false;
+
+        try {
+            const quizType = `module_${moduleNum}_quiz`;
+            const url = window.location.origin + '/api/kids/quiz';
+            // console.log(`[SafeScape] Submitting quiz to ${url}`, { moduleNum, score, maxScore });
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ quizType, score, maxScore })
+            });
+
+            if (!response.ok) {
+                console.error(`[SafeScape] Quiz submit failed: ${response.status} ${response.statusText}`);
+                const text = await response.text();
+                console.error(`[SafeScape] Error details:`, text);
+                return false;
+            }
+
+            return true;
+        } catch (e) {
+            console.error('SafeScape: Quiz submit network error', e);
             return false;
         }
     }
@@ -188,18 +238,23 @@ const SafeScapeProgress = (function () {
         return null;
     }
 
-    // Initialize: merge API progress with local on page load
+    // Initialize: merge API progress with local (in-memory) on page load
     async function initializeFromAPI() {
+        // console.log('SafeScape: Initializing from API...');
         const apiData = await fetchProgressFromAPI();
-        if (apiData && apiData.progress) {
-            const localProgress = getProgress();
 
-            // Merge API progress into local progress
+        if (apiData && apiData.progress) {
+            // console.log('SafeScape: API data received', apiData.progress);
+            const localProgress = getProgress(); // Gets current in-memory defaults
+
+            // Merge API progress into local progress 
+            // AND recalibrate unlocked status for ALL modules
             for (let i = 1; i <= 5; i++) {
+                const moduleKey = `module${i}`;
+
+                // 1. Merge Completed/Section data if exists in API
                 if (apiData.progress[i]) {
-                    const moduleKey = `module${i}`;
                     localProgress[moduleKey].completed = apiData.progress[i].completed;
-                    localProgress[moduleKey].unlocked = i === 1 || apiData.progress[i - 1]?.completed;
 
                     // Merge section data
                     if (apiData.progress[i].sectionData) {
@@ -209,15 +264,29 @@ const SafeScapeProgress = (function () {
                         };
                     }
                 }
+
+                // 2. Strict Unlock Logic (Independent of API existence)
+                if (i === 1) {
+                    localProgress[moduleKey].unlocked = true;
+                } else {
+                    const prevModuleKey = `module${i - 1}`;
+                    // Unlocked if previous is completed
+                    if (localProgress[prevModuleKey].completed) {
+                        localProgress[moduleKey].unlocked = true;
+                    }
+                }
             }
 
-            // Update student name from URL
-            const userName = getUserNameFromUrl();
+            // Update student name from URL/Session
+            const userName = getUserName();
             if (userName && userName !== 'Future Hero') {
                 localProgress.studentName = userName;
             }
 
-            saveProgress(localProgress);
+            saveProgress(localProgress); // Updates in-memory and notifies listeners
+            // console.log('SafeScape: Progress initialized', localProgress);
+        } else {
+            // console.log('SafeScape: No API data or fetch failed.');
         }
     }
 
@@ -381,6 +450,11 @@ const SafeScapeProgress = (function () {
         return result;
     }
 
+    // Returns a promise that resolves when API initialization is complete
+    function whenReady() {
+        return _readyPromise;
+    }
+
     // --- Public API ---
     return {
         // Core
@@ -408,16 +482,18 @@ const SafeScapeProgress = (function () {
         exportProgressJSON,
         importProgressJSON,
         syncToAPI,
+        submitQuizResult,
         fetchProgressFromAPI,
         initializeFromAPI,
 
+        // Ready gate
+        whenReady,
+        _resolveReady: () => _readyResolve(),
+
         // Auth helpers
         isAuthenticated,
-        getUserIdFromUrl,
-        getUserNameFromUrl,
-
-        // Constants
-        STORAGE_KEY
+        getUserId,
+        getUserName
     };
 })();
 
@@ -425,8 +501,10 @@ const SafeScapeProgress = (function () {
 window.SafeScapeProgress = SafeScapeProgress;
 
 // Auto-initialize from API when loaded in iframe with userId
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
     if (SafeScapeProgress.isAuthenticated()) {
-        SafeScapeProgress.initializeFromAPI();
+        await SafeScapeProgress.initializeFromAPI();
     }
+    // Signal that initialization is complete (even if not authenticated)
+    SafeScapeProgress._resolveReady();
 });

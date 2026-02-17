@@ -120,16 +120,20 @@ export async function GET(request: NextRequest) {
 // POST - Update user's SafeScape progress
 export async function POST(request: NextRequest) {
   try {
+    console.log("DEBUG: POST /api/kids/safescape/progress called");
     const user = await getUserFromSession();
 
     if (!user) {
+      console.log("DEBUG: POST /api/kids/safescape/progress - User not found in session");
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
+    console.log(`DEBUG: POST /api/kids/safescape/progress - User authenticated: ${user.id}`);
 
     const body = await request.json();
+    console.log("DEBUG: Payload received:", JSON.stringify(body));
     const { moduleNum, sectionData, completed } = body;
 
     if (!moduleNum || moduleNum < 1 || moduleNum > 5) {
@@ -203,6 +207,40 @@ export async function POST(request: NextRequest) {
     console.error('Error updating SafeScape progress:', error);
     return NextResponse.json(
       { error: 'Failed to update progress' },
+      { status: 500 }
+    );
+  }
+}
+// DELETE - Reset user's SafeScape progress
+export async function DELETE(request: NextRequest) {
+  try {
+    const user = await getUserFromSession();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    // Delete all progress records for this user
+    await prisma.$transaction([
+      prisma.safeScapeProgress.deleteMany({
+        where: { userId: user.id },
+      }),
+      prisma.quizResult.deleteMany({
+        where: { userId: user.id }
+      })
+    ]);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Progress reset successfully'
+    });
+  } catch (error) {
+    console.error('Error resetting SafeScape progress:', error);
+    return NextResponse.json(
+      { error: 'Failed to reset progress' },
       { status: 500 }
     );
   }

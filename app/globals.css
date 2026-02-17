@@ -5,8 +5,10 @@
 
 :root {
   /* Base colors - Refined neutral tones for institutional feel */
-  --background: oklch(0.98 0.005 260); /* Very light gray-blue */
-  --foreground: oklch(0.2 0.02 260); /* Dark gray-blue */
+  --background: oklch(0.98 0.005 260);
+  /* Very light gray-blue */
+  --foreground: oklch(0.2 0.02 260);
+  /* Dark gray-blue */
 
   /* Card colors - Slightly off-white */
   --card: oklch(0.97 0.03 260);
@@ -17,20 +19,25 @@
   --popover-foreground: oklch(0.2 0.02 260);
 
   /* Primary - BFP Red (used as accent) */
-  --primary: oklch(0.5 0.22 25); /* BFP Red */
+  --primary: oklch(0.5 0.22 25);
+  /* BFP Red */
   --primary-foreground: oklch(1 0 0);
 
   /* Secondary - A more muted, professional tone (e.g., a deep blue-gray) */
-  --secondary: oklch(0.45 0.05 240); /* Professional blue-gray */
+  --secondary: oklch(0.45 0.05 240);
+  /* Professional blue-gray */
   --secondary-foreground: oklch(1 0 0);
 
   /* Accent - A refined, complementary color (e.g., a deep teal) */
-  --accent: oklch(0.4 0.06 180); /* Deep teal */
+  --accent: oklch(0.4 0.06 180);
+  /* Deep teal */
   --accent-foreground: oklch(1 0 0);
 
   /* Muted colors - Soft, neutral grays */
-  --muted: oklch(0.92 0.002 260); /* Light gray-blue */
-  --muted-foreground: oklch(0.5 0.01 260); /* Medium gray-blue */
+  --muted: oklch(0.92 0.002 260);
+  /* Light gray-blue */
+  --muted-foreground: oklch(0.5 0.01 260);
+  /* Medium gray-blue */
 
   /* Destructive colors - Standard red for errors */
   --destructive: oklch(0.55 0.25 27);
@@ -39,14 +46,20 @@
   /* Border and input - Subtle gray */
   --border: oklch(0.85 0.002 260);
   --input: oklch(0.85 0.002 260);
-  --ring: oklch(0.5 0.22 25); /* BFP Red for focus rings */
+  --ring: oklch(0.5 0.22 25);
+  /* BFP Red for focus rings */
 
   /* Chart colors using refined palette */
-  --chart-1: oklch(0.5 0.22 25); /* Red */
-  --chart-2: oklch(0.45 0.05 240); /* Professional blue-gray */
-  --chart-3: oklch(0.4 0.06 180); /* Deep teal */
-  --chart-4: oklch(0.6 0.08 60); /* Soft yellow */
-  --chart-5: oklch(0.35 0.07 300); /* Soft purple */
+  --chart-1: oklch(0.5 0.22 25);
+  /* Red */
+  --chart-2: oklch(0.45 0.05 240);
+  /* Professional blue-gray */
+  --chart-3: oklch(0.4 0.06 180);
+  /* Deep teal */
+  --chart-4: oklch(0.6 0.08 60);
+  /* Soft yellow */
+  --chart-5: oklch(0.35 0.07 300);
+  /* Soft purple */
 
   --radius: 0.625rem;
 
@@ -104,6 +117,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -114,16 +128,11 @@
 
 /* Tablet screens (640px - 1023px) */
 @media (min-width: 640px) and (max-width: 1023px) {
-  .chatbot-berong-image {
-    width: 160px !important;
-    height: 160px !important;
-  }
-  
   .chatbot-window-container {
     bottom: 80px !important;
     right: 16px !important;
   }
-  
+
   .chatbot-window {
     width: 450px !important;
     height: 80vh !important;
@@ -134,16 +143,11 @@
 
 /* Mobile screens (less than 640px) */
 @media (max-width: 639px) {
-  .chatbot-berong-image {
-    width: 130px !important;
-    height: 130px !important;
-  }
-  
   .chatbot-window-container {
     bottom: 64px !important;
     right: 8px !important;
   }
-  
+
   .chatbot-window {
     width: calc(100vw - 24px) !important;
     height: 75vh !important;

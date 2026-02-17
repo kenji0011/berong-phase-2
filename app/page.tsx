@@ -2,7 +2,8 @@ import { Navigation } from '@/components/navigation';
 import { HeroCarousel } from '@/components/ui/hero-carousel';
 import { FeaturedCards } from '@/components/ui/featured-cards';
 import { TwoColumnBlock } from '@/components/ui/two-column-block';
-import { VideoHighlight } from '@/components/ui/video-highlight';
+import { LandingAboutSection } from '@/components/landing-about-section';
+import { LandingAssessmentSection } from '@/components/landing-assessment-section';
 import { Footer } from '@/components/footer';
 
 // Force dynamic rendering - this page fetches data from database
@@ -23,15 +24,21 @@ export default function HomePage() {
           <FeaturedCards />
         </section>
 
+        {/* About Sections (Platform, Partnership, Team) */}
+        <LandingAboutSection />
+
+        {/* Assessment Section */}
+        <LandingAssessmentSection />
+
         {/* Two Column Block */}
-        <section className="mb-12">
+        {/* <section className="mb-12">
           <TwoColumnBlock />
-        </section>
+        </section> */}
 
         {/* Video Highlight */}
-        <section className="mb-12">
+        {/* <section className="mb-12">
           <VideoHighlight />
-        </section>
+        </section> */}
       </main>
 
       {/* Footer */}

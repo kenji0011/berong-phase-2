@@ -121,7 +121,7 @@ export function Navigation() {
               {isAuthenticated ? (
                 <div className="flex gap-2">
                   <div className="relative group">
-                    <Link href="/about">
+                    {/* <Link href="/about">
                       <Button
                         variant="outline"
                         size="icon"
@@ -129,7 +129,7 @@ export function Navigation() {
                       >
                         <Info className="h-4 w-4" />
                       </Button>
-                    </Link>
+                    </Link> */}
                     <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/90 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[9999] pointer-events-none">
                       About
                     </span>

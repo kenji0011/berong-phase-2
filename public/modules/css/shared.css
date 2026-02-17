@@ -3,8 +3,10 @@
 /* ===== NAVIGATION BAR ===== */
 .ss-nav {
     width: 100%;
-    background-color: #1e293b; /* slate-800 */
-    border-bottom: 1px solid #334155; /* slate-700 */
+    background-color: #1e293b;
+    /* slate-800 */
+    border-bottom: 1px solid #334155;
+    /* slate-700 */
     padding: 1rem;
     position: sticky;
     top: 0;
@@ -35,7 +37,8 @@
 }
 
 .ss-nav-brand i {
-    color: #f97316; /* orange-500 */
+    color: #f97316;
+    /* orange-500 */
     font-size: 1.5rem;
 }
 
@@ -47,7 +50,8 @@
 }
 
 .ss-nav-brand span {
-    color: #64748b; /* slate-500 */
+    color: #64748b;
+    /* slate-500 */
     font-weight: normal;
 }
 
@@ -73,35 +77,43 @@
 }
 
 .ss-module-dot.locked {
-    background-color: #334155; /* slate-700 */
-    color: #64748b; /* slate-500 */
+    background-color: #334155;
+    /* slate-700 */
+    color: #64748b;
+    /* slate-500 */
     cursor: not-allowed;
 }
 
 .ss-module-dot.unlocked {
-    background-color: #1e40af; /* blue-800 */
-    color: #93c5fd; /* blue-300 */
+    background-color: #1e40af;
+    /* blue-800 */
+    color: #93c5fd;
+    /* blue-300 */
     cursor: pointer;
 }
 
 .ss-module-dot.unlocked:hover {
-    background-color: #1d4ed8; /* blue-700 */
+    background-color: #1d4ed8;
+    /* blue-700 */
     transform: scale(1.1);
 }
 
 .ss-module-dot.current {
-    background-color: #f97316; /* orange-500 */
+    background-color: #f97316;
+    /* orange-500 */
     color: white;
     box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.4);
 }
 
 .ss-module-dot.completed {
-    background-color: #16a34a; /* green-600 */
+    background-color: #16a34a;
+    /* green-600 */
     color: white;
 }
 
 .ss-module-dot.completed:hover {
-    background-color: #15803d; /* green-700 */
+    background-color: #15803d;
+    /* green-700 */
 }
 
 .ss-module-dot i {
@@ -112,11 +124,13 @@
 .ss-module-connector {
     width: 1.5rem;
     height: 2px;
-    background-color: #334155; /* slate-700 */
+    background-color: #334155;
+    /* slate-700 */
 }
 
 .ss-module-connector.active {
-    background-color: #16a34a; /* green-600 */
+    background-color: #16a34a;
+    /* green-600 */
 }
 
 /* ===== LOCKED SECTIONS ===== */
@@ -381,9 +395,17 @@
 
 /* ===== UNLOCK ANIMATION ===== */
 @keyframes unlockPulse {
-    0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7); }
-    70% { box-shadow: 0 0 0 20px rgba(249, 115, 22, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
+    0% {
+        box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 20px rgba(249, 115, 22, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(249, 115, 22, 0);
+    }
 }
 
 .ss-just-unlocked {
@@ -450,6 +472,7 @@
         transform: translateX(100%);
         opacity: 0;
     }
+
     to {
         transform: translateX(0);
         opacity: 1;
@@ -462,18 +485,18 @@
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .ss-module-indicators {
         width: 100%;
         justify-content: center;
     }
-    
+
     .ss-module-dot {
         width: 2rem;
         height: 2rem;
         font-size: 0.75rem;
     }
-    
+
     .ss-module-connector {
         width: 1rem;
     }

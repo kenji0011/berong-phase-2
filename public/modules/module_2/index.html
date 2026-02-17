@@ -5,6 +5,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SafeScape | Module 2: The School Drill</title>
+    <script>
+        // Suppress Tailwind CDN warning
+        console.warn = (function (originalWarn) {
+            return function (...args) {
+                if (args[0] && args[0].includes && args[0].includes('cdn.tailwindcss.com')) return;
+                originalWarn.apply(console, args);
+            };
+        })(console.warn);
+    </script>
+    <script>
+        // Suppress Tailwind CDN warning
+        console.warn = (function (originalWarn) {
+            return function (...args) {
+                if (args[0] && args[0].includes && args[0].includes('cdn.tailwindcss.com')) return;
+                originalWarn.apply(console, args);
+            };
+        })(console.warn);
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/shared.css">
@@ -276,7 +294,7 @@
                         </p>
                     </div>
 
-                    <button onclick="markContentRead()" class="ss-btn ss-btn-secondary mt-4">
+                    <button id="btn-content-read" onclick="markContentRead()" class="ss-btn ss-btn-secondary mt-4">
                         <i class="fa-solid fa-check"></i> I understand the alarm system
                     </button>
                 </div>
@@ -330,7 +348,7 @@
                     class="order-2 md:order-1 bg-white rounded-xl overflow-hidden shadow-lg border-4 border-slate-700 h-64 relative flex items-center justify-center">
                     <div
                         class="bg-white rounded-xl overflow-hidden shadow-lg border-4 border-slate-700 h-96 relative flex items-center justify-center transform rotate-1 hover:rotate-0 transition-transform duration-500">
-                        <img src="../../module_2/line.png" alt="Line Up" class="w-full h-full object-contain">
+                        <img src="../assets/images/line.png" alt="Line Up" class="w-full h-full object-contain">
                     </div>
                 </div>
                 <div class="order-1 md:order-2 space-y-6">
@@ -493,13 +511,23 @@
         };
 
         // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Wait for progress to load from API before checking locks
+            if (SafeScapeProgress.isAuthenticated()) {
+                await SafeScapeProgress.initializeFromAPI();
+            }
+
             // Check if module is unlocked
             if (!SafeScapeProgress.isModuleUnlocked(moduleNum)) {
                 window.location.href = '../index.html';
                 return;
             }
+
             loadProgress();
+
+            // Listen for updates from API sync
+            window.addEventListener('safescape-progress-update', loadProgress);
+
             updateNavigation();
             updateSectionStates();
             renderQuiz();
@@ -512,15 +540,11 @@
                 localState = { ...localState, ...moduleData.sections };
             }
             updateModuleProgress();
-        }
-
-        function saveLocalProgress() {
-            Object.keys(localState).forEach(key => {
-                SafeScapeProgress.completeSection(moduleNum, key, localState[key]);
-            });
-            updateModuleProgress();
             updateSectionStates();
         }
+
+        // REMOVED: saveLocalProgress loop
+        // logic is now reactive via SafeScapeProgress events
 
         function updateModuleProgress() {
             const keys = ['videoWatched', 'soundDetectivePassed', 'networkMapViewed', 'rhythmGameCompleted', 'quizPassed'];
@@ -532,7 +556,15 @@
         function updateSectionStates() {
             if (localState.videoWatched) document.getElementById('section-video').classList.add('completed');
             if (localState.soundDetectivePassed) document.getElementById('section-sound').classList.add('completed');
-            if (localState.networkMapViewed) document.getElementById('section-content').classList.add('completed');
+            if (localState.networkMapViewed) {
+                document.getElementById('section-content').classList.add('completed');
+                const btn = document.getElementById('btn-content-read');
+                if (btn) {
+                    btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Completed';
+                    btn.className = "ss-btn ss-btn-success mt-4 cursor-default";
+                    btn.onclick = null;
+                }
+            }
             if (localState.rhythmGameCompleted) document.getElementById('section-game').classList.add('completed');
             if (localState.quizPassed) document.getElementById('final-quiz').classList.add('completed');
         }
@@ -574,16 +606,14 @@
         // --- EVENT HANDLERS ---
         function onVideoPlay() {
             if (!localState.videoWatched) {
-                localState.videoWatched = true;
-                saveLocalProgress();
+                SafeScapeProgress.completeSection(moduleNum, 'videoWatched', true);
                 showToast('success', 'Video started!');
             }
         }
 
         function markContentRead() {
             if (!localState.networkMapViewed) {
-                localState.networkMapViewed = true;
-                saveLocalProgress();
+                SafeScapeProgress.completeSection(moduleNum, 'networkMapViewed', true);
                 showToast('success', 'Content section completed!');
             }
         }
@@ -646,8 +676,7 @@
                 feedback.innerHTML = "<span class='text-green-400'>CORRECT! Long Continuous Ring = Fire!</span>";
                 btn.classList.add('bg-green-600', 'text-white', 'border-green-600');
                 if (!localState.soundDetectivePassed) {
-                    localState.soundDetectivePassed = true;
-                    saveLocalProgress();
+                    SafeScapeProgress.completeSection(moduleNum, 'soundDetectivePassed', true);
                     showToast('success', 'Sound Detective passed!');
                 }
             } else {
@@ -737,8 +766,7 @@
 
                 // Mark game as completed
                 if (!localState.rhythmGameCompleted) {
-                    localState.rhythmGameCompleted = true;
-                    saveLocalProgress();
+                    SafeScapeProgress.completeSection(moduleNum, 'rhythmGameCompleted', true);
                     showToast('success', 'Rhythm Marshal completed!');
                 }
             }
@@ -804,7 +832,11 @@
 
             answeredCount++;
             if (answeredCount === quizData.length) {
-                setTimeout(showQuizResult, 1000);
+                setTimeout(() => {
+                    showQuizResult();
+                    // Save quiz result to database
+                    SafeScapeProgress.submitQuizResult(moduleNum, correctCount, 5);
+                }, 1000);
             }
         }
 
@@ -820,22 +852,22 @@
             localState.quizScore = correctCount;
 
             if (correctCount >= 4) {
-                icon.innerText = "🎖️";
-                title.innerText = "CERTIFIED MARSHAL!";
+                icon.innerText = "🏆";
+                title.innerText = "MARSHAL CERTIFIED!";
                 title.className = "text-2xl font-bold text-green-400 mb-2";
-                desc.innerText = `Outstanding! You got ${correctCount}/5. You are a true leader with integrity.`;
+                desc.innerText = `You scored ${correctCount}/5. You are ready to lead!`;
+
                 nextBtn.classList.remove('hidden');
 
                 if (!localState.quizPassed) {
-                    localState.quizPassed = true;
-                    saveLocalProgress();
+                    SafeScapeProgress.completeSection(moduleNum, 'quizPassed', true);
                     showToast('success', '🎉 Module 2 complete! Module 3 unlocked!');
                 }
             } else {
-                icon.innerText = "📚";
-                title.innerText = "ALMOST THERE!";
+                icon.innerText = "⚠️";
+                title.innerText = "KEEP PRACTICING";
                 title.className = "text-2xl font-bold text-red-400 mb-2";
-                desc.innerText = `You got ${correctCount}/5. You need at least 4 correct to certify. Try again!`;
+                desc.innerText = `You scored ${correctCount}/5. You need 4/5 to pass.`;
                 retakeBtn.classList.remove('hidden');
             }
         }
