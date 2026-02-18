@@ -1,10 +1,31 @@
-import { useLayoutEffect, useRef, useCallback } from 'react';
+import { useLayoutEffect, useRef, useCallback, ReactNode } from 'react';
 import Lenis from 'lenis';
 import './ScrollStack.css';
 
-export const ScrollStackItem = ({ children, itemClassName = '' }) => (
+interface ScrollStackItemProps {
+  children: ReactNode;
+  itemClassName?: string;
+}
+
+export const ScrollStackItem = ({ children, itemClassName = '' }: ScrollStackItemProps) => (
   <div className={`scroll-stack-card ${itemClassName}`.trim()}>{children}</div>
 );
+
+interface ScrollStackProps {
+  children: ReactNode;
+  className?: string;
+  itemDistance?: number;
+  itemScale?: number;
+  itemStackDistance?: number;
+  stackPosition?: string;
+  scaleEndPosition?: string;
+  baseScale?: number;
+  scaleDuration?: number;
+  rotationAmount?: number;
+  blurAmount?: number;
+  useWindowScroll?: boolean;
+  onStackComplete?: () => void;
+}
 
 const ScrollStack = ({
   children,
@@ -20,22 +41,22 @@ const ScrollStack = ({
   blurAmount = 0,
   useWindowScroll = false,
   onStackComplete
-}) => {
-  const scrollerRef = useRef(null);
+}: ScrollStackProps) => {
+  const scrollerRef = useRef<HTMLDivElement>(null);
   const stackCompletedRef = useRef(false);
-  const animationFrameRef = useRef(null);
-  const lenisRef = useRef(null);
-  const cardsRef = useRef([]);
+  const animationFrameRef = useRef<number | null>(null);
+  const lenisRef = useRef<Lenis | null>(null);
+  const cardsRef = useRef<HTMLElement[]>([]);
   const lastTransformsRef = useRef(new Map());
   const isUpdatingRef = useRef(false);
 
-  const calculateProgress = useCallback((scrollTop, start, end) => {
+  const calculateProgress = useCallback((scrollTop: number, start: number, end: number) => {
     if (scrollTop < start) return 0;
     if (scrollTop > end) return 1;
     return (scrollTop - start) / (end - start);
   }, []);
 
-  const parsePercentage = useCallback((value, containerHeight) => {
+  const parsePercentage = useCallback((value: string | number, containerHeight: number) => {
     if (typeof value === 'string' && value.includes('%')) {
       return (parseFloat(value) / 100) * containerHeight;
     }
