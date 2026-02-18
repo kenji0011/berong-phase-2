@@ -57,6 +57,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
+      - ./Database-bfp-berong.sql:/docker-entrypoint-initdb.d/Database-bfp-berong.sql:ro
     # No external ports - only accessible within Docker network
     expose:
       - "5432"
@@ -148,6 +150,8 @@ services:
       - no-new-privileges:true
     tmpfs:
       - /tmp
+    volumes:
+      - simulation_jobs:/app/data
     deploy:
       resources:
         limits:
@@ -158,6 +162,8 @@ volumes:
   postgres_data:
     driver: local
   uploads_data:
+    driver: local
+  simulation_jobs:
     driver: local
 
 networks:

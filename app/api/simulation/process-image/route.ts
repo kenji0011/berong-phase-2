@@ -1,9 +1,14 @@
 ﻿import { NextRequest, NextResponse } from "next/server"
+import { requireAuth } from "@/lib/auth-guard"
 
 const BACKEND_URL = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://python-backend:8000"
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Require authentication to prevent unauthenticated file uploads
+    const auth = await requireAuth()
+    if (auth instanceof NextResponse) return auth
+
     const formData = await request.formData()
     const file = formData.get("file") as File
 

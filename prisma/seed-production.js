@@ -1,6 +1,7 @@
 /**
  * Production seed script for BFP Berong
- * Creates default admin account and essential data
+ * Creates default admin account and essential data ONLY if they don't exist.
+ * SECURITY: Never resets existing passwords on restart.
  * Run with: node prisma/seed-production.js
  */
 
@@ -12,77 +13,82 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting production database seeding...');
 
-  // Create admin user
-  const adminPassword = await bcrypt.hash('admin123', 10);
-  const adminUser = await prisma.user.upsert({
-    where: { username: 'admin' },
-    update: {
-      password: adminPassword, // Reset password on re-seed if needed
-    },
-    create: {
-      username: 'admin',
-      email: 'admin@bfp.gov.ph',
-      password: adminPassword,
-      name: 'BFP Administrator',
-      age: 30,
-      role: 'admin',
-      isActive: true,
-    },
-  });
-  console.log('✅ Admin user ready:', adminUser.username);
+  // SECURITY: Use environment variable for admin password, never hardcode
+  const adminPass = process.env.ADMIN_DEFAULT_PASSWORD || 'admin123';
+  const adminPassword = await bcrypt.hash(adminPass, 12);
 
-  // Create sample test accounts
-  const kidPassword = await bcrypt.hash('kid123', 10);
-  const adultPassword = await bcrypt.hash('adult123', 10);
-  const professionalPassword = await bcrypt.hash('pro123', 10);
+  // Check if admin exists — NEVER reset the password on restart
+  const existingAdmin = await prisma.user.findUnique({ where: { username: 'admin' } });
+  if (!existingAdmin) {
+    const adminUser = await prisma.user.create({
+      data: {
+        username: 'admin',
+        email: 'admin@bfp.gov.ph',
+        password: adminPassword,
+        name: 'BFP Administrator',
+        age: 30,
+        role: 'admin',
+        isActive: true,
+      },
+    });
+    console.log('✅ Admin user created:', adminUser.username);
+    console.log('⚠️  IMPORTANT: Change the default admin password immediately!');
+  } else {
+    console.log('ℹ️  Admin user already exists, skipping (password preserved)');
+  }
 
-  const kidUser = await prisma.user.upsert({
-    where: { username: 'testkid' },
-    update: {},
-    create: {
-      username: 'testkid',
-      email: 'kid@bfp.gov.ph',
-      password: kidPassword,
-      name: 'Young Firefighter',
-      age: 12,
-      role: 'kid',
-      isActive: true,
-    },
-  });
+  // SECURITY: Only create test accounts in non-production environments
+  if (process.env.NODE_ENV !== 'production') {
+    const kidPassword = await bcrypt.hash('kid123', 10);
+    const adultPassword = await bcrypt.hash('adult123', 10);
+    const professionalPassword = await bcrypt.hash('pro123', 10);
 
-  const adultUser = await prisma.user.upsert({
-    where: { username: 'testadult' },
-    update: {},
-    create: {
-      username: 'testadult',
-      email: 'adult@bfp.gov.ph',
-      password: adultPassword,
-      name: 'John Smith',
-      age: 25,
-      role: 'adult',
-      isActive: true,
-    },
-  });
+    await prisma.user.upsert({
+      where: { username: 'testkid' },
+      update: {},
+      create: {
+        username: 'testkid',
+        email: 'kid@bfp.gov.ph',
+        password: kidPassword,
+        name: 'Young Firefighter',
+        age: 12,
+        role: 'kid',
+        isActive: true,
+      },
+    });
 
-  const professionalUser = await prisma.user.upsert({
-    where: { username: 'testpro' },
-    update: {},
-    create: {
-      username: 'testpro',
-      email: 'pro@bfp.gov.ph',
-      password: professionalPassword,
-      name: 'Firefighter Cruz',
-      age: 28,
-      role: 'professional',
-      isActive: true,
-    },
-  });
+    await prisma.user.upsert({
+      where: { username: 'testadult' },
+      update: {},
+      create: {
+        username: 'testadult',
+        email: 'adult@bfp.gov.ph',
+        password: adultPassword,
+        name: 'John Smith',
+        age: 25,
+        role: 'adult',
+        isActive: true,
+      },
+    });
 
-  console.log('✅ Test accounts ready:');
-  console.log('   - Kid: testkid / kid123');
-  console.log('   - Adult: testadult / adult123');
-  console.log('   - Professional: testpro / pro123');
-  console.log('   - Admin: admin / admin123');
+    await prisma.user.upsert({
+      where: { username: 'testpro' },
+      update: {},
+      create: {
+        username: 'testpro',
+        email: 'pro@bfp.gov.ph',
+        password: professionalPassword,
+        name: 'Firefighter Cruz',
+        age: 28,
+        role: 'professional',
+        isActive: true,
+      },
+    });
+
+    console.log('✅ Test accounts ready (dev only)');
+  } else {
+    console.log('ℹ️  Skipping test accounts in production');
+  }
 
   // Seed carousel images if not exist
   const existingCarousel = await prisma.carouselImage.count();
@@ -177,16 +183,12 @@ async function main() {
 
   console.log('');
   console.log('🎉 Database seeding completed successfully!');
-  console.log('');
-  console.log('📋 Default Login Credentials:');
-  console.log('   ┌──────────────┬────────────┬────────────┐');
-  console.log('   │ Role         │ Username   │ Password   │');
-  console.log('   ├──────────────┼────────────┼────────────┤');
-  console.log('   │ Admin        │ admin      │ admin123   │');
-  console.log('   │ Professional │ testpro    │ pro123     │');
-  console.log('   │ Adult        │ testadult  │ adult123   │');
-  console.log('   │ Kid          │ testkid    │ kid123     │');
-  console.log('   └──────────────┴────────────┴────────────┘');
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('');
+    console.log('📋 Default Login Credentials (dev only):');
+    console.log('   Admin: admin / (see ADMIN_DEFAULT_PASSWORD env var or default)');
+    console.log('   Test accounts only created in non-production environments');
+  }
 }
 
 main()

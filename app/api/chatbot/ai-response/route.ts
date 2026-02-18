@@ -1,9 +1,14 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { getFireSafetySystemPrompt } from '@/lib/fire-safety-system-prompt';
+import { requireAuth } from '@/lib/auth-guard';
 
 export async function POST(request: NextRequest) {
     try {
+        // SECURITY: Require authentication to prevent API key abuse
+        const auth = await requireAuth()
+        if (auth instanceof NextResponse) return auth
+
         const body = await request.json();
         const { message } = body as { message: string };
 

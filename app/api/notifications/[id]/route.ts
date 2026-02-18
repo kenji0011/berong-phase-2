@@ -1,11 +1,16 @@
 import { NextResponse } from 'next/server';
 import { NotificationService } from '@/lib/notification-service';
+import { requireAuth } from '@/lib/auth-guard';
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // SECURITY: Require authentication
+    const auth = await requireAuth()
+    if (auth instanceof NextResponse) return auth
+
     const resolvedParams = await params;
     const notificationId = parseInt(resolvedParams.id);
     if (isNaN(notificationId)) {
@@ -15,23 +20,8 @@ export async function PATCH(
       );
     }
 
-    const body = await request.json();
-    const { userId } = body;
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      );
-    }
-
-    const numericUserId = parseInt(userId);
-    if (isNaN(numericUserId)) {
-      return NextResponse.json(
-        { error: 'Invalid user ID' },
-        { status: 400 }
-      );
-    }
+    // Use authenticated user's ID instead of trusting request body
+    const numericUserId = auth.id as number;
 
     const result = await NotificationService.markAsRead(notificationId, numericUserId);
 
@@ -57,6 +47,10 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // SECURITY: Require authentication
+    const auth = await requireAuth()
+    if (auth instanceof NextResponse) return auth
+
     const resolvedParams = await params;
     const notificationId = parseInt(resolvedParams.id);
     if (isNaN(notificationId)) {
@@ -66,23 +60,8 @@ export async function DELETE(
       );
     }
 
-    const url = new URL(request.url);
-    const userId = url.searchParams.get('userId');
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      );
-    }
-
-    const numericUserId = parseInt(userId);
-    if (isNaN(numericUserId)) {
-      return NextResponse.json(
-        { error: 'Invalid user ID' },
-        { status: 400 }
-      );
-    }
+    // Use authenticated user's ID
+    const numericUserId = auth.id as number;
 
     const result = await NotificationService.deleteNotification(notificationId, numericUserId);
 
