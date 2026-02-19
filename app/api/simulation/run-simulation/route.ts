@@ -1,10 +1,19 @@
 ﻿import { NextRequest, NextResponse } from "next/server"
+import { requireAuth } from "@/lib/auth-guard"
 
 const BACKEND_URL = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://python-backend:8000"
+
+// Maximum grid dimensions to prevent memory exhaustion attacks
+const MAX_GRID_SIZE = 200
+const MAX_GRID_CELLS = 40000 // 200x200
 const PPO_VERSION: string = "500k_steps" // Options: "v1.5", "v2.0_lite", "500k_steps", "v2.0"
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Require authentication to prevent unauthenticated abuse
+    const auth = await requireAuth()
+    if (auth instanceof NextResponse) return auth
+
     // Health check gate: ensure backend models are loaded before proceeding
     try {
       const healthController = new AbortController()
@@ -38,6 +47,21 @@ export async function POST(request: NextRequest) {
     if (!body.grid || !Array.isArray(body.grid)) {
       return NextResponse.json(
         { error: "Invalid grid data" },
+        { status: 400 }
+      )
+    }
+
+    // SECURITY: Validate grid dimensions to prevent memory exhaustion
+    if (body.grid.length > MAX_GRID_SIZE) {
+      return NextResponse.json(
+        { error: `Grid height exceeds maximum of ${MAX_GRID_SIZE} rows` },
+        { status: 400 }
+      )
+    }
+    const totalCells = body.grid.reduce((sum: number, row: unknown[]) => sum + (Array.isArray(row) ? row.length : 0), 0)
+    if (totalCells > MAX_GRID_CELLS) {
+      return NextResponse.json(
+        { error: `Grid exceeds maximum of ${MAX_GRID_CELLS} cells` },
         { status: 400 }
       )
     }

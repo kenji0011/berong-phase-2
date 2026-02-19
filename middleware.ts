@@ -5,11 +5,8 @@ import { jwtVerify } from 'jose'
 function getSecret(): Uint8Array {
   const secret = process.env.JWT_SECRET
   if (!secret) {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('[Middleware] FATAL: JWT_SECRET is not set in production!')
-    }
-    console.error('[Middleware] JWT_SECRET is not set! Falling back to dev key.')
-    return new TextEncoder().encode('fallback-dev-key')
+    // SECURITY: Never fall back to a predictable key — fail closed in all environments
+    throw new Error('[Middleware] FATAL: JWT_SECRET is not set! Refusing to start with insecure fallback.')
   }
   return new TextEncoder().encode(secret)
 }

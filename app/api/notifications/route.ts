@@ -2,26 +2,17 @@ import { NextResponse } from 'next/server';
 import { NotificationService } from '@/lib/notification-service';
 import { prisma } from '@/lib/prisma';
 import { ContentCategory } from '@prisma/client';
+import { requireAuth } from '@/lib/auth-guard';
 
 export async function GET(request: Request) {
   try {
+    // SECURITY: Require authentication
+    const auth = await requireAuth()
+    if (auth instanceof NextResponse) return auth
+
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      );
-    }
-
-    const numericUserId = parseInt(userId);
-    if (isNaN(numericUserId)) {
-      return NextResponse.json(
-        { error: 'Invalid user ID' },
-        { status: 400 }
-      );
-    }
+    // Use authenticated user's ID instead of trusting query param
+    const numericUserId = auth.id as number;
 
     const result = await NotificationService.getUserNotifications(numericUserId);
 
@@ -44,6 +35,13 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    // SECURITY: Only admins can create notifications
+    const auth = await requireAuth()
+    if (auth instanceof NextResponse) return auth
+    if (auth.role !== 'admin') {
+      return NextResponse.json({ error: 'Forbidden: admin access required' }, { status: 403 })
+    }
+
     const body = await request.json();
     const { title, message, type, category, userIds } = body;
 
