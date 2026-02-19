@@ -113,7 +113,8 @@ export async function POST(request: NextRequest) {
       title: `New Video: ${body.title}`,
       message: `A new video "${body.title}" has been published in the ${body.category} section.`,
       type: 'video',
-      category: body.category
+      category: body.category,
+      resourceId: newVideo.id
     })
 
     return NextResponse.json(transformedVideo)

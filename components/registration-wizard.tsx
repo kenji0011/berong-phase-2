@@ -49,7 +49,9 @@ interface AssessmentQuestion {
 
 interface RegistrationData {
   // Step 1: Basic Info
-  name: string
+  firstName: string
+  lastName: string
+  middleName: string
   age: string
   gender: string
 
@@ -63,6 +65,7 @@ interface RegistrationData {
 
   // Step 3: Account
   username: string
+  email: string
   password: string
   confirmPassword: string
   dataPrivacyConsent: boolean
@@ -93,7 +96,9 @@ export function RegistrationWizard() {
   } | null>(null)
 
   const [data, setData] = useState<RegistrationData>({
-    name: "",
+    firstName: "",
+    lastName: "",
+    middleName: "",
     age: "",
     gender: "",
     barangay: "",
@@ -103,6 +108,7 @@ export function RegistrationWizard() {
     occupationOther: "",
     gradeLevel: "",
     username: "",
+    email: "",
     password: "",
     confirmPassword: "",
     dataPrivacyConsent: false,
@@ -138,7 +144,14 @@ export function RegistrationWizard() {
 
   const isKid = parseInt(data.age) < 18
 
+  const autoCapitalize = (text: string) =>
+    text.replace(/\b\w/g, (char) => char.toUpperCase())
+
   const updateField = (field: keyof RegistrationData, value: any) => {
+    // Auto-capitalize first letter of each word for name fields
+    if (field === "firstName" || field === "lastName" || field === "middleName") {
+      value = autoCapitalize(value as string)
+    }
     setData(prev => ({ ...prev, [field]: value }))
     // Clear validation error when user types
     if (validationErrors[field]) {
@@ -151,7 +164,8 @@ export function RegistrationWizard() {
 
     switch (step) {
       case 1:
-        if (!data.name.trim()) errors.name = "Name is required"
+        if (!data.lastName.trim()) errors.lastName = "Last Name is required"
+        if (!data.firstName.trim()) errors.firstName = "First Name is required"
         if (!data.age) errors.age = "Age is required"
         else if (parseInt(data.age) < 1 || parseInt(data.age) > 120) errors.age = "Please enter a valid age"
         if (!data.gender) errors.gender = "Please select your gender"
@@ -181,7 +195,7 @@ export function RegistrationWizard() {
           errors.username = "Username can only contain letters, numbers, and underscores"
         }
         if (!data.password) errors.password = "Password is required"
-        else if (data.password.length < 6) errors.password = "Password must be at least 6 characters"
+        else if (data.password.length < 8) errors.password = "Password must be at least 8 characters"
         if (data.password !== data.confirmPassword) errors.confirmPassword = "Passwords do not match"
         if (!data.dataPrivacyConsent) errors.dataPrivacyConsent = "You must agree to the data privacy policy"
         break
@@ -198,8 +212,59 @@ export function RegistrationWizard() {
     return Object.keys(errors).length === 0
   }
 
-  const handleNext = () => {
+  const checkUsernameAvailability = async (username: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`/api/auth/check-username?username=${username}`)
+      const result = await response.json()
+
+      if (result.error) {
+        return false
+      }
+
+      return result.available
+    } catch (error) {
+      console.error('Error checking username:', error)
+      return false
+    }
+  }
+
+  const handleNext = async () => {
     if (validateStep(currentStep)) {
+      if (currentStep === 3) {
+        // Validate ALL credentials against the server before proceeding to the pre-test
+        setLoading(true)
+        setError("")
+        try {
+          const response = await fetch('/api/auth/validate-credentials', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              username: data.username,
+              password: data.password,
+              email: data.email || undefined,
+            }),
+          })
+          const result = await response.json()
+
+          if (!result.valid) {
+            // Show server-side validation errors
+            const serverErrors: Record<string, string> = {}
+            if (result.errors?.username) serverErrors.username = result.errors.username
+            if (result.errors?.password) serverErrors.password = result.errors.password
+            if (result.errors?.email) serverErrors.email = result.errors.email
+            setValidationErrors(prev => ({ ...prev, ...serverErrors }))
+            setError(Object.values(result.errors || {}).join('. '))
+            setLoading(false)
+            return
+          }
+        } catch (err) {
+          setError('Failed to validate credentials. Please try again.')
+          setLoading(false)
+          return
+        }
+        setLoading(false)
+      }
+
       if (currentStep < 4) {
         setCurrentStep(prev => prev + 1)
         setError("")
@@ -235,7 +300,9 @@ export function RegistrationWizard() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: data.name,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          middleName: data.middleName || undefined,
           age: parseInt(data.age),
           gender: data.gender,
           barangay: data.barangay,
@@ -245,6 +312,7 @@ export function RegistrationWizard() {
           occupationOther: data.occupation === "Other (Please specify)" ? data.occupationOther : null,
           gradeLevel: data.gradeLevel || null,
           username: data.username,
+          email: data.email || undefined,
           password: data.password,
           dataPrivacyConsent: data.dataPrivacyConsent,
           preTestAnswers: data.preTestAnswers,
@@ -379,17 +447,41 @@ export function RegistrationWizard() {
         {currentStep === 1 && (
           <div className="space-y-4">
             <div>
-              <Label htmlFor="name">Full Name *</Label>
+              <Label htmlFor="lastName">Last Name *</Label>
               <Input
-                id="name"
-                placeholder="Enter your full name"
-                value={data.name}
-                onChange={(e) => updateField("name", e.target.value)}
-                className={validationErrors.name ? "border-red-500" : ""}
+                id="lastName"
+                placeholder="Enter your last name"
+                value={data.lastName}
+                onChange={(e) => updateField("lastName", e.target.value)}
+                className={validationErrors.lastName ? "border-red-500" : ""}
               />
-              {validationErrors.name && (
-                <p className="text-sm text-red-500 mt-1">{validationErrors.name}</p>
+              {validationErrors.lastName && (
+                <p className="text-sm text-red-500 mt-1">{validationErrors.lastName}</p>
               )}
+            </div>
+
+            <div>
+              <Label htmlFor="firstName">First Name *</Label>
+              <Input
+                id="firstName"
+                placeholder="Enter your first name"
+                value={data.firstName}
+                onChange={(e) => updateField("firstName", e.target.value)}
+                className={validationErrors.firstName ? "border-red-500" : ""}
+              />
+              {validationErrors.firstName && (
+                <p className="text-sm text-red-500 mt-1">{validationErrors.firstName}</p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="middleName">Middle Name (Optional)</Label>
+              <Input
+                id="middleName"
+                placeholder="Enter your middle name"
+                value={data.middleName}
+                onChange={(e) => updateField("middleName", e.target.value)}
+              />
             </div>
 
             <div>
@@ -576,6 +668,21 @@ export function RegistrationWizard() {
             </div>
 
             <div>
+              <Label htmlFor="email">Email (Optional)</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email (optional)"
+                value={data.email}
+                onChange={(e) => updateField("email", e.target.value)}
+                className={validationErrors.email ? "border-red-500" : ""}
+              />
+              {validationErrors.email && (
+                <p className="text-sm text-red-500 mt-1">{validationErrors.email}</p>
+              )}
+            </div>
+
+            <div>
               <Label htmlFor="password">Password *</Label>
               <Input
                 id="password"
@@ -726,10 +833,10 @@ export function RegistrationWizard() {
                       key={q.id}
                       onClick={() => setCurrentQuestionIndex(idx)}
                       className={`w-8 h-8 rounded-full text-xs font-medium transition-colors ${currentQuestionIndex === idx
-                          ? "bg-orange-500 text-white"
-                          : data.preTestAnswers[q.id] !== undefined
-                            ? "bg-green-100 text-green-700 border border-green-300"
-                            : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                        ? "bg-orange-500 text-white"
+                        : data.preTestAnswers[q.id] !== undefined
+                          ? "bg-green-100 text-green-700 border border-green-300"
+                          : "bg-gray-100 text-gray-500 hover:bg-gray-200"
                         }`}
                     >
                       {idx + 1}

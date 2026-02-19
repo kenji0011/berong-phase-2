@@ -7,17 +7,18 @@ interface CreateNotificationData {
   type: string;
   category: ContentCategory;
   userIds?: number[]; // Optional: if specific users, otherwise will be sent to all users with matching permissions
+  resourceId?: number;
 }
 
 export class NotificationService {
   static async createNotification(data: CreateNotificationData) {
     try {
-      const { title, message, type, category, userIds } = data;
-      
+      const { title, message, type, category, userIds, resourceId } = data;
+
       // If specific user IDs are provided, send to those users
       if (userIds && userIds.length > 0) {
         const notifications = await Promise.all(
-          userIds.map(userId => 
+          userIds.map(userId =>
             prisma.notification.create({
               data: {
                 title,
@@ -25,16 +26,17 @@ export class NotificationService {
                 type,
                 category,
                 userId,
+                resourceId
               }
             })
           )
         );
         return { success: true, notifications };
       }
-      
+
       // Otherwise, find all users with matching permissions based on category
       let matchingUsers: { id: number }[] = [];
-      
+
       switch (category) {
         case 'kids':
           matchingUsers = await prisma.user.findMany({
@@ -81,10 +83,12 @@ export class NotificationService {
             select: { id: true }
           });
       }
-      
+
+      console.log(`[NotificationService] Found ${matchingUsers.length} matching users for category ${category}`);
+
       // Create notifications for all matching users
       const notifications = await Promise.all(
-        matchingUsers.map(user => 
+        matchingUsers.map(user =>
           prisma.notification.create({
             data: {
               title,
@@ -92,17 +96,18 @@ export class NotificationService {
               type,
               category,
               userId: user.id,
+              resourceId
             }
           })
         )
       );
-      
+
       return { success: true, notifications };
     } catch (error) {
       console.error('Error creating notifications:', error);
       return { success: false, error: 'Failed to create notifications' };
     }
- }
+  }
 
   static async getUserNotifications(userId: number) {
     try {
@@ -117,16 +122,16 @@ export class NotificationService {
     }
   }
 
-  static async markAsRead(notificationId: number, userId: number) {
+  static async updateReadStatus(notificationId: number, userId: number, isRead: boolean) {
     try {
       const notification = await prisma.notification.update({
         where: { id: notificationId, userId },
-        data: { isRead: true },
+        data: { isRead },
       });
       return { success: true, notification };
     } catch (error) {
-      console.error('Error marking notification as read:', error);
-      return { success: false, error: 'Failed to mark as read' };
+      console.error('Error updating notification read status:', error);
+      return { success: false, error: 'Failed to update read status' };
     }
   }
 

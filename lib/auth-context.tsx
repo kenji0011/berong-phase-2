@@ -9,6 +9,7 @@ export type UserRole = "guest" | "kid" | "adult" | "professional" | "admin"
 export interface User {
   id: number
   username: string
+  email?: string
   name: string
   age: number
   role: UserRole
@@ -36,6 +37,7 @@ interface AuthContextType {
   login: (username: string, password: string) => Promise<{ success: boolean; error?: string; user?: User }>
   register: (username: string, password: string, name: string, age: number) => Promise<{ success: boolean; error?: string }>
   logout: () => void
+  refreshUser: () => Promise<void>
   isLoading: boolean
   isLoggingOut: boolean
   isAuthenticated: boolean
@@ -247,6 +249,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, 1500)
   }
 
+  const refreshUser = async () => {
+    try {
+      const response = await fetch('/api/auth/me', {
+        method: 'GET',
+        credentials: 'include',
+      })
+      if (response.ok) {
+        const data = await response.json()
+        if (data.user) {
+          const userWithPermissions = {
+            ...data.user,
+            permissions: determinePermissions(data.user.role)
+          }
+          setUser(userWithPermissions)
+          localStorage.setItem('user', JSON.stringify(userWithPermissions))
+        }
+      }
+    } catch (error) {
+      console.error('Failed to refresh user:', error)
+    }
+  }
+
   const getRedirectPath = () => {
     return determineRedirectPath(user)
   }
@@ -254,7 +278,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAuthenticated = user !== null
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, isLoading, isLoggingOut, isAuthenticated, isAuthenticating, getRedirectPath }}>
+    <AuthContext.Provider value={{ user, login, register, logout, refreshUser, isLoading, isLoggingOut, isAuthenticated, isAuthenticating, getRedirectPath }}>
       {children}
     </AuthContext.Provider>
   )

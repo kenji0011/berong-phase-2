@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "motion/react"
 import { useAuth } from "@/lib/auth-context"
 import Link from "next/link"
 import ReactMarkdown from "react-markdown"
+import chatbotIntents from "@/lib/chatbot-intents.json"
 
 interface Message {
   id: string
@@ -24,6 +25,25 @@ interface QuickQuestion {
   responseText: string;
   category: string;
 }
+
+// Pre-process intents for fast matching: extract keywords from all patterns
+const processedIntents = Object.entries(chatbotIntents).map(([tag, data]) => {
+  const intentData = data as { patterns: string[]; responses: string[] }
+  // Extract unique keywords from all patterns (lowercased, 3+ chars)
+  const allKeywords = new Set<string>()
+  intentData.patterns.forEach((pattern: string) => {
+    pattern.toLowerCase().split(/\s+/).forEach((word: string) => {
+      const clean = word.replace(/[^a-z0-9]/g, "")
+      if (clean.length >= 3) allKeywords.add(clean)
+    })
+  })
+  return {
+    tag,
+    patterns: intentData.patterns.map((p: string) => p.toLowerCase()),
+    responses: intentData.responses,
+    keywords: Array.from(allKeywords),
+  }
+})
 
 export function Chatbot() {
   const { isAuthenticated } = useAuth()
@@ -165,27 +185,48 @@ export function Chatbot() {
 
   const generateRuleBasedResponse = (input: string): string => {
     const lowerInput = input.toLowerCase()
+    const inputWords = lowerInput.split(/\s+/).map(w => w.replace(/[^a-z0-9]/g, "")).filter(w => w.length >= 3)
 
-    if (lowerInput.includes("fire") && lowerInput.includes("extinguisher")) {
-      return "To use a fire extinguisher, remember PASS: Pull the pin, Aim at the base, Squeeze the handle, and Sweep side to side. Check our Adult section for detailed tutorials!"
-    }
-    if (lowerInput.includes("emergency") || lowerInput.includes("911")) {
-      return "In case of fire emergency, call 911 immediately. Our emergency hotline is also available at (02) 888-0000."
-    }
-    if (lowerInput.includes("smoke detector") || lowerInput.includes("alarm")) {
-      return "Smoke detectors should be tested monthly and batteries replaced annually. Install them on every level of your home, especially near bedrooms."
-    }
-    if (lowerInput.includes("kids") || lowerInput.includes("children")) {
-      return "We have a dedicated Kids section with educational games and modules! Children can learn fire safety in a fun, interactive way."
-    }
-    if (lowerInput.includes("professional") || lowerInput.includes("training")) {
-      return "Our Professional section offers advanced firefighting techniques, fire codes, and BFP manuals. Access requires professional credentials or admin permission."
-    }
-    if (lowerInput.includes("contact") || lowerInput.includes("location")) {
-      return "BFP Sta Cruz Fire Station is located in Sta Cruz, Philippines. Contact us at (02) 8888-000 or bfp.stacruz@bfp.gov.ph"
+    // Step 1: Check for exact/near-exact pattern match
+    let bestMatch: { tag: string; score: number } = { tag: "", score: 0 }
+
+    for (const intent of processedIntents) {
+      // Check if input closely matches any full pattern
+      for (const pattern of intent.patterns) {
+        const patternWords = pattern.split(/\s+/).map(w => w.replace(/[^a-z0-9]/g, "")).filter(w => w.length >= 3)
+        const matchingWords = inputWords.filter(w => patternWords.includes(w))
+        // Score = what fraction of the pattern keywords match, boosted by how many input words match
+        if (patternWords.length > 0) {
+          const patternCoverage = matchingWords.length / patternWords.length
+          const inputCoverage = matchingWords.length / Math.max(inputWords.length, 1)
+          const score = (patternCoverage * 0.7) + (inputCoverage * 0.3)
+          if (score > bestMatch.score) {
+            bestMatch = { tag: intent.tag, score }
+          }
+        }
+      }
+
+      // Also do keyword overlap scoring
+      const matchingKeywords = inputWords.filter(w => intent.keywords.includes(w))
+      if (matchingKeywords.length > 0) {
+        const keywordScore = (matchingKeywords.length / Math.max(inputWords.length, 1)) * 0.6
+        if (keywordScore > bestMatch.score) {
+          bestMatch = { tag: intent.tag, score: keywordScore }
+        }
+      }
     }
 
-    return "Thank you for your question! For specific fire safety information, please explore our Dashboard, Adult, or Professional sections. For emergencies, always call 911."
+    // Step 2: If we have a decent match (score > 0.2), return a response from that intent
+    if (bestMatch.score > 0.2 && bestMatch.tag) {
+      const intentData = chatbotIntents[bestMatch.tag as keyof typeof chatbotIntents]
+      if (intentData && intentData.responses.length > 0) {
+        const randomIndex = Math.floor(Math.random() * intentData.responses.length)
+        return intentData.responses[randomIndex]
+      }
+    }
+
+    // Step 3: Fallback for no match
+    return "Thank you for your question! I can help with fire safety topics like fire prevention, emergency procedures, fire extinguishers, evacuation planning, and more. Try asking about a specific fire safety topic!"
   }
 
   return (

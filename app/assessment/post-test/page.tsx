@@ -123,7 +123,7 @@ export default function PostTestPage() {
     try {
       setLoading(true)
       const role = user?.age && user.age < 18 ? "kid" : "adult"
-      const response = await fetch(`/api/assessment/questions?role=${role}&type=postTest&limit=15`)
+      const response = await fetch(`/api/assessment/questions?role=${role}&limit=15`)
       if (response.ok) {
         const data = await response.json()
         setQuestions(data.questions || [])

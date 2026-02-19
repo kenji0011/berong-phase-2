@@ -33,7 +33,7 @@ const teamMembers = [
     {
         name: "John Kervin D. Evangelista",
         roles: ["Project Head", "DevOps", "AI/ML Engineer", "Developer"],
-        image: "/placeholder-user.jpg",
+        image: "/evangelista_1x1.png",
         socials: [
             { icon: Github, url: "https://github.com/Toneejake", label: "GitHub" },
             { icon: Globe, url: "https://toneejake.tech", label: "Portfolio" },
@@ -45,7 +45,7 @@ const teamMembers = [
     {
         name: "Aedran Gabriel R. Teaño",
         roles: ["Game Developer", "3D/2D Artist", "Sound Designer"],
-        image: "/placeholder-user.jpg",
+        image: "/teano_1x1.jpg",
         socials: [
             { icon: Github, url: "https://github.com/Izect", label: "GitHub" },
             { icon: Instagram, url: "https://www.instagram.com/aedraaann/", label: "Instagram" },
@@ -57,7 +57,7 @@ const teamMembers = [
     {
         name: "Keinji C. Velina",
         roles: ["Developer", "Data Scientist", "AI Engineer"],
-        image: "/placeholder-user.jpg",
+        image: "/velina_1x1.png",
         socials: [
             { icon: Github, url: "https://github.com/sitol2", label: "GitHub" },
             { icon: Linkedin, url: "https://www.linkedin.com/in/keinji-velina-423736326/", label: "LinkedIn" },

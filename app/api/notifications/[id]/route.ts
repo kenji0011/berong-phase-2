@@ -33,7 +33,11 @@ export async function PATCH(
       );
     }
 
-    const result = await NotificationService.markAsRead(notificationId, numericUserId);
+    const result = await NotificationService.updateReadStatus(
+      notificationId,
+      numericUserId,
+      typeof body.isRead === 'boolean' ? body.isRead : true
+    );
 
     if (result.success) {
       return NextResponse.json(result.notification);

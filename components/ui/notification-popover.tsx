@@ -3,10 +3,17 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { Bell, Check, CheckCheck, MoreHorizontal } from "lucide-react";
+import { Bell, Check, CheckCheck, MoreHorizontal, Trash2, ArrowRight } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/lib/auth-context";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Notification {
   id: number;
@@ -16,6 +23,7 @@ interface Notification {
   category: string;
   isRead: boolean;
   createdAt: string;
+  resourceId?: number | null;
 }
 
 export function NotificationPopover() {
@@ -55,7 +63,9 @@ export function NotificationPopover() {
     return () => clearInterval(interval);
   }, [user?.id]);
 
-  const markAsRead = async (id: number) => {
+  const router = useRouter();
+
+  const toggleReadStatus = async (id: number, isRead: boolean) => {
     if (!user?.id) return;
 
     try {
@@ -64,18 +74,36 @@ export function NotificationPopover() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId: user.id }),
+        body: JSON.stringify({ userId: user.id, isRead }),
       });
 
       if (response.ok) {
         setNotifications(notifications.map(n =>
-          n.id === id ? { ...n, isRead: true } : n
+          n.id === id ? { ...n, isRead } : n
         ));
       } else {
-        console.error('Failed to mark notification as read');
+        console.error('Failed to update notification status');
       }
     } catch (err) {
-      console.error('Error marking notification as read:', err);
+      console.error('Error updating notification status:', err);
+    }
+  };
+
+  const deleteNotification = async (id: number) => {
+    if (!user?.id) return;
+
+    try {
+      const response = await fetch(`/api/notifications/${id}?userId=${user.id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setNotifications(notifications.filter(n => n.id !== id));
+      } else {
+        console.error('Failed to delete notification');
+      }
+    } catch (err) {
+      console.error('Error deleting notification:', err);
     }
   };
 
@@ -88,11 +116,37 @@ export function NotificationPopover() {
 
       // Then update in the database
       const unreadNotificationIds = notifications.filter(n => !n.isRead).map(n => n.id);
-      await Promise.all(unreadNotificationIds.map(id => markAsRead(id)));
+      await Promise.all(unreadNotificationIds.map(id => toggleReadStatus(id, true)));
     } catch (err) {
       console.error('Error marking all notifications as read:', err);
       // Revert the UI changes if there was an error
       setNotifications(notifications.map(n => ({ ...n, isRead: false })));
+    }
+  };
+
+  const handleGo = (notification: Notification) => {
+    // Mark as read first
+    if (!notification.isRead) {
+      toggleReadStatus(notification.id, true);
+    }
+
+    if (notification.resourceId) {
+      if (notification.type === 'blog') {
+        router.push(`/adult/blog/${notification.resourceId}`);
+      } else if (notification.type === 'video') {
+        // Assuming video page or section, might need adjustment based on route structure
+        // For now, redirecting to generic video page if specific ID route doesn't exist
+        // or if query params are used. Let's assume /adult/videos matches the resource type
+        router.push(`/adult/videos`);
+      } else {
+        // Fallback based on category
+        router.push(`/${notification.category}`);
+      }
+    } else {
+      // Fallback for notifications without resourceId
+      if (notification.type === 'blog') router.push('/adult/blog');
+      else if (notification.type === 'video') router.push('/adult/videos');
+      else router.push(`/${notification.category}`);
     }
   };
 
@@ -194,7 +248,7 @@ export function NotificationPopover() {
                 {notifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className={`p-3 rounded-md transition-colors ${!notification.isRead
+                    className={`p-3 rounded-md transition-colors group relative ${!notification.isRead
                       ? "bg-accent/50 hover:bg-accent/70"
                       : "hover:bg-muted/50"
                       }`}
@@ -203,7 +257,7 @@ export function NotificationPopover() {
                       <div className={`mt-0.5 flex h-6 w-6 items-center justify-center rounded-full ${getNotificationBadge(notification.type)}`}>
                         {getNotificationIcon(notification.type)}
                       </div>
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 pr-8">
                         <div className="flex items-center gap-2">
                           <h4 className="text-sm font-medium line-clamp-2">
                             {notification.title}
@@ -221,19 +275,44 @@ export function NotificationPopover() {
                           {formatDate(notification.createdAt)}
                         </p>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => markAsRead(notification.id)}
-                        className="h-auto p-1 text-xs opacity-0 group-hover:opacity-100"
-                      >
-                        {!notification.isRead ? (
-                          <Check className="h-3 w-3" />
-                        ) : (
-                          <CheckCheck className="h-3 w-3 text-green-50" />
-                        )}
-                      </Button>
                     </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute top-2 right-2 h-6 w-6 text-foreground bg-background/50 hover:bg-background border border-transparent hover:border-border shadow-sm transition-all"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleGo(notification)}>
+                          <ArrowRight className="mr-2 h-4 w-4" />
+                          <span>Go</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => toggleReadStatus(notification.id, !notification.isRead)}>
+                          {!notification.isRead ? (
+                            <>
+                              <Check className="mr-2 h-4 w-4" />
+                              <span>Mark as Read</span>
+                            </>
+                          ) : (
+                            <>
+                              <Bell className="mr-2 h-4 w-4" />
+                              <span>Mark as Unread</span>
+                            </>
+                          )}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => deleteNotification(notification.id)}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          <span>Delete</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 ))}
               </div>
@@ -241,6 +320,6 @@ export function NotificationPopover() {
           </div>
         </ScrollArea>
       </PopoverContent>
-    </Popover>
+    </Popover >
   );
 }

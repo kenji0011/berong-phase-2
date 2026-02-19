@@ -11,7 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Shield, AlertCircle, Loader2 } from "lucide-react"
+import { Shield, AlertCircle, Loader2, KeyRound, Eye, EyeOff } from "lucide-react"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import Link from "next/link"
 import Image from "next/image"
 import { RegistrationWizard } from "@/components/registration-wizard"
@@ -24,7 +25,16 @@ function AuthContent() {
   const [loading, setLoading] = useState(false)
   const [isLogin, setIsLogin] = useState(true)
   const [showRegistrationWizard, setShowRegistrationWizard] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const defaultTab = searchParams.get("tab") || "login"
+
+  // Reset password state
+  const [showResetDialog, setShowResetDialog] = useState(false)
+  const [resetUsername, setResetUsername] = useState("")
+  const [resetCode, setResetCode] = useState("")
+  const [resetStep, setResetStep] = useState(1) // 1 = enter username, 2 = enter code
+  const [resetLoading, setResetLoading] = useState(false)
+  const [resetMessage, setResetMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
   const [loginData, setLoginData] = useState({ username: "", password: "" })
   const [registerData, setRegisterData] = useState({
@@ -104,6 +114,68 @@ function AuthContent() {
     }
 
     setLoading(false)
+  }
+
+  const handleResetPassword = async () => {
+    if (resetStep === 1) {
+      // Step 1: Send verification code
+      if (!resetUsername.trim()) {
+        setResetMessage({ type: 'error', text: 'Please enter your username.' })
+        return
+      }
+
+      setResetLoading(true)
+      setResetMessage(null)
+
+      try {
+        const response = await fetch('/api/auth/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: resetUsername.trim(), step: 1 }),
+        })
+        const result = await response.json()
+
+        if (result.success) {
+          setResetStep(2)
+          setResetMessage({ type: 'success', text: result.message })
+        } else {
+          setResetMessage({ type: 'error', text: result.error })
+        }
+      } catch (err) {
+        setResetMessage({ type: 'error', text: 'Something went wrong. Please try again.' })
+      } finally {
+        setResetLoading(false)
+      }
+    } else if (resetStep === 2) {
+      // Step 2: Verify code and reset password
+      if (!resetCode.trim()) {
+        setResetMessage({ type: 'error', text: 'Please enter the verification code.' })
+        return
+      }
+
+      setResetLoading(true)
+      setResetMessage(null)
+
+      try {
+        const response = await fetch('/api/auth/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: resetUsername.trim(), step: 2, code: resetCode.trim() }),
+        })
+        const result = await response.json()
+
+        if (result.success) {
+          setResetMessage({ type: 'success', text: result.message })
+          setResetStep(3) // Done state
+        } else {
+          setResetMessage({ type: 'error', text: result.error })
+        }
+      } catch (err) {
+        setResetMessage({ type: 'error', text: 'Something went wrong. Please try again.' })
+      } finally {
+        setResetLoading(false)
+      }
+    }
   }
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -204,15 +276,26 @@ function AuthContent() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="login-password">Password</Label>
-                    <Input
-                      id="login-password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={loginData.password}
-                      onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                      required
-                      autoComplete="current-password"
-                    />
+                    <div className="relative">
+                      <Input
+                        id="login-password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        value={loginData.password}
+                        onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                        required
+                        autoComplete="current-password"
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        tabIndex={-1}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                     {validationErrors.password && (
                       <p className="mt-1 text-sm text-red-600">{validationErrors.password}</p>
                     )}
@@ -228,6 +311,24 @@ function AuthContent() {
                   <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={loading}>
                     {loading ? "Signing in..." : "Sign In"}
                   </Button>
+
+                  <div className="text-center">
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="text-sm text-muted-foreground hover:text-primary"
+                      onClick={() => {
+                        setShowResetDialog(true)
+                        setResetMessage(null)
+                        setResetUsername("")
+                        setResetCode("")
+                        setResetStep(1)
+                      }}
+                    >
+                      <KeyRound className="h-3 w-3 mr-1" />
+                      Forgot Password?
+                    </Button>
+                  </div>
                 </form>
               </TabsContent>
 
@@ -265,6 +366,106 @@ function AuthContent() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Reset Password Dialog */}
+        <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <KeyRound className="h-5 w-5 text-orange-500" />
+                Reset Password
+              </DialogTitle>
+              <DialogDescription>
+                {resetStep === 1 && 'Enter your username. A verification code will be sent to your email.'}
+                {resetStep === 2 && 'Enter the 6-digit verification code sent to your email.'}
+                {resetStep === 3 && 'Your password has been reset successfully!'}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-2">
+              {/* Step 1: Username */}
+              {resetStep === 1 && (
+                <div className="space-y-2">
+                  <Label htmlFor="reset-username">Username</Label>
+                  <Input
+                    id="reset-username"
+                    placeholder="Enter your username"
+                    value={resetUsername}
+                    onChange={(e) => {
+                      setResetUsername(e.target.value)
+                      setResetMessage(null)
+                    }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleResetPassword() }}
+                  />
+                </div>
+              )}
+
+              {/* Step 2: Verification Code */}
+              {resetStep === 2 && (
+                <div className="space-y-2">
+                  <Label htmlFor="reset-code">Verification Code</Label>
+                  <Input
+                    id="reset-code"
+                    placeholder="Enter 6-digit code"
+                    value={resetCode}
+                    onChange={(e) => {
+                      setResetCode(e.target.value.replace(/\D/g, '').slice(0, 6))
+                      setResetMessage(null)
+                    }}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && resetCode.length === 6) handleResetPassword() }}
+                    maxLength={6}
+                    className="text-center text-2xl tracking-[0.5em] font-Arial"
+                  />
+                </div>
+              )}
+
+              {resetMessage && (
+                <Alert variant={resetMessage.type === 'error' ? 'destructive' : 'default'}
+                  className={resetMessage.type === 'success' ? 'border-green-500 bg-green-50 text-green-800' : ''}
+                >
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{resetMessage.text}</AlertDescription>
+                </Alert>
+              )}
+            </div>
+
+            <DialogFooter>
+              {resetStep === 3 ? (
+                <Button onClick={() => setShowResetDialog(false)} className="w-full">
+                  Back to Sign In
+                </Button>
+              ) : (
+                <>
+                  <Button variant="outline" onClick={() => {
+                    if (resetStep === 2) {
+                      setResetStep(1)
+                      setResetCode("")
+                      setResetMessage(null)
+                    } else {
+                      setShowResetDialog(false)
+                    }
+                  }}>
+                    {resetStep === 2 ? 'Back' : 'Cancel'}
+                  </Button>
+                  <Button
+                    onClick={handleResetPassword}
+                    disabled={resetLoading || (resetStep === 1 ? !resetUsername.trim() : resetCode.length !== 6)}
+                    className="bg-orange-500 hover:bg-orange-600"
+                  >
+                    {resetLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        {resetStep === 1 ? 'Sending...' : 'Verifying...'}
+                      </>
+                    ) : (
+                      resetStep === 1 ? 'Send Code' : 'Verify & Reset'
+                    )}
+                  </Button>
+                </>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

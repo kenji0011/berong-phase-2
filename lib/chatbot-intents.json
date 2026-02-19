@@ -1,0 +1,642 @@
+{
+    "goodbye": {
+        "patterns": [
+            "Exit",
+            "I have to go",
+            "See you later",
+            "Goodbye",
+            "Talk to you later",
+            "Bye",
+            "okay bye",
+            "I'm done",
+            "that's all",
+            "exit now",
+            "quit",
+            "talk to you later",
+            "see ya"
+        ],
+        "responses": [
+            "Goodbye! Remember to always practice fire safety.",
+            "Take care and stay fire safe!",
+            "Stay safe! Feel free to ask if you have more questions."
+        ]
+    },
+    "greeting": {
+        "patterns": [
+            "Is anyone there?",
+            "Good day",
+            "Hey",
+            "Hello",
+            "Hi",
+            "How are you",
+            "What's up",
+            "hello there",
+            "good morning",
+            "good evening",
+            "hi",
+            "hey bot",
+            "can you help?",
+            "what's up",
+            "yo"
+        ],
+        "responses": [
+            "Hi there! How can I assist you with fire safety questions?",
+            "Hello! I'm your fire safety assistant. How can I help you with fire safety today?"
+        ]
+    },
+    "emergency": {
+        "patterns": [
+            "My building is on fire",
+            "what is is the emergency contact number?",
+            "There is a fire!",
+            "What should I do in a fire?",
+            "can you tell me is the fire emergency procedure?",
+            "Help, my house is on fire!",
+            "What is the emergency contact number?",
+            "Fire emergency steps",
+            "What is the fire emergency procedure?",
+            "How to escape a fire?",
+            "I have an emergency!",
+            "FIRE!",
+            "what to do in a fire",
+            "help me there is a fire",
+            "my kitchen is on fire",
+            "steps for fire emergency",
+            "how do I escape a burning building"
+        ],
+        "responses": [
+            "In a fire emergency, your priority is to get to safety. Alert everyone, get out, and stay out. Call 911 or the the local emergency hotline immediately. Do not go back inside for any reason.",
+            "If you see a fire, evacuate immediately and call 911. The your local BFP emergency hotline is your local emergency hotline. Stay calm and get to a safe location."
+        ]
+    },
+    "fire_prevention": {
+        "patterns": [
+            "Home fire safety checklist",
+            "How can I prevent fires at home?",
+            "What are the most common causes of house fires?",
+            "How to avoid electrical fires?",
+            "Tips for fire prevention",
+            "What are some kitchen fire safety tips?",
+            "how to stop fires from starting",
+            "tips for preventing fire",
+            "what causes house fires",
+            "kitchen fire prevention",
+            "how to be fire safe at home",
+            "electrical fire safety tips",
+            "home safety checklist"
+        ],
+        "responses": [
+            "The leading causes of home fires are cooking, heating equipment, and electrical malfunctions. Always be cautious, have a fire extinguisher accessible, and follow safety guidelines.",
+            "To prevent fires, never leave cooking unattended, keep flammable items away from heat sources, check electrical cords for damage, and don't overload outlets. A clean and clutter-free home is a safer home."
+        ]
+    },
+    "kids_safety": {
+        "patterns": [
+            "What is 'Stop, Drop, and Roll'?",
+            "Do you have any educational games for kids?",
+            "What are some fire safety rules for children?",
+            "How can I teach my kids about fire safety?",
+            "Family fire escape plan",
+            "how to teach children about fire",
+            "fire safety for my kids",
+            "what is stop drop and roll",
+            "do you have fire games for children",
+            "family escape plan help",
+            "rules for kids fire safety"
+        ],
+        "responses": [
+            "We have a dedicated Kids section with fun games, videos, and learning modules to teach children about fire safety in an engaging way. It's a great place for them to learn how to be safe.",
+            "Teach children to 'Stop, Drop, and Roll' if their clothes catch fire. Also, establish a family fire escape plan with a designated meeting spot outside, and practice it with them regularly."
+        ]
+    },
+    "fire_extinguisher": {
+        "patterns": [
+            "Can you explain how to use a fire extinguisher?",
+            "How do I use a fire extinguisher?",
+            "What are the instructions for a fire extinguisher?",
+            "Fire extinguisher operation",
+            "what is does PASS mean?",
+            "What does PASS mean?",
+            "When should I use an extinguisher?",
+            "explain PASS",
+            "how does a fire extinguisher work",
+            "when to use fire extinguisher",
+            "what's the way to use an extinguisher",
+            "instructions for extinguisher",
+            "PASS acronym",
+            "pull aim squeeze sweep"
+        ],
+        "responses": [
+            "To use a fire extinguisher, remember the PASS acronym: P-Pull the pin. A-Aim the nozzle at the base of the fire. S-Squeeze the lever slowly. S-Sweep the nozzle from side to side.",
+            "PASS stands for Pull, Aim, Squeeze, and Sweep. It's the standard procedure for operating a fire extinguisher. Only use an extinguisher for small, contained fires and ensure you have a clear exit path."
+        ]
+    },
+    "contact_info": {
+        "patterns": [
+            "BFP hotline",
+            "Where is the fire station located?",
+            "How can I contact your local BFP?",
+            "can you explain how can I contact your local BFP?",
+            "What is the address of the fire station?",
+            "where is is the fire station located?",
+            "What is your contact number?",
+            "what's the number for the fire station",
+            "where is your local BFP",
+            "hotline for fire",
+            "BFP address",
+            "how to call BFP",
+            "email for your local BFP",
+            "contact details for fire department"
+        ],
+        "responses": [
+            "You can contact BFP Sta Cruz Fire Station through Globe: 09670528897, Smart: 09620937725, or Tel: (049) 808-2278. Email: stacruzfs027@gmail.com. Visit our Facebook page: facebook.com/bfpsantacruzfslaguna. For emergencies, call 911 or 160 (BFP Direct)."
+        ]
+    },
+    "thanks": {
+        "patterns": [
+            "Thanks",
+            "That's helpful",
+            "Awesome, thanks",
+            "I appreciate it",
+            "Thank you",
+            "Thanks a lot",
+            "thanks for the help",
+            "you're helpful",
+            "appreciate it",
+            "ty",
+            "thank you so much",
+            "ok thanks"
+        ],
+        "responses": [
+            "Anytime! Let me know if you need anything else.",
+            "You're welcome! I'm here to help.",
+            "Happy to assist! Stay safe."
+        ]
+    },
+    "smoke_detector": {
+        "patterns": [
+            "My smoke alarm is beeping, what does it mean?",
+            "Where should I install smoke alarms?",
+            "How often should I test my smoke detectors?",
+            "How to take care of smoke alarms?",
+            "What is the proper maintenance for smoke detectors?",
+            "what is the way to take care of smoke alarms?",
+            "Why is my smoke detector chirping?",
+            "can you tell me is the proper maintenance for smoke detectors?",
+            "what is the location of should I install smoke alarms?",
+            "How often should I test the smoke detectors?",
+            "why is my smoke alarm beeping",
+            "smoke alarm maintenance",
+            "where to put smoke alarms",
+            "how to test smoke detector",
+            "my detector is chirping",
+            "change batteries in smoke alarm"
+        ],
+        "responses": [
+            "Smoke detectors should be tested at least once a month, and batteries should be replaced at least once a year. Install them on every level of your home, inside bedrooms, and outside sleeping areas.",
+            "If your smoke alarm is chirping intermittently, it usually means the battery is low and needs to be replaced. A continuous loud alarm indicates a potential fire, and you should evacuate immediately."
+        ]
+    },
+    "professional_info": {
+        "patterns": [
+            "Are there professional training materials available?",
+            "Resources for fire safety professionals",
+            "Where can I find information for firefighters?",
+            "Where can I read the Fire Code of the Philippines?",
+            "Do you have the BFP manuals?",
+            "where is the fire code",
+            "BFP manuals for firefighters",
+            "training materials for BFP",
+            "info for professionals",
+            "fire code of philippines",
+            "how to access professional section"
+        ],
+        "responses": [
+            "Professionals can find in-depth resources and official BFP documents in the Professional section of our platform. Please log in with appropriate credentials to access it.",
+            "Our Professional section contains the Fire Code of the Philippines, BFP operational manuals, and advanced training materials. Access to this section requires professional credentials or admin permission."
+        ]
+    },
+    "small_talk": {
+        "patterns": [
+            "How do you feel?",
+            "How are you?",
+            "How is the weather?",
+            "what is time is it?",
+            "Are you busy?",
+            "How's it going?",
+            "can you explain how do you feel?",
+            "What time is it?",
+            "Tell me a joke",
+            "What's up?",
+            "What's the weather like?",
+            "What day is it?",
+            "Do you like music?",
+            "how's your day",
+            "what do you do",
+            "tell me a fun fact",
+            "are you a real person",
+            "what's the time",
+            "do you get tired"
+        ],
+        "responses": [
+            "I don't experience feelings like humans do, but I'm ready to help! What would you like to know about fire safety?",
+            "I'm doing great! I'm here to chat about fire safety. Is there anything specific you'd like to know?",
+            "I'm here and ready to help! While I can't tell you the weather, I can definitely help with fire safety topics.",
+            "I'm functioning well, thank you for asking! How can I assist you with fire safety today?"
+        ]
+    },
+    "help": {
+        "patterns": [
+            "What can I ask you?",
+            "Guide me",
+            "Can you help me?",
+            "How do I use this?",
+            "I need help",
+            "What topics do you cover?",
+            "Where can I find information?",
+            "I'm lost",
+            "Help",
+            "Assist me",
+            "What can I ask the assistant",
+            "I need assistance",
+            "can you assist me",
+            "what can you do",
+            "I'm lost, please help",
+            "what info do you have",
+            "guide me"
+        ],
+        "responses": [
+            "Sure! You can ask me things like 'How to use a fire extinguisher?', 'What to do in case of a fire?', or 'Tell me about fire prevention tips'.",
+            "I'm here to help! You can ask me questions about fire safety, emergency procedures, fire prevention, and the services offered by your local BFP.",
+            "You can explore our website's Dashboard, Adult, Kids, and Professional sections for detailed information. I can also answer specific questions you have."
+        ]
+    },
+    "user_feedback": {
+        "patterns": [
+            "Good job",
+            "You're helpful",
+            "That's not right",
+            "You're not very helpful",
+            "I don't understand",
+            "Can you rephrase that?",
+            "That's correct",
+            "That's confusing",
+            "that was a good answer",
+            "that's wrong",
+            "you are not helpful",
+            "you're a good bot",
+            "bad bot",
+            "I'm confused by your answer"
+        ],
+        "responses": [
+            "Thanks for letting me know. I'm here to improve. How else can I help with fire safety?",
+            "Thank you for the feedback! I'll keep learning to better assist with your fire safety needs.",
+            "I appreciate your input. If my answer wasn't clear, please try rephrasing your fire safety question."
+        ]
+    },
+    "about_bot": {
+        "patterns": [
+            "Are you a bot?",
+            "What are you?",
+            "Who created you?",
+            "Are you human?",
+            "Tell me about yourself",
+            "Who are you?",
+            "What do you do?",
+            "Introduce yourself",
+            "what is can you do?",
+            "What is your name?",
+            "What is your purpose?",
+            "can you tell me do you do?",
+            "What can you do?",
+            "who made you",
+            "what's your name",
+            "tell me about yourself",
+            "what is your purpose",
+            "are you an AI",
+            "introduce yourself"
+        ],
+        "responses": [
+            "I'm your assistant, your virtual assistant for the your local BFP platform. I can answer questions about fire prevention, emergency procedures, and more.",
+            "Hi, I'm your assistant! I'm an AI assistant designed to provide information on fire safety and related topics.",
+            "I am your assistant, the your local BFP assistant. I'm here to help you with fire safety questions and information."
+        ]
+    },
+    "out_of_scope": {
+        "patterns": [
+            "What's the meaning of life?",
+            "Translate 'hello' to French",
+            "Who is the president of France?",
+            "How tall is Mount Everest?",
+            "Can you book a flight?",
+            "What is quantum physics?",
+            "Solve 2+2",
+            "Who won the World Cup?",
+            "What are the trending movies?",
+            "How do I bake a cake?",
+            "Can the assistant book a flight?",
+            "What's the capital of Mongolia?",
+            "Tell me the news",
+            "what's the weather",
+            "who is the president",
+            "tell me a joke",
+            "how to cook rice",
+            "what is 2+2",
+            "meaning of life"
+        ],
+        "responses": [
+            "That's outside my area of expertise. I specialize in fire safety information. Can I assist you with a fire safety question instead?",
+            "I'm designed to help with fire safety questions. For other topics, you might want to try a general search engine. Can I help with fire safety?",
+            "I'm sorry, I can't answer that. My knowledge is focused on fire safety and related topics. Is there something about fire safety I can help you with?"
+        ]
+    },
+    "gratitude": {
+        "patterns": [
+            "You're great",
+            "You're awesome",
+            "You're the best",
+            "Much appreciated",
+            "much appreciated",
+            "you're the best",
+            "thanks a lot",
+            "I'm grateful for your help",
+            "you're awesome"
+        ],
+        "responses": [
+            "You're very welcome! I'm glad I could help with your fire safety questions.",
+            "Happy to assist! Stay safe, and don't hesitate to ask if you have more questions.",
+            "Thank you for asking! Remember, fire safety is everyone's responsibility."
+        ]
+    },
+    "Fire Prevention": {
+        "patterns": [
+            "Can I reduce fire risks at home?",
+            "Where can I reduce fire risks at home?",
+            "What is the best way to reduce fire risks at home?",
+            "Do we need to reduce fire risks at home?",
+            "What should I do if reduce fire risks at home?",
+            "Is it safe to reduce fire risks at home?",
+            "Why does reduce fire risks at home?",
+            "When should we reduce fire risks at home?",
+            "Who should I call when reduce fire risks at home?",
+            "How do I reduce fire risks at home?",
+            "how can I reduce fire risk",
+            "stop fires at home",
+            "what are common fire hazards",
+            "how to make my home safer from fire",
+            "tips for fire prevention"
+        ],
+        "responses": [
+            "Declutter, maintain wiring, keep heat sources clear, and store fuels safely. Create a checklist and review monthly. Never use water on grease or electrical fires.",
+            "Declutter, maintain wiring, keep heat sources clear, and store fuels safely. Create a checklist and review monthly. Crawl low under smoke and close doors behind you.",
+            "Declutter, maintain wiring, keep heat sources clear, and store fuels safely. Create a checklist and review monthly. Call 911 or local BFP hotline immediately and evacuate first.",
+            "Declutter, maintain wiring, keep heat sources clear, and store fuels safely. Create a checklist and review monthly. Avoid daisy-chaining extension cords and overloading outlets.",
+            "Declutter, maintain wiring, keep heat sources clear, and store fuels safely. Create a checklist and review monthly. Schedule regular inspections and keep records up to date.",
+            "Declutter, maintain wiring, keep heat sources clear, and store fuels safely. Create a checklist and review monthly. Keep a Class ABC extinguisher accessible and learn PASS: Pull, Aim, Squeeze, Sweep."
+        ]
+    },
+    "Emergency Response": {
+        "patterns": [
+            "What is the best way to respond when a small fire starts at night?",
+            "Is it safe to respond when a small fire starts at night?",
+            "Do we need to respond when a small fire starts at night?",
+            "Who should I call when respond when a small fire starts at night?",
+            "Can I respond when a small fire starts at night?",
+            "When should we respond when a small fire starts at night?",
+            "How do I respond when a small fire starts at night?",
+            "Why does respond when a small fire starts at night?",
+            "Where can I respond when a small fire starts at night?",
+            "What should I do if respond when a small fire starts at night?",
+            "what to do after a fire",
+            "fire aftermath help",
+            "I had a small fire, what now",
+            "how to respond to fire alarm",
+            "what's the procedure for a fire"
+        ],
+        "responses": [
+            "Alert everyone, evacuate along your plan, call 911/BFP, and only attempt a quick extinguisher use if trained and the exit is behind you. Check smoke alarms monthly and replace batteries yearly.",
+            "Alert everyone, evacuate along your plan, call 911/BFP, and only attempt a quick extinguisher use if trained and the exit is behind you. Schedule regular inspections and keep records up to date.",
+            "Alert everyone, evacuate along your plan, call 911/BFP, and only attempt a quick extinguisher use if trained and the exit is behind you. Store LPG cylinders upright in a ventilated area and check for leaks with soapy water.",
+            "Alert everyone, evacuate along your plan, call 911/BFP, and only attempt a quick extinguisher use if trained and the exit is behind you. Teach children stop, drop, and roll and how to call for help.",
+            "Alert everyone, evacuate along your plan, call 911/BFP, and only attempt a quick extinguisher use if trained and the exit is behind you. Call 911 or local BFP hotline immediately and evacuate first."
+        ]
+    },
+    "Community & BFP": {
+        "patterns": [
+            "How do I get a fire safety inspection certificate?",
+            "Why does get a fire safety inspection certificate?",
+            "What should I do if get a fire safety inspection certificate?",
+            "What is the best way to get a fire safety inspection certificate?",
+            "Can I get a fire safety inspection certificate?",
+            "Where can I get a fire safety inspection certificate?",
+            "Who should I call when get a fire safety inspection certificate?",
+            "Do we need to get a fire safety inspection certificate?",
+            "When should we get a fire safety inspection certificate?",
+            "Is it safe to get a fire safety inspection certificate?",
+            "how to get a fire inspection",
+            "what is a fire safety certificate",
+            "BFP permits",
+            "how to apply for FSEC",
+            "BFP inspection requirements"
+        ],
+        "responses": [
+            "Prepare building plans, extinguisher records, and electrical clearances, then apply at the BFP office. Schedule inspection and address any noted findings. Check smoke alarms monthly and replace batteries yearly.",
+            "Prepare building plans, extinguisher records, and electrical clearances, then apply at the BFP office. Schedule inspection and address any noted findings. Schedule regular inspections and keep records up to date.",
+            "Prepare building plans, extinguisher records, and electrical clearances, then apply at the BFP office. Schedule inspection and address any noted findings. Keep exits clear and practice two ways out.",
+            "Prepare building plans, extinguisher records, and electrical clearances, then apply at the BFP office. Schedule inspection and address any noted findings. Never use water on grease or electrical fires.",
+            "Prepare building plans, extinguisher records, and electrical clearances, then apply at the BFP office. Schedule inspection and address any noted findings. Keep a Class ABC extinguisher accessible and learn PASS: Pull, Aim, Squeeze, Sweep.",
+            "Prepare building plans, extinguisher records, and electrical clearances, then apply at the BFP office. Schedule inspection and address any noted findings. Call 911 or local BFP hotline immediately and evacuate first."
+        ]
+    },
+    "First Aid": {
+        "patterns": [
+            "What is the best way to treat a minor burn safely?",
+            "Can I treat a minor burn safely?",
+            "How do I treat a minor burn safely?",
+            "Do we need to treat a minor burn safely?",
+            "Who should I call when treat a minor burn safely?",
+            "When should we treat a minor burn safely?",
+            "What should I do if treat a minor burn safely?",
+            "Is it safe to treat a minor burn safely?",
+            "Why does treat a minor burn safely?",
+            "Where can I treat a minor burn safely?",
+            "how to treat a burn",
+            "what to do for a minor burn",
+            "burn first aid",
+            "my kid got burned",
+            "first aid for scalds"
+        ],
+        "responses": [
+            "Cool under running water for 20 minutes, remove tight items, cover with a clean non-stick dressing, and seek care if blistered or large. Do not apply butter or toothpaste. Never use water on grease or electrical fires.",
+            "Cool under running water for 20 minutes, remove tight items, cover with a clean non-stick dressing, and seek care if blistered or large. Do not apply butter or toothpaste. Check smoke alarms monthly and replace batteries yearly.",
+            "Cool under running water for 20 minutes, remove tight items, cover with a clean non-stick dressing, and seek care if blistered or large. Do not apply butter or toothpaste. Crawl low under smoke and close doors behind you.",
+            "Cool under running water for 20 minutes, remove tight items, cover with a clean non-stick dressing, and seek care if blistered or large. Do not apply butter or toothpaste. Store LPG cylinders upright in a ventilated area and check for leaks with soapy water.",
+            "Cool under running water for 20 minutes, remove tight items, cover with a clean non-stick dressing, and seek care if blistered or large. Do not apply butter or toothpaste. Keep a Class ABC extinguisher accessible and learn PASS: Pull, Aim, Squeeze, Sweep."
+        ]
+    },
+    "School Safety": {
+        "patterns": [
+            "Why does teach students about fire safety?",
+            "How do I teach students about fire safety?",
+            "What should I do if teach students about fire safety?",
+            "Is it safe to teach students about fire safety?",
+            "Do we need to teach students about fire safety?",
+            "Can I teach students about fire safety?",
+            "Where can I teach students about fire safety?",
+            "When should we teach students about fire safety?",
+            "What is the best way to teach students about fire safety?",
+            "Who should I call when teach students about fire safety?",
+            "fire safety for teachers",
+            "fire drills in school",
+            "how to teach students fire safety",
+            "school fire evacuation plan"
+        ],
+        "responses": [
+            "Use age-appropriate activities, practice evacuation, assign marshals, and brief on stop, drop, and roll. Coordinate drills with the local fire station. Teach children stop, drop, and roll and how to call for help.",
+            "Use age-appropriate activities, practice evacuation, assign marshals, and brief on stop, drop, and roll. Coordinate drills with the local fire station. Check smoke alarms monthly and replace batteries yearly.",
+            "Use age-appropriate activities, practice evacuation, assign marshals, and brief on stop, drop, and roll. Coordinate drills with the local fire station. Schedule regular inspections and keep records up to date.",
+            "Use age-appropriate activities, practice evacuation, assign marshals, and brief on stop, drop, and roll. Coordinate drills with the local fire station. Crawl low under smoke and close doors behind you.",
+            "Use age-appropriate activities, practice evacuation, assign marshals, and brief on stop, drop, and roll. Coordinate drills with the local fire station. Keep a Class ABC extinguisher accessible and learn PASS: Pull, Aim, Squeeze, Sweep.",
+            "Use age-appropriate activities, practice evacuation, assign marshals, and brief on stop, drop, and roll. Coordinate drills with the local fire station. Store LPG cylinders upright in a ventilated area and check for leaks with soapy water.",
+            "Use age-appropriate activities, practice evacuation, assign marshals, and brief on stop, drop, and roll. Coordinate drills with the local fire station. Avoid daisy-chaining extension cords and overloading outlets.",
+            "Use age-appropriate activities, practice evacuation, assign marshals, and brief on stop, drop, and roll. Coordinate drills with the local fire station. Keep exits clear and practice two ways out."
+        ]
+    },
+    "Electrical Safety": {
+        "patterns": [
+            "Who should I call when know if my outlet is overloaded?",
+            "Where can I know if my outlet is overloaded?",
+            "What should I do if know if my outlet is overloaded?",
+            "Can I know if my outlet is overloaded?",
+            "What is the best way to know if my outlet is overloaded?",
+            "Is it safe to know if my outlet is overloaded?",
+            "How do I know if my outlet is overloaded?",
+            "Why does know if my outlet is overloaded?",
+            "When should we know if my outlet is overloaded?",
+            "Do we need to know if my outlet is overloaded?",
+            "how to prevent electrical fires",
+            "is my outlet overloaded",
+            "what to do with frayed cords",
+            "appliance fire safety",
+            "extension cord safety"
+        ],
+        "responses": [
+            "Warm plates, tripping breakers, and buzzing sounds suggest overload. Move devices to separate circuits and consult a licensed electrician. Crawl low under smoke and close doors behind you.",
+            "Warm plates, tripping breakers, and buzzing sounds suggest overload. Move devices to separate circuits and consult a licensed electrician. Check smoke alarms monthly and replace batteries yearly.",
+            "Warm plates, tripping breakers, and buzzing sounds suggest overload. Move devices to separate circuits and consult a licensed electrician. Call 911 or local BFP hotline immediately and evacuate first.",
+            "Warm plates, tripping breakers, and buzzing sounds suggest overload. Move devices to separate circuits and consult a licensed electrician. Schedule regular inspections and keep records up to date.",
+            "Warm plates, tripping breakers, and buzzing sounds suggest overload. Move devices to separate circuits and consult a licensed electrician. Keep a Class ABC extinguisher accessible and learn PASS: Pull, Aim, Squeeze, Sweep.",
+            "Warm plates, tripping breakers, and buzzing sounds suggest overload. Move devices to separate circuits and consult a licensed electrician. Keep exits clear and practice two ways out.",
+            "Warm plates, tripping breakers, and buzzing sounds suggest overload. Move devices to separate circuits and consult a licensed electrician. Teach children stop, drop, and roll and how to call for help."
+        ]
+    },
+    "Evacuation Planning": {
+        "patterns": [
+            "Where can I create a home fire escape plan?",
+            "When should we create a home fire escape plan?",
+            "How do I create a home fire escape plan?",
+            "What should I do if create a home fire escape plan?",
+            "Is it safe to create a home fire escape plan?",
+            "What is the best way to create a home fire escape plan?",
+            "Who should I call when create a home fire escape plan?",
+            "Why does create a home fire escape plan?",
+            "Can I create a home fire escape plan?",
+            "Do we need to create a home fire escape plan?",
+            "how to make a fire escape plan",
+            "home fire drill",
+            "family evacuation plan",
+            "what is a fire meeting spot",
+            "how to practice a fire escape"
+        ],
+        "responses": [
+            "Map every room, mark two exits, assign a meeting point, and practice twice a year at day and night. Include pets and persons with disabilities. Keep a Class ABC extinguisher accessible and learn PASS: Pull, Aim, Squeeze, Sweep.",
+            "Map every room, mark two exits, assign a meeting point, and practice twice a year at day and night. Include pets and persons with disabilities. Call 911 or local BFP hotline immediately and evacuate first.",
+            "Map every room, mark two exits, assign a meeting point, and practice twice a year at day and night. Include pets and persons with disabilities. Keep exits clear and practice two ways out.",
+            "Map every room, mark two exits, assign a meeting point, and practice twice a year at day and night. Include pets and persons with disabilities. Never use water on grease or electrical fires.",
+            "Map every room, mark two exits, assign a meeting point, and practice twice a year at day and night. Include pets and persons with disabilities. Avoid daisy-chaining extension cords and overloading outlets.",
+            "Map every room, mark two exits, assign a meeting point, and practice twice a year at day and night. Include pets and persons with disabilities. Store LPG cylinders upright in a ventilated area and check for leaks with soapy water.",
+            "Map every room, mark two exits, assign a meeting point, and practice twice a year at day and night. Include pets and persons with disabilities. Schedule regular inspections and keep records up to date."
+        ]
+    },
+    "Kitchen Safety": {
+        "patterns": [
+            "Is it safe to handle a grease fire on my stove?",
+            "Who should I call when handle a grease fire on my stove?",
+            "When should we handle a grease fire on my stove?",
+            "How do I handle a grease fire on my stove?",
+            "Where can I handle a grease fire on my stove?",
+            "What should I do if handle a grease fire on my stove?",
+            "Can I handle a grease fire on my stove?",
+            "Why does handle a grease fire on my stove?",
+            "What is the best way to handle a grease fire on my stove?",
+            "Do we need to handle a grease fire on my stove?",
+            "what to do for a grease fire",
+            "how to handle stove fire",
+            "oven fire safety",
+            "kitchen fire prevention tips",
+            "is it safe to leave cooking"
+        ],
+        "responses": [
+            "Turn off the heat, cover the pan with a metal lid, and use baking soda if needed. Never use water. Check smoke alarms monthly and replace batteries yearly.",
+            "Turn off the heat, cover the pan with a metal lid, and use baking soda if needed. Never use water. Keep a Class ABC extinguisher accessible and learn PASS: Pull, Aim, Squeeze, Sweep.",
+            "Turn off the heat, cover the pan with a metal lid, and use baking soda if needed. Never use water. Keep exits clear and practice two ways out.",
+            "Turn off the heat, cover the pan with a metal lid, and use baking soda if needed. Never use water. Store LPG cylinders upright in a ventilated area and check for leaks with soapy water.",
+            "Turn off the heat, cover the pan with a metal lid, and use baking soda if needed. Never use water. Schedule regular inspections and keep records up to date.",
+            "Turn off the heat, cover the pan with a metal lid, and use baking soda if needed. Never use water. Never use water on grease or electrical fires.",
+            "Turn off the heat, cover the pan with a metal lid, and use baking soda if needed. Never use water. Crawl low under smoke and close doors behind you."
+        ]
+    },
+    "General Safety": {
+        "patterns": [
+            "Is it safe to improve fire safety in a small apartment?",
+            "How do I improve fire safety in a small apartment?",
+            "When should we improve fire safety in a small apartment?",
+            "What is the best way to improve fire safety in a small apartment?",
+            "What should I do if improve fire safety in a small apartment?",
+            "Can I improve fire safety in a small apartment?",
+            "Do we need to improve fire safety in a small apartment?",
+            "Who should I call when improve fire safety in a small apartment?",
+            "Why does improve fire safety in a small apartment?",
+            "Where can I improve fire safety in a small apartment?",
+            "apartment fire safety",
+            "fire safety in a small space",
+            "how to use sprinklers",
+            "what's a go-bag",
+            "general fire safety advice"
+        ],
+        "responses": [
+            "Install smoke alarms in sleeping areas, keep exits clear, and avoid blocking sprinklers. Keep a go-bag and review your plan with roommates. Check smoke alarms monthly and replace batteries yearly.",
+            "Install smoke alarms in sleeping areas, keep exits clear, and avoid blocking sprinklers. Keep a go-bag and review your plan with roommates. Crawl low under smoke and close doors behind you.",
+            "Install smoke alarms in sleeping areas, keep exits clear, and avoid blocking sprinklers. Keep a go-bag and review your plan with roommates. Store LPG cylinders upright in a ventilated area and check for leaks with soapy water.",
+            "Install smoke alarms in sleeping areas, keep exits clear, and avoid blocking sprinklers. Keep a go-bag and review your plan with roommates. Schedule regular inspections and keep records up to date.",
+            "Install smoke alarms in sleeping areas, keep exits clear, and avoid blocking sprinklers. Keep a go-bag and review your plan with roommates. Keep a Class ABC extinguisher accessible and learn PASS: Pull, Aim, Squeeze, Sweep.",
+            "Install smoke alarms in sleeping areas, keep exits clear, and avoid blocking sprinklers. Keep a go-bag and review your plan with roommates. Call 911 or local BFP hotline immediately and evacuate first."
+        ]
+    },
+    "Workplace Safety": {
+        "patterns": [
+            "Where can I keep our office compliant with fire codes?",
+            "What should I do if keep our office compliant with fire codes?",
+            "Who should I call when keep our office compliant with fire codes?",
+            "How do I keep our office compliant with fire codes?",
+            "What is the best way to keep our office compliant with fire codes?",
+            "Do we need to keep our office compliant with fire codes?",
+            "Is it safe to keep our office compliant with fire codes?",
+            "Why does keep our office compliant with fire codes?",
+            "Can I keep our office compliant with fire codes?",
+            "When should we keep our office compliant with fire codes?",
+            "office fire safety",
+            "fire code for business",
+            "workplace fire drills",
+            "company fire safety plan",
+            "BFP compliance for office"
+        ],
+        "responses": [
+            "Maintain extinguishers and signage, conduct quarterly drills, clear egress paths, and update maintenance logs. Coordinate with local BFP for inspections. Call 911 or local BFP hotline immediately and evacuate first.",
+            "Maintain extinguishers and signage, conduct quarterly drills, clear egress paths, and update maintenance logs. Coordinate with local BFP for inspections. Never use water on grease or electrical fires.",
+            "Maintain extinguishers and signage, conduct quarterly drills, clear egress paths, and update maintenance logs. Coordinate with local BFP for inspections. Schedule regular inspections and keep records up to date.",
+            "Maintain extinguishers and signage, conduct quarterly drills, clear egress paths, and update maintenance logs. Coordinate with local BFP for inspections. Avoid daisy-chaining extension cords and overloading outlets.",
+            "Maintain extinguishers and signage, conduct quarterly drills, clear egress paths, and update maintenance logs. Coordinate with local BFP for inspections. Check smoke alarms monthly and replace batteries yearly."
+        ]
+    }
+}

@@ -18,9 +18,12 @@ async function ensureConnection() {
 export async function registerUser(
   username: string,
   password: string,
-  name: string,
+  firstName: string,
+  lastName: string,
   age: number,
   enhancedFields?: {
+    middleName?: string;
+    email?: string;
     gender?: string;
     barangay?: string;
     school?: string;
@@ -39,7 +42,7 @@ export async function registerUser(
     await ensureConnection();
 
     // Validate input
-    if (!username || !password || !name || !age) {
+    if (!username || !password || !firstName || !lastName || !age) {
       throw new Error('All fields are required');
     }
 
@@ -71,14 +74,19 @@ export async function registerUser(
     // Determine role based on age
     const role = age < 18 ? UserRole.kid : UserRole.adult;
 
-    // Create user with auto-generated email if not provided
-    const autoEmail = `${username.toLowerCase()}@bfp-user.local`;
+    // Combine name for backward compatibility
+    const middleInitial = enhancedFields?.middleName ? ` ${enhancedFields.middleName.charAt(0)}.` : '';
+    const fullName = `${firstName}${middleInitial} ${lastName}`;
+
     const user = await prisma.user.create({
       data: {
         username,
-        email: autoEmail,
+        email: enhancedFields?.email || null,
         password: hashedPassword,
-        name,
+        name: fullName,
+        firstName,
+        lastName,
+        middleName: enhancedFields?.middleName,
         age,
         role,
         // Enhanced fields

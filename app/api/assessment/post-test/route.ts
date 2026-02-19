@@ -3,6 +3,7 @@ import { cookies } from "next/headers"
 import { prisma } from "@/lib/prisma"
 import { POST_TEST_UNLOCK_THRESHOLDS, ENGAGEMENT_POINTS } from "@/lib/constants"
 import { verifyToken } from '@/lib/jwt'
+import { FALLBACK_ASSESSMENT_QUESTIONS } from '@/lib/assessment-fallback-questions'
 
 export async function POST(request: NextRequest) {
   try {
@@ -86,51 +87,56 @@ export async function POST(request: NextRequest) {
       }, { status: 403 })
     }
 
-    // Fetch questions with correct answers
     const questionIds = Object.keys(answers).map(id => parseInt(id))
-    const questions = await prisma.assessmentQuestion.findMany({
-      where: {
-        id: { in: questionIds },
-        isActive: true,
-      }
-    })
 
-    if (questions.length === 0) {
+    // Check if we're using fallback questions (negative IDs)
+    const usingFallback = questionIds.some(id => id < 0)
+
+    let score = 0
+    let maxScore = 0
+    const answerRecords: { questionId: number; selectedAnswer: number; isCorrect: boolean }[] = []
+
+    if (usingFallback) {
+      // Grade using fallback questions
+      for (const qId of questionIds) {
+        const fallbackQ = FALLBACK_ASSESSMENT_QUESTIONS.find(q => q.id === qId)
+        if (fallbackQ) {
+          maxScore++
+          const selectedAnswer = answers[qId.toString()]
+          const isCorrect = selectedAnswer === fallbackQ.correctAnswer
+          if (isCorrect) score++
+          answerRecords.push({ questionId: qId, selectedAnswer, isCorrect })
+        }
+      }
+    } else {
+      // Grade using database questions
+      const questions = await prisma.assessmentQuestion.findMany({
+        where: {
+          id: { in: questionIds },
+          isActive: true,
+        }
+      })
+
+      maxScore = questions.length
+
+      for (const question of questions) {
+        const selectedAnswer = answers[question.id]
+        const isCorrect = selectedAnswer === question.correctAnswer
+        if (isCorrect) score++
+        answerRecords.push({
+          questionId: question.id,
+          selectedAnswer,
+          isCorrect,
+        })
+      }
+    }
+
+    if (maxScore === 0) {
       return NextResponse.json({ error: "No valid questions found" }, { status: 400 })
     }
 
-    // Calculate score
-    let score = 0
-    const maxScore = questions.length
-    const answerRecords: { questionId: number; selectedAnswer: number; isCorrect: boolean }[] = []
-
-    for (const question of questions) {
-      const selectedAnswer = answers[question.id]
-      const isCorrect = selectedAnswer === question.correctAnswer
-
-      if (isCorrect) {
-        score++
-      }
-
-      answerRecords.push({
-        questionId: question.id,
-        selectedAnswer,
-        isCorrect,
-      })
-    }
-
     // Save answers and update user
-    await prisma.$transaction([
-      // Save post-test answers
-      prisma.userAnswer.createMany({
-        data: answerRecords.map(record => ({
-          userId: user.id,
-          questionId: record.questionId,
-          selectedAnswer: record.selectedAnswer,
-          isCorrect: record.isCorrect,
-          testType: "postTest",
-        }))
-      }),
+    const transactionOps = [
       // Update user's post-test score
       prisma.user.update({
         where: { id: user.id },
@@ -149,7 +155,24 @@ export async function POST(request: NextRequest) {
           eventData: { score, maxScore },
         }
       })
-    ])
+    ]
+
+    // Only save individual answers for DB questions (fallback IDs are negative)
+    if (!usingFallback) {
+      transactionOps.unshift(
+        prisma.userAnswer.createMany({
+          data: answerRecords.map(record => ({
+            userId: user.id,
+            questionId: record.questionId,
+            selectedAnswer: record.selectedAnswer,
+            isCorrect: record.isCorrect,
+            testType: "postTest",
+          }))
+        })
+      )
+    }
+
+    await prisma.$transaction(transactionOps)
 
     // Calculate improvement
     const preTestScore = user.preTestScore || 0

@@ -180,6 +180,15 @@ For administrators to manage the platform:
 - **FSEC** (Fire Safety Evaluation Clearance) - For building plans
 - Contact local BFP office for inspections and certifications
 
+## BFP Sta Cruz Contact Information
+When users ask for hotlines, contact numbers, or how to reach BFP Sta Cruz, provide this information:
+- **Globe**: 09670528897
+- **Smart**: 09620937725
+- **Telephone**: (049) 808-2278
+- **Email**: stacruzfs027@gmail.com
+- **Facebook Page**: https://www.facebook.com/bfpsantacruzfslaguna
+- For national emergencies, call **911** or **160** (BFP Direct)
+
 ## Response Guidelines
 
 ### DO:
@@ -239,5 +248,5 @@ If it cannot be related to fire safety, use the standard refusal message:
  * Can be extended in the future to include dynamic content from database
  */
 export function getFireSafetySystemPrompt(): string {
-    return FIRE_SAFETY_SYSTEM_PROMPT;
+  return FIRE_SAFETY_SYSTEM_PROMPT;
 }

@@ -31,12 +31,15 @@ export async function POST(request: NextRequest) {
     })
 
     // Create notification for users with access to this category
-    await NotificationService.createNotification({
+    console.log(`[AdminBlog] Creating notification for blog: ${body.title}, category: ${body.category}, id: ${newBlog.id}`);
+    const notificationResult = await NotificationService.createNotification({
       title: `New Blog Post: ${body.title}`,
       message: `A new blog post "${body.title}" has been published in the ${body.category} section.`,
       type: 'blog',
-      category: body.category
+      category: body.category,
+      resourceId: newBlog.id
     })
+    console.log('[AdminBlog] Notification result:', notificationResult);
 
     return NextResponse.json(newBlog)
   } catch (error) {

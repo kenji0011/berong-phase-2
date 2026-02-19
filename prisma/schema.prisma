@@ -12,6 +12,9 @@ model User {
   email         String?        @unique
   password      String
   name          String
+  firstName     String   @default("")
+  lastName      String   @default("")
+  middleName    String?
   age           Int?
   role          UserRole       @default(guest)
   isActive      Boolean        @default(true)
@@ -172,6 +175,7 @@ model Notification {
   type        String   // 'blog', 'video', 'system', etc.
   category    String   // 'adult', 'professional', 'kids'
   isRead      Boolean  @default(false)
+  resourceId  Int?     // Shared ID for Blog/Video link
   createdAt   DateTime @default(now())
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -233,6 +237,8 @@ model AssessmentQuestion {
   difficulty      String         @default("Medium") // Easy, Medium, Hard
   isActive        Boolean        @default(true)
   forRoles        Json           // ["kid", "adult", "professional"] - Using Json for SQLite compatibility
+  type            String         @default("preTest") // "preTest", "postTest", "quiz"
+  order           Int            @default(0)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   userAnswers     UserAnswer[]

@@ -7,10 +7,13 @@ import { signToken } from '@/lib/jwt'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { 
-      username, 
-      password, 
-      name, 
+    const {
+      username,
+      password,
+      firstName,
+      lastName,
+      middleName,
+      email,
       age,
       // New enhanced fields
       gender,
@@ -24,7 +27,7 @@ export async function POST(request: NextRequest) {
       preTestAnswers, // Record<questionId, selectedAnswerIndex>
     } = body
 
-    if (!username || !password || !name || !age) {
+    if (!username || !password || !firstName || !lastName || !age) {
       return NextResponse.json(
         { success: false, error: 'All fields are required' },
         { status: 400 }
@@ -42,10 +45,10 @@ export async function POST(request: NextRequest) {
     // Calculate pre-test score if answers provided
     let preTestScore = null
     let maxScore = 0
-    
+
     if (preTestAnswers && Object.keys(preTestAnswers).length > 0) {
       const questionIds = Object.keys(preTestAnswers).map(id => parseInt(id))
-      
+
       // Fetch correct answers from database
       const questions = await prisma.assessmentQuestion.findMany({
         where: {
@@ -71,7 +74,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Register user with enhanced fields
-    const result = await registerUser(username, password, name, ageNumber, {
+    const result = await registerUser(username, password, firstName, lastName, ageNumber, {
+      middleName,
+      email,
       gender,
       barangay,
       school: school === "Other (Please specify)" ? schoolOther : school,
@@ -126,15 +131,15 @@ export async function POST(request: NextRequest) {
 
     // Set secure cookie
     const response = NextResponse.json(
-      { 
-        success: true, 
+      {
+        success: true,
         user: result.user,
         preTestScore,
         maxScore,
       },
       { status: 201 }
     )
-    
+
     const token = await signToken(result.user as Record<string, unknown>)
 
     response.cookies.set('bfp_user', token, {
