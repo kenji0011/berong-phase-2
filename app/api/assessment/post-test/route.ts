@@ -136,7 +136,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Save answers and update user
-    const transactionOps = [
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const transactionOps: any[] = [
       // Update user's post-test score
       prisma.user.update({
         where: { id: user.id },
