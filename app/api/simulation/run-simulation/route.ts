@@ -4,8 +4,9 @@ import { requireAuth } from "@/lib/auth-guard"
 const BACKEND_URL = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://python-backend:8000"
 
 // Maximum grid dimensions to prevent memory exhaustion attacks
-const MAX_GRID_SIZE = 200
-const MAX_GRID_CELLS = 40000 // 200x200
+// Backend IMAGE_SIZE=256 produces 256x256 grids from uploaded floor plans
+const MAX_GRID_SIZE = 512
+const MAX_GRID_CELLS = 262144 // 512x512
 const PPO_VERSION: string = "500k_steps" // Options: "v1.5", "v2.0_lite", "500k_steps", "v2.0"
 
 export async function POST(request: NextRequest) {

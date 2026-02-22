@@ -31,7 +31,21 @@ p.user.count().then(c => { console.log(c > 0 ? 'yes' : 'no'); p.\$disconnect(); 
 " 2>/dev/null || echo "no")
 
 if [ "$DATA_EXISTS" = "yes" ]; then
-  echo "ℹ️  Database already has data, skipping seed"
+  echo "ℹ️  Database already has user data, skipping full seed"
+  
+  # Still check if assessment questions exist (needed for pre/post tests)
+  ASSESSMENT_EXISTS=$(node -e "
+const { PrismaClient } = require('@prisma/client');
+const p = new PrismaClient();
+p.assessmentQuestion.count().then(c => { console.log(c > 0 ? 'yes' : 'no'); p.\$disconnect(); }).catch(() => { console.log('no'); p.\$disconnect(); });
+" 2>/dev/null || echo "no")
+
+  if [ "$ASSESSMENT_EXISTS" != "yes" ]; then
+    echo "🌱 Seeding assessment questions and missing data..."
+    node prisma/seed-production.js || echo "⚠️ Assessment seeding failed"
+  else
+    echo "ℹ️  Assessment questions already exist, skipping"
+  fi
 else
   echo "🌱 Seeding database..."
   node prisma/seed-production.js || echo "⚠️ Seeding skipped or failed"
