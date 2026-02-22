@@ -23,6 +23,9 @@ export async function PATCH(
     // Use authenticated user's ID instead of trusting request body
     const numericUserId = auth.id as number;
 
+    // Parse request body for isRead flag
+    const body = await request.json().catch(() => ({}));
+
     const result = await NotificationService.updateReadStatus(
       notificationId,
       numericUserId,
