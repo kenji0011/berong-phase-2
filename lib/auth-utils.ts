@@ -1,19 +1,6 @@
-import { PrismaClient, UserRole } from '@prisma/client';
+import { UserRole } from '@prisma/client';
+import { prisma } from './prisma';
 import bcrypt from 'bcryptjs';
-
-const prisma = new PrismaClient({
-  log: ['error', 'warn'],
-});
-
-// Ensure database connection is established
-async function ensureConnection() {
-  try {
-    await prisma.$connect();
-  } catch (error) {
-    console.error('Database connection failed:', error);
-    throw new Error('Database connection failed');
-  }
-}
 
 export async function registerUser(
   username: string,
@@ -39,7 +26,7 @@ export async function registerUser(
   }
 ) {
   try {
-    await ensureConnection();
+
 
     // Validate input
     if (!username || !password || !firstName || !lastName || !age) {
@@ -142,7 +129,7 @@ export async function registerUser(
 
 export async function loginUser(identifier: string, password: string) {
   try {
-    await ensureConnection();
+
 
     // Validate input
     if (!identifier || !password) {
@@ -245,7 +232,4 @@ function determinePermissions(role: UserRole) {
   }
 }
 
-export async function disconnectDatabase() {
-  await prisma.$disconnect();
-}
 

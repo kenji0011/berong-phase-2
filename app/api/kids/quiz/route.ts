@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/jwt';
-
-const prisma = new PrismaClient();
 
 // Helper to get user from cookies
 async function getUserFromSession() {

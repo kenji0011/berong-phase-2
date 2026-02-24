@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/jwt';
-
-const prisma = new PrismaClient();
 
 // Helper to get user from cookies - try both bfp_user and session for compatibility
 async function getUserFromSession() {
@@ -130,7 +128,7 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
-    console.log(`DEBUG: POST /api/kids/safescape/progress - User authenticated: ${user.id}`);
+    console.log(`DEBUG: POST / api / kids / safescape / progress - User authenticated: ${user.id} `);
 
     const body = await request.json();
     console.log("DEBUG: Payload received:", JSON.stringify(body));
@@ -190,7 +188,7 @@ export async function POST(request: NextRequest) {
             userId: user.id,
             eventType: 'module',
             points: MODULE_COMPLETION_POINTS,
-            eventData: { moduleNum, moduleName: `SafeScape Module ${moduleNum}` },
+            eventData: { moduleNum, moduleName: `SafeScape Module ${moduleNum} ` },
           },
         }),
       ]);

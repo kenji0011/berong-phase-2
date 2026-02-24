@@ -1,0 +1,452 @@
+﻿Collecting sb3-contrib
+  Using cached sb3_contrib-2.7.1-py3-none-any.whl.metadata (4.1 kB)
+Collecting stable-baselines3[extra]
+  Using cached stable_baselines3-2.7.1-py3-none-any.whl.metadata (4.8 kB)
+Requirement already satisfied: gymnasium<1.3.0,>=0.29.1 in c:\users\keinj\documents\berong-safescape\bfp-simulation-backend\.venv\lib\site-packages (from stable-baselines3[extra]) (1.2.3)
+Requirement already satisfied: numpy<3.0,>=1.20 in c:\users\keinj\documents\berong-safescape\bfp-simulation-backend\.venv\lib\site-packages (from stable-baselines3[extra]) (2.4.2)
+Requirement already satisfied: torch<3.0,>=2.3 in c:\users\keinj\documents\berong-safescape\bfp-simulation-backend\.venv\lib\site-packages (from stable-baselines3[extra]) (2.10.0+cpu)
+Requirement already satisfied: cloudpickle in c:\users\keinj\documents\berong-safescape\bfp-simulation-backend\.venv\lib\site-packages (from stable-baselines3[extra]) (3.1.2)
+Collecting pandas (from stable-baselines3[extra])
+  Using cached pandas-3.0.1-cp314-cp314-win_amd64.whl.metadata (19 kB)
+Collecting matplotlib (from stable-baselines3[extra])
+  Using cached matplotlib-3.10.8-cp314-cp314-win_amd64.whl.metadata (52 kB)
+Collecting opencv-python (from stable-baselines3[extra])
+  Using cached opencv_python-4.13.0.92-cp37-abi3-win_amd64.whl.metadata (20 kB)
+Collecting pygame (from stable-baselines3[extra])
+  Using cached pygame-2.6.1.tar.gz (14.8 MB)
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'error'
+.venv\Scripts\pip.exe 
+:   error: subprocess-e
+xited-with-error
+At line:1 char:1
++ 
+.venv\Scripts\pip.exe 
+install "stable-baselin
+es3[extra]" 
+sb3-contrib  ...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo     
+         : 
+NotSpecified: (  e    
+rror: subprocess-exite 
+   
+d-with-error:String) [ 
+   ], RemoteException
+    + 
+FullyQualifiedErrorI   
+ d : NativeCommandError
+ 
+  
+  Getting requirements 
+to build wheel did not 
+run successfully.
+  exit code: 1
+  
+  [112 lines of output]
+  Skipping Cython 
+compilation
+  
+  
+  WARNING, No "Setup" 
+File Exists, Running 
+"buildconfig/config.py"
+  Using WINDOWS 
+configuration...
+  
+  Making dir 
+:prebuilt_downloads:
+  Downloading... https:
+//www.libsdl.org/releas
+e/SDL2-devel-2.28.4-VC.
+zip 25ef9d201ce3fd5f976
+c37dddedac36bd173975c
+  Unzipping :prebuilt_d
+ownloads\SDL2-devel-2.2
+8.4-VC.zip:
+  Downloading... https:
+//www.libsdl.org/projec
+ts/SDL_image/release/SD
+L2_image-devel-2.0.5-VC
+.zip 137f86474691f4e12e
+76e07d58d5920c8d844d5b
+  Unzipping :prebuilt_d
+ownloads\SDL2_image-dev
+el-2.0.5-VC.zip:
+  Downloading... https:
+//github.com/libsdl-org
+/SDL_ttf/releases/downl
+oad/release-2.20.1/SDL2
+_ttf-devel-2.20.1-VC.zi
+p 371606aceba450384428f
+d2852f73d2f6290b136
+  Unzipping :prebuilt_d
+ownloads\SDL2_ttf-devel
+-2.20.1-VC.zip:
+  Downloading... https:
+//github.com/libsdl-org
+/SDL_mixer/releases/dow
+nload/release-2.6.2/SDL
+2_mixer-devel-2.6.2-VC.
+zip 000e3ea8a50261d46db
+d200fb450b93c59ed4482
+  Unzipping :prebuilt_d
+ownloads\SDL2_mixer-dev
+el-2.6.2-VC.zip:
+  Downloading... https:
+//github.com/pygame/pyg
+ame/releases/download/2
+.1.3.dev4/prebuilt-x64-
+pygame-2.1.4-20220319.z
+ip 16b46596744ce9ef80e7
+e40fa72ddbafef1cf586
+  Unzipping :prebuilt_d
+ownloads\prebuilt-x64-p
+ygame-2.1.4-20220319.zi
+p:
+  copying into 
+.\prebuilt-x64
+  Path for SDL: prebuil
+t-x64\SDL2-2.28.4
+  ...Library directory 
+for SDL: prebuilt-x64/S
+DL2-2.28.4/lib/x64
+  ...Include directory 
+for SDL: prebuilt-x64/S
+DL2-2.28.4/include
+  Path for FONT: prebui
+lt-x64\SDL2_ttf-2.20.1
+  ...Library directory 
+for FONT: prebuilt-x64/
+SDL2_ttf-2.20.1/lib/x64
+  ...Include directory 
+for FONT: prebuilt-x64/
+SDL2_ttf-2.20.1/include
+  Path for IMAGE: prebu
+ilt-x64\SDL2_image-2.0.
+5
+  ...Library directory 
+for IMAGE: prebuilt-x64
+/SDL2_image-2.0.5/lib/x
+64
+  ...Include directory 
+for IMAGE: prebuilt-x64
+/SDL2_image-2.0.5/inclu
+de
+  Path for MIXER: prebu
+ilt-x64\SDL2_mixer-2.6.
+2
+  ...Library directory 
+for MIXER: prebuilt-x64
+/SDL2_mixer-2.6.2/lib/x
+64
+  ...Include directory 
+for MIXER: prebuilt-x64
+/SDL2_mixer-2.6.2/inclu
+de
+  Path for PORTMIDI: 
+prebuilt-x64
+  ...Library directory 
+for PORTMIDI: 
+prebuilt-x64/lib
+  ...Include directory 
+for PORTMIDI: 
+prebuilt-x64/include
+  DLL for SDL2: prebuil
+t-x64/SDL2-2.28.4/lib/x
+64/SDL2.dll
+  DLL for SDL2_ttf: pre
+built-x64/SDL2_ttf-2.20
+.1/lib/x64/SDL2_ttf.dll
+  DLL for SDL2_image: p
+rebuilt-x64/SDL2_image-
+2.0.5/lib/x64/SDL2_imag
+e.dll
+  DLL for SDL2_mixer: p
+rebuilt-x64/SDL2_mixer-
+2.6.2/lib/x64/SDL2_mixe
+r.dll
+  DLL for portmidi: pre
+built-x64/lib/portmidi.
+dll
+  Path for FREETYPE: 
+prebuilt-x64
+  ...Library directory 
+for FREETYPE: 
+prebuilt-x64/lib
+  ...Include directory 
+for FREETYPE: 
+prebuilt-x64/include
+  Path for PNG not 
+found.
+  ...Found include dir 
+but no library dir in 
+prebuilt-x64.
+  Path for JPEG not 
+found.
+  ...Found include dir 
+but no library dir in 
+prebuilt-x64.
+  DLL for freetype: pre
+built-x64/lib/freetype.
+dll
+  DLL for png: prebuilt
+-x64/SDL2_image-2.0.5/l
+ib/x64/libpng16-16.dll
+  
+  ---
+  For help with 
+compilation see:
+      https://www.pygam
+e.org/wiki/CompileWindo
+ws
+  To contribute to 
+pygame development see:
+      https://www.pygam
+e.org/contribute.html
+  ---
+  
+  Traceback (most 
+recent call last):
+    File "C:\Users\kein
+j\AppData\Local\Temp\pi
+p-install-b6zwe62x\pyga
+me_66a0e1649d554353903d
+f4d93137c748\buildconfi
+g\vstools.py", line 4, 
+in <module>
+      from 
+distutils.msvccompiler 
+import MSVCCompiler, 
+get_build_architecture
+  ModuleNotFoundError: 
+No module named 'distut
+ils.msvccompiler'
+  
+  During handling of 
+the above exception, 
+another exception 
+occurred:
+  
+  Traceback (most 
+recent call last):
+    File "C:\Users\kein
+j\AppData\Local\Temp\pi
+p-install-b6zwe62x\pyga
+me_66a0e1649d554353903d
+f4d93137c748\buildconfi
+g\config_win.py", line 
+336, in configure
+      from . import 
+vstools
+    File "C:\Users\kein
+j\AppData\Local\Temp\pi
+p-install-b6zwe62x\pyga
+me_66a0e1649d554353903d
+f4d93137c748\buildconfi
+g\vstools.py", line 6, 
+in <module>
+      from setuptools._
+distutils.msvccompiler 
+import MSVCCompiler, 
+get_build_architecture
+  ModuleNotFoundError: 
+No module named 'setupt
+ools._distutils.msvccom
+piler'
+  
+  During handling of 
+the above exception, 
+another exception 
+occurred:
+  
+  Traceback (most 
+recent call last):
+    File "C:\Users\kein
+j\AppData\Local\Temp\pi
+p-install-b6zwe62x\pyga
+me_66a0e1649d554353903d
+f4d93137c748\buildconfi
+g\vstools.py", line 4, 
+in <module>
+      from 
+distutils.msvccompiler 
+import MSVCCompiler, 
+get_build_architecture
+  ModuleNotFoundError: 
+No module named 'distut
+ils.msvccompiler'
+  
+  During handling of 
+the above exception, 
+another exception 
+occurred:
+  
+  Traceback (most 
+recent call last):
+    File "C:\Users\kein
+j\Documents\berong-safe
+scape\bfp-simulation-ba
+ckend\.venv\Lib\site-pa
+ckages\pip\_vendor\pypr
+oject_hooks\_in_process
+\_in_process.py", line 
+389, in <module>
+      main()
+      ~~~~^^
+    File "C:\Users\kein
+j\Documents\berong-safe
+scape\bfp-simulation-ba
+ckend\.venv\Lib\site-pa
+ckages\pip\_vendor\pypr
+oject_hooks\_in_process
+\_in_process.py", line 
+373, in main
+      
+json_out["return_val"] 
+= hook(**hook_input["kw
+args"])
+                       
+        ~~~~^^^^^^^^^^^
+^^^^^^^^^^^^^
+    File "C:\Users\kein
+j\Documents\berong-safe
+scape\bfp-simulation-ba
+ckend\.venv\Lib\site-pa
+ckages\pip\_vendor\pypr
+oject_hooks\_in_process
+\_in_process.py", line 
+143, in get_requires_fo
+r_build_wheel
+      return 
+hook(config_settings)
+    File "C:\Users\kein
+j\AppData\Local\Temp\pi
+p-build-env-ofidtu03\ov
+erlay\Lib\site-packages
+\setuptools\build_meta.
+py", line 333, in get_r
+equires_for_build_wheel
+      return self._get_
+build_requires(config_s
+ettings, 
+requirements=[])
+             ~~~~~~~~~~
+~~~~~~~~~~~~~~^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
+^^
+    File "C:\Users\kein
+j\AppData\Local\Temp\pi
+p-build-env-ofidtu03\ov
+erlay\Lib\site-packages
+\setuptools\build_meta.
+py", line 301, in 
+_get_build_requires
+      self.run_setup()
+      ~~~~~~~~~~~~~~^^
+    File "C:\Users\kein
+j\AppData\Local\Temp\pi
+p-build-env-ofidtu03\ov
+erlay\Lib\site-packages
+\setuptools\build_meta.
+py", line 520, in 
+run_setup
+      super().run_setup
+(setup_script=setup_scr
+ipt)
+      ~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
+^^^^
+    File "C:\Users\kein
+j\AppData\Local\Temp\pi
+p-build-env-ofidtu03\ov
+erlay\Lib\site-packages
+\setuptools\build_meta.
+py", line 317, in 
+run_setup
+      exec(code, 
+locals())
+      
+~~~~^^^^^^^^^^^^^^^^
+    File "<string>", 
+line 432, in <module>
+    File "C:\Users\kein
+j\AppData\Local\Temp\pi
+p-install-b6zwe62x\pyga
+me_66a0e1649d554353903d
+f4d93137c748\buildconfi
+g\config.py", line 
+234, in main
+      deps = 
+CFG.main(**kwds, 
+auto_config=auto)
+    File "C:\Users\kein
+j\AppData\Local\Temp\pi
+p-install-b6zwe62x\pyga
+me_66a0e1649d554353903d
+f4d93137c748\buildconfi
+g\config_win.py", line 
+493, in main
+      return setup_preb
+uilt_sdl2(prebuilt_dir)
+    File "C:\Users\kein
+j\AppData\Local\Temp\pi
+p-install-b6zwe62x\pyga
+me_66a0e1649d554353903d
+f4d93137c748\buildconfi
+g\config_win.py", line 
+453, in 
+setup_prebuilt_sdl2
+      DEPS.configure()
+      ~~~~~~~~~~~~~~^^
+    File "C:\Users\kein
+j\AppData\Local\Temp\pi
+p-install-b6zwe62x\pyga
+me_66a0e1649d554353903d
+f4d93137c748\buildconfi
+g\config_win.py", line 
+338, in configure
+      from buildconfig 
+import vstools
+    File "C:\Users\kein
+j\AppData\Local\Temp\pi
+p-install-b6zwe62x\pyga
+me_66a0e1649d554353903d
+f4d93137c748\buildconfi
+g\vstools.py", line 6, 
+in <module>
+      from setuptools._
+distutils.msvccompiler 
+import MSVCCompiler, 
+get_build_architecture
+  ModuleNotFoundError: 
+No module named 'setupt
+ools._distutils.msvccom
+piler'
+  [end of output]
+  
+  note: This error 
+originates from a 
+subprocess, and is 
+likely not a problem 
+with pip.
+
+[notice] A new release 
+of pip is available: 
+25.3 -> 26.0.1
+[notice] To update, 
+run: C:\Users\keinj\Doc
+uments\berong-safescape
+\bfp-simulation-backend
+\.venv\Scripts\python.e
+xe -m pip install 
+--upgrade pip
+ERROR: Failed to build 
+'pygame' when getting 
+requirements to build 
+wheel

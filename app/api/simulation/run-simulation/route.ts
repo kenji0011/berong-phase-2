@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(result)
     } catch (fetchError: any) {
       clearTimeout(timeoutId)
-      
+
       if (fetchError.name === 'AbortError') {
         console.error("Backend request timeout when starting simulation")
         return NextResponse.json(
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
           { status: 503 }
         )
       }
-      
+
       if (fetchError.cause?.code === 'ECONNREFUSED' || fetchError.message?.includes('fetch failed')) {
         console.error("Cannot connect to simulation backend:", BACKEND_URL)
         return NextResponse.json(
@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
           { status: 503 }
         )
       }
-      
+
       throw fetchError
     }
   } catch (error: any) {

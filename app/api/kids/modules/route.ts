@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/jwt';
-
-const prisma = new PrismaClient();
 
 // Helper to get user from cookies - consistent with other kids APIs
 async function getUserFromSession() {
@@ -106,7 +104,7 @@ export async function GET(request: NextRequest) {
         isCompleted: isCompleted,
         progress: progressPercent,
         // Helper link for frontend
-        href: `/kids/safescape/${mod.dayNumber}`
+        href: `/ kids / safescape / ${mod.dayNumber} `
       };
     });
 
