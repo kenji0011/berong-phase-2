@@ -41,7 +41,9 @@ export function NotificationPopover() {
 
       try {
         setLoading(true);
-        const response = await fetch(`/api/notifications?userId=${user.id}`);
+        const response = await fetch(`/api/notifications`, {
+          credentials: 'include',
+        });
         if (response.ok) {
           const data = await response.json();
           setNotifications(data);
@@ -73,6 +75,7 @@ export function NotificationPopover() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ userId: user.id, isRead }),
       });
 
@@ -92,8 +95,9 @@ export function NotificationPopover() {
     if (!user?.id) return;
 
     try {
-      const response = await fetch(`/api/notifications/${id}?userId=${user.id}`, {
+      const response = await fetch(`/api/notifications/${id}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
 
       if (response.ok) {

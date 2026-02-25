@@ -18,18 +18,29 @@ export class NotificationService {
       // If specific user IDs are provided, send to those users
       if (userIds && userIds.length > 0) {
         const notifications = await Promise.all(
-          userIds.map(userId =>
-            prisma.notification.create({
-              data: {
-                title,
-                message,
-                type,
-                category,
-                userId,
-                resourceId
+          userIds.map(async (userId) => {
+            const notificationData: any = {
+              title,
+              message,
+              type,
+              category,
+              userId,
+            }
+
+            if (typeof resourceId === 'number') {
+              notificationData.resourceId = resourceId
+            }
+
+            try {
+              return await prisma.notification.create({ data: notificationData })
+            } catch (error: any) {
+              if (error?.code === 'P2022' && String(error?.meta?.column || '').includes('resourceId')) {
+                const { resourceId: _, ...withoutResourceId } = notificationData
+                return await prisma.notification.create({ data: withoutResourceId })
               }
-            })
-          )
+              throw error
+            }
+          })
         );
         return { success: true, notifications };
       }
@@ -88,18 +99,29 @@ export class NotificationService {
 
       // Create notifications for all matching users
       const notifications = await Promise.all(
-        matchingUsers.map(user =>
-          prisma.notification.create({
-            data: {
-              title,
-              message,
-              type,
-              category,
-              userId: user.id,
-              resourceId
+        matchingUsers.map(async (user) => {
+          const notificationData: any = {
+            title,
+            message,
+            type,
+            category,
+            userId: user.id,
+          }
+
+          if (typeof resourceId === 'number') {
+            notificationData.resourceId = resourceId
+          }
+
+          try {
+            return await prisma.notification.create({ data: notificationData })
+          } catch (error: any) {
+            if (error?.code === 'P2022' && String(error?.meta?.column || '').includes('resourceId')) {
+              const { resourceId: _, ...withoutResourceId } = notificationData
+              return await prisma.notification.create({ data: withoutResourceId })
             }
-          })
-        )
+            throw error
+          }
+        })
       );
 
       return { success: true, notifications };
@@ -116,7 +138,37 @@ export class NotificationService {
         orderBy: { createdAt: 'desc' },
       });
       return { success: true, notifications };
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.code === 'P2022' && String(error?.meta?.column || '').includes('resourceId')) {
+        try {
+          const notifications = await prisma.$queryRaw<Array<{
+            id: number
+            userId: number
+            title: string
+            message: string
+            type: string
+            category: string
+            isRead: boolean
+            createdAt: Date
+          }>>`
+            SELECT id, "userId", title, message, type, category, "isRead", "createdAt"
+            FROM notifications
+            WHERE "userId" = ${userId}
+            ORDER BY "createdAt" DESC
+          `
+
+          return {
+            success: true,
+            notifications: notifications.map((notification) => ({
+              ...notification,
+              resourceId: null,
+            })),
+          }
+        } catch (fallbackError) {
+          console.error('Error fetching user notifications (fallback query):', fallbackError);
+          return { success: false, error: 'Failed to fetch notifications' };
+        }
+      }
       console.error('Error fetching user notifications:', error);
       return { success: false, error: 'Failed to fetch notifications' };
     }
@@ -124,10 +176,18 @@ export class NotificationService {
 
   static async updateReadStatus(notificationId: number, userId: number, isRead: boolean) {
     try {
-      const notification = await prisma.notification.update({
+      const updateResult = await prisma.notification.updateMany({
         where: { id: notificationId, userId },
         data: { isRead },
       });
+
+      if (updateResult.count === 0) {
+        return { success: false, error: 'Notification not found' };
+      }
+
+      const notification = await prisma.notification.findUnique({
+        where: { id: notificationId },
+      })
       return { success: true, notification };
     } catch (error) {
       console.error('Error updating notification read status:', error);
@@ -150,9 +210,12 @@ export class NotificationService {
 
   static async deleteNotification(notificationId: number, userId: number) {
     try {
-      await prisma.notification.delete({
+      const deleteResult = await prisma.notification.deleteMany({
         where: { id: notificationId, userId },
       });
+      if (deleteResult.count === 0) {
+        return { success: false, error: 'Notification not found' };
+      }
       return { success: true };
     } catch (error) {
       console.error('Error deleting notification:', error);
