@@ -109,15 +109,19 @@ export default function ProfessionalPage() {
         <div className="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4 mb-6 sm:mb-8">
           <SpotlightCard spotlightColor="rgba(220, 38, 38, 0.15)">
             <Card
-              className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-primary h-full"
+              className="relative overflow-hidden hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-primary h-full group"
               onClick={() => document.getElementById('training-videos-section')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              <CardContent className="p-3 sm:p-4">
+              <div
+                className="absolute inset-0 bg-cover bg-center z-0 opacity-20 group-hover:opacity-30 transition-opacity"
+                style={{ backgroundImage: "url('/Training Vidoes Modal.png')" }}
+              />
+              <CardContent className="relative z-10 p-3 sm:p-4 bg-background/60 backdrop-blur-[2px]">
                 <div className="flex items-center gap-3">
-                  <Video className="h-5 w-5 text-primary flex-shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <CardTitle className="text-base sm:text-xl">Training Videos</CardTitle>
-                    <p className="text-xs sm:text-sm text-muted-foreground truncate">{videos.length} professional training videos</p>
+                  <Video className="h-5 w-5 text-primary flex-shrink-0 drop-shadow-md" />
+                  <div className="min-w-0 flex-1 drop-shadow-sm">
+                    <CardTitle className="text-base sm:text-xl text-foreground font-extrabold">Training Videos</CardTitle>
+                    <p className="text-xs sm:text-sm text-foreground/90 font-medium truncate">{videos.length} professional training videos</p>
                   </div>
                 </div>
               </CardContent>
@@ -126,15 +130,19 @@ export default function ProfessionalPage() {
 
           <SpotlightCard spotlightColor="rgba(139, 92, 246, 0.15)">
             <Card
-              className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-secondary h-full"
+              className="relative overflow-hidden hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-secondary h-full group"
               onClick={() => document.getElementById('manuals-section')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              <CardContent className="p-3 sm:p-4">
+              <div
+                className="absolute inset-0 bg-cover bg-center z-0 opacity-20 group-hover:opacity-30 transition-opacity"
+                style={{ backgroundImage: "url('/BFP Manuals Modal.png')" }}
+              />
+              <CardContent className="relative z-10 p-3 sm:p-4 bg-background/60 backdrop-blur-[2px]">
                 <div className="flex items-center gap-3">
-                  <BookOpen className="h-5 w-5 text-secondary flex-shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <CardTitle className="text-base sm:text-xl">BFP Manuals</CardTitle>
-                    <p className="text-xs sm:text-sm text-muted-foreground truncate">Standard operating procedures and guidelines</p>
+                  <BookOpen className="h-5 w-5 text-secondary flex-shrink-0 drop-shadow-md" />
+                  <div className="min-w-0 flex-1 drop-shadow-sm">
+                    <CardTitle className="text-base sm:text-xl text-foreground font-extrabold">BFP Manuals</CardTitle>
+                    <p className="text-xs sm:text-sm text-foreground/90 font-medium truncate">Standard operating procedures and guidelines</p>
                   </div>
                 </div>
               </CardContent>
@@ -242,25 +250,31 @@ export default function ProfessionalPage() {
           <h2 className="text-2xl font-bold mb-6 text-foreground">Additional Resources</h2>
           <div className="grid md:grid-cols-1 gap-6">
             <SpotlightCard spotlightColor="rgba(139, 92, 246, 0.2)">
-              <Card className="h-full">
-                <CardHeader>
-                  <div className="flex items-center gap-3 mb-2">
-                    <BookOpen className="h-6 w-6 text-secondary" />
-                    <CardTitle>BFP Standard Operating Procedures</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground mb-4 text-pretty">
-                    Access comprehensive manuals covering firefighting operations, emergency response protocols, and
-                    safety procedures.
-                  </p>
-                  <ManualsDialog>
-                    <Button className="bg-secondary hover:bg-secondary/90 text-secondary-foreground cursor-pointer">
-                      <FileText className="h-4 w-4 mr-2" />
-                      View Manuals
-                    </Button>
-                  </ManualsDialog>
-                </CardContent>
+              <Card className="relative overflow-hidden h-full group">
+                <div
+                  className="absolute inset-0 bg-cover bg-center z-0 opacity-20 group-hover:opacity-30 transition-opacity"
+                  style={{ backgroundImage: "url('/BFP Standard Operating Procedures Manuals Modal.png')" }}
+                />
+                <div className="relative z-10 bg-background/60 backdrop-blur-[2px] h-full flex flex-col">
+                  <CardHeader>
+                    <div className="flex items-center gap-3 mb-2 drop-shadow-sm">
+                      <BookOpen className="h-6 w-6 text-secondary drop-shadow-md" />
+                      <CardTitle className="text-foreground font-extrabold">BFP Standard Operating Procedures</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex-1 flex flex-col justify-between">
+                    <p className="text-foreground/90 font-medium mb-4 text-pretty drop-shadow-sm">
+                      Access comprehensive manuals covering firefighting operations, emergency response protocols, and
+                      safety procedures.
+                    </p>
+                    <ManualsDialog>
+                      <Button className="bg-secondary/90 hover:bg-secondary text-secondary-foreground cursor-pointer shadow-md w-fit">
+                        <FileText className="h-4 w-4 mr-2" />
+                        View Manuals
+                      </Button>
+                    </ManualsDialog>
+                  </CardContent>
+                </div>
               </Card>
             </SpotlightCard>
           </div>

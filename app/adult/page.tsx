@@ -90,18 +90,22 @@ export default function AdultPage() {
         <div className="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-6 mb-6 sm:mb-8">
           <SpotlightCard spotlightColor="rgba(245, 158, 11, 0.15)">
             <Card
-              className="hover:shadow-lg transition-shadow cursor-pointer border-l-4 border-l-accent h-full"
+              className="relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer border-l-4 border-l-accent h-full group"
               onClick={() => document.getElementById('articles-section')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              <CardContent className="p-4 sm:p-6">
+              <div
+                className="absolute inset-0 bg-cover bg-center z-0 opacity-20 group-hover:opacity-30 transition-opacity"
+                style={{ backgroundImage: "url('/Articles Modal.png')" }}
+              />
+              <CardContent className="relative z-10 p-4 sm:p-6 bg-background/60 backdrop-blur-[2px]">
                 <div className="flex items-start gap-3">
-                  <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-accent flex-shrink-0 mt-0.5" />
-                  <div className="min-w-0 flex-1">
-                    <CardTitle className="text-lg sm:text-2xl mb-1 sm:mb-2">Fire Safety Articles</CardTitle>
-                    <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-4 line-clamp-2">
+                  <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-accent flex-shrink-0 mt-0.5 drop-shadow-md" />
+                  <div className="min-w-0 flex-1 drop-shadow-sm">
+                    <CardTitle className="text-lg sm:text-2xl mb-1 sm:mb-2 text-foreground font-extrabold">Fire Safety Articles</CardTitle>
+                    <p className="text-xs sm:text-sm text-foreground/90 font-medium mb-2 sm:mb-4 line-clamp-2">
                       Read comprehensive articles on home fire safety, prevention tips, and emergency preparedness.
                     </p>
-                    <p className="text-xs sm:text-sm font-semibold text-accent">{blogs.length} articles available</p>
+                    <p className="text-xs sm:text-sm font-bold text-accent">{blogs.length} articles available</p>
                   </div>
                 </div>
               </CardContent>
@@ -109,17 +113,21 @@ export default function AdultPage() {
           </SpotlightCard>
 
           <SpotlightCard spotlightColor="rgba(239, 68, 68, 0.15)">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer border-l-4 border-l-red-500 h-full">
-              <CardContent className="p-4 sm:p-6">
+            <Card className="relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer border-l-4 border-l-red-500 h-full group">
+              <div
+                className="absolute inset-0 bg-cover bg-center z-0 opacity-20 group-hover:opacity-30 transition-opacity"
+                style={{ backgroundImage: "url('/EDITH Modal.png')" }}
+              />
+              <CardContent className="relative z-10 p-4 sm:p-6 bg-background/60 backdrop-blur-[2px]">
                 <div className="flex items-start gap-3">
-                  <Flame className="h-5 w-5 sm:h-6 sm:w-6 text-red-500 flex-shrink-0 mt-0.5" />
-                  <div className="min-w-0 flex-1">
-                    <CardTitle className="text-lg sm:text-2xl mb-1 sm:mb-2">Exit Drill In The Home (EDITH)</CardTitle>
-                    <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-4 line-clamp-2">
+                  <Flame className="h-5 w-5 sm:h-6 sm:w-6 text-red-500 flex-shrink-0 mt-0.5 drop-shadow-md" />
+                  <div className="min-w-0 flex-1 drop-shadow-sm">
+                    <CardTitle className="text-lg sm:text-2xl mb-1 sm:mb-2 text-foreground font-extrabold">Exit Drill In The Home (EDITH)</CardTitle>
+                    <p className="text-xs sm:text-sm text-foreground/90 font-medium mb-2 sm:mb-4 line-clamp-2">
                       Interactive tool to visualize how fire spreads in different environments.
                     </p>
                     <Link href="/adult/simulation">
-                      <Button size="sm" className="bg-red-500 hover:bg-red-600 text-white w-full sm:w-auto">
+                      <Button size="sm" className="bg-red-500 hover:bg-red-600 text-white w-full sm:w-auto mt-2 shadow-md">
                         Launch Simulator
                         <ArrowRight className="h-4 w-4 ml-2" />
                       </Button>
