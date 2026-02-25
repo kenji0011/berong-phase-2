@@ -15,6 +15,7 @@
         })(console.warn);
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Alice&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/shared.css">
 </head>
@@ -266,28 +267,23 @@
             </button>
 
             <!-- Certificate Container -->
-            <div class="relative w-full aspect-[16/9] select-none">
-                <img src="../fire_safety_certificate.png" alt="Certificate Template"
-                    class="absolute inset-0 w-full h-full object-contain bg-[#fdfbf7]">
+            <div class="relative w-full select-none" style="aspect-ratio: 1123/794;">
+                <img src="../safescape_certificate.svg" alt="Certificate Template"
+                    class="absolute inset-0 w-full h-full object-contain">
 
                 <!-- Dynamic Text Overlays -->
-                <div class="absolute inset-x-0 top-[48%] -translate-y-1/2 text-center">
+                <div class="absolute inset-x-0 text-center flex justify-center items-center"
+                    style="top: 50%; transform: translateY(-50%);">
                     <h2 id="cert-student-name"
-                        class="font-serif text-[2.5cqw] md:text-3xl font-bold text-[#1a365d] uppercase tracking-wider">
+                        class="text-[clamp(1rem,3vw,2.5rem)] font-bold text-[#1a1a2e] uppercase tracking-widest"
+                        style="font-family: 'Georgia', 'Times New Roman', serif;">
                         Future Hero</h2>
                 </div>
 
-                <div class="absolute bottom-[14%] left-[22%] -translate-x-1/2 text-center w-[20%]">
-                    <p id="cert-date" class="font-serif text-[1.2cqw] md:text-lg text-slate-800 font-bold"></p>
-                </div>
-
-                <!-- Score (Optional display area) -->
-                <div class="absolute top-[15%] right-[10%] -translate-x-1/2 rotate-12 bg-yellow-400/90 text-red-700 font-bold rounded-full w-[10cqw] h-[10cqw] flex items-center justify-center shadow-lg border-4 border-white/50 hidden"
-                    id="cert-score-badge">
-                    <div class="text-center leading-tight">
-                        <span class="block text-[1.5cqw]">SCORE</span>
-                        <span class="block text-[2.5cqw]" id="cert-score-val">15</span>
-                    </div>
+                <div class="absolute inset-x-0 text-center flex justify-center items-center"
+                    style="top: 78%; transform: translateY(-50%);">
+                    <p id="cert-date" class="text-[clamp(0.6rem,1.5vw,1rem)] text-[#333]"
+                        style="font-family: 'Alice', 'Georgia', serif;"></p>
                 </div>
             </div>
 
@@ -453,21 +449,26 @@
         function showCertificate() {
             const progress = SafeScapeProgress.getProgress();
             const studentName = SafeScapeProgress.getStudentName() || "Future Hero";
-            const date = new Date().toLocaleDateString();
+
+            // Format date as "Given this Xth day of Month, Year"
+            const d = new Date();
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const day = d.getDate();
+            const getOrdinal = (n) => {
+                const s = ["th", "st", "nd", "rd"];
+                const v = n % 100;
+                return n + (s[(v - 20) % 10] || s[v] || s[0]);
+            };
+            const formattedDate = `Given this ${getOrdinal(day)} day of ${monthNames[d.getMonth()]}, ${d.getFullYear()}`;
+
             const score = progress.module5?.sections?.finalExamScore || 15;
 
             document.getElementById('cert-student-name').textContent = studentName;
-            document.getElementById('cert-date').textContent = date;
+            document.getElementById('cert-date').textContent = formattedDate;
 
             // Generate a fake ID for "authenticity"
             const id = Math.random().toString(36).substr(2, 9).toUpperCase();
             document.getElementById('cert-id').textContent = `ID: ${id}`;
-
-            // Optional: Show score badge if excellent
-            if (score === 15) {
-                document.getElementById('cert-score-badge').classList.remove('hidden');
-                document.getElementById('cert-score-val').textContent = score;
-            }
 
             document.getElementById('cert-modal').classList.remove('hidden');
         }

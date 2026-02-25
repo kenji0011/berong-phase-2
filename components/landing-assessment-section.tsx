@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -11,8 +11,13 @@ import {
     Lock,
     Trophy,
     Loader2,
-    LogIn
+    LogIn,
+    X,
+    Download
 } from "lucide-react"
+import { Dialog, DialogContent, DialogClose, DialogTitle } from "@/components/ui/dialog"
+import { toPng } from "html-to-image"
+import jsPDF from "jspdf"
 import { useAuth } from "@/lib/auth-context"
 
 interface EligibilityData {
@@ -44,7 +49,24 @@ export function LandingAssessmentSection() {
     const { user, isAuthenticated, isLoading } = useAuth()
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+    const [downloading, setDownloading] = useState(false)
     const [eligibility, setEligibility] = useState<EligibilityData | null>(null)
+    const [showCertificate, setShowCertificate] = useState(false)
+    const certificateRef = useRef<HTMLDivElement>(null)
+
+    // Format date properly
+    const formatDate = (dateString?: string) => {
+        if (!dateString) return ""
+        const d = new Date(dateString)
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+        const day = d.getDate()
+        const getOrdinal = (n: number) => {
+            const s = ["th", "st", "nd", "rd"]
+            const v = n % 100
+            return n + (s[(v - 20) % 10] || s[v] || s[0])
+        }
+        return `Given this ${getOrdinal(day)} day of ${monthNames[d.getMonth()]}, ${d.getFullYear()}`
+    }
 
     useEffect(() => {
         if (!isLoading && isAuthenticated) {
@@ -64,6 +86,48 @@ export function LandingAssessmentSection() {
             console.error("Failed to check eligibility", err)
         } finally {
             setLoading(false)
+        }
+    }
+
+    const downloadPDF = async () => {
+        if (!certificateRef.current) return;
+
+        try {
+            setDownloading(true);
+
+            // html-to-image handles modern CSS like Tailwind v4 oklch() colors much better
+            const dataUrl = await toPng(certificateRef.current, {
+                quality: 1.0,
+                pixelRatio: 2,
+                backgroundColor: '#ffffff',
+                filter: (node) => {
+                    // Filter out elements that might cause serialization issues
+                    // like elements with specific oklch styles or external SVGs if they fail
+                    return true;
+                },
+                style: {
+                    // Force a consistent rendering context
+                    transform: 'none',
+                    margin: '0',
+                }
+            });
+
+            // A4 size in mm: 297 x 210 (Landscape)
+            const pdf = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+
+            pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save(`SafeScape_Certificate_${user?.name?.replace(/\s+/g, '_') || 'Hero'}.pdf`);
+        } catch (error) {
+            console.error("Error generating PDF", error);
+        } finally {
+            setDownloading(false);
         }
     }
 
@@ -135,7 +199,7 @@ export function LandingAssessmentSection() {
                                                 <Button onClick={handleStartClick} variant="outline" className="flex-1">
                                                     View Results
                                                 </Button>
-                                                <Button onClick={() => router.push("/profile")} className="flex-1">
+                                                <Button onClick={() => setShowCertificate(true)} className="flex-1 text-white bg-red-700 hover:bg-red-800">
                                                     View Certificate
                                                 </Button>
                                             </div>
@@ -235,6 +299,51 @@ export function LandingAssessmentSection() {
                     </div>
                 </div>
             </div>
+
+            {/* Certificate Modal */}
+            <Dialog open={showCertificate} onOpenChange={setShowCertificate}>
+                <DialogContent className="max-w-[95vw] sm:max-w-4xl md:max-w-5xl lg:max-w-6xl w-full p-0 overflow-hidden bg-transparent border-none shadow-none">
+                    <DialogTitle className="sr-only">Certificate of Completion</DialogTitle>
+                    <div className="relative w-full max-w-[95vw] sm:max-w-4xl md:max-w-5xl lg:max-w-6xl bg-white rounded-lg shadow-2xl overflow-hidden flex flex-col items-center">
+                        <DialogClose asChild>
+                            <button className="absolute top-4 right-4 z-20 bg-red-600 hover:bg-red-700 text-white rounded-full p-2 w-10 h-10 flex items-center justify-center transition-colors shadow-lg disabled:opacity-50" disabled={downloading}>
+                                <X className="h-5 w-5" />
+                            </button>
+                        </DialogClose>
+
+                        <div ref={certificateRef} className="relative w-full select-none" style={{ aspectRatio: '1123/794' }}>
+                            <img src="/safescape_certificate.svg" alt="Certificate Template" className="absolute inset-0 w-full h-full object-contain" crossOrigin="anonymous" />
+
+                            <div className="absolute inset-x-0 text-center flex justify-center items-center" style={{ top: '50%', transform: 'translateY(-50%)' }}>
+                                <h2 className="text-[clamp(1rem,3vw,2.5rem)] font-bold text-[#1a1a2e] uppercase tracking-widest" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>
+                                    {user?.name || "Future Hero"}
+                                </h2>
+                            </div>
+
+                            <div className="absolute inset-x-0 text-center flex justify-center items-center" style={{ top: '78%', transform: 'translateY(-50%)' }}>
+                                <p className="text-[clamp(0.6rem,1.5vw,1rem)] text-[#333]" style={{ fontFamily: "'Alice', 'Georgia', serif" }}>
+                                    {formatDate(eligibility?.completedAt)}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="bg-slate-50 w-full p-4 border-t border-slate-200 flex justify-center items-center">
+                            <Button
+                                onClick={downloadPDF}
+                                disabled={downloading}
+                                className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-full font-bold transition-colors flex items-center gap-2"
+                            >
+                                {downloading ? (
+                                    <><Loader2 className="h-4 w-4 animate-spin" /> Generating PDF...</>
+                                ) : (
+                                    <><Download className="h-4 w-4" /> Download Certificate</>
+                                )}
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
         // </section>
     )
