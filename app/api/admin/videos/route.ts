@@ -44,7 +44,7 @@ export async function GET() {
     if (auth instanceof NextResponse) return auth
 
     const videos = await prisma.video.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: { order: 'asc' }
     })
 
     // Transform the response to match the expected format

@@ -14,7 +14,7 @@ export async function GET() {
           }
         }
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { order: 'asc' }
     })
 
     // Transform the data to return author name as string instead of object

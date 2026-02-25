@@ -16,7 +16,18 @@ import { Shield, ImageIcon, FileText, Video, Users, Plus, Trash2, AlertCircle, C
 import type { CarouselImage, BlogPost } from "@/lib/mock-data"
 import { ImageUpload } from "@/components/ui/image-upload"
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { SortableCarouselList } from "@/components/sortable-carousel-list"
+import { SortableContentList } from "@/components/sortable-content-list"
 import { LoadingOverlay } from "@/components/ui/loading-overlay"
 
 export default function AdminPage() {
@@ -399,6 +410,60 @@ export default function AdminPage() {
     }
   }
 
+  // Handle blog reordering
+  const handleReorderBlogs = async (newOrder: BlogPost[]) => {
+    try {
+      const blogIds = newOrder.map((blog) => blog.id)
+      const response = await fetch('/api/admin/blogs/reorder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ blogIds }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to reorder')
+      }
+
+      const updated = await response.json()
+      setBlogPosts(updated)
+
+      setSuccess('Blog order updated')
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (error) {
+      console.error('Error reordering blogs:', error)
+      setError('Failed to update blog order')
+      await loadBlogPosts()
+      throw error
+    }
+  }
+
+  // Handle video reordering
+  const handleReorderVideos = async (newOrder: any[]) => {
+    try {
+      const videoIds = newOrder.map((video) => video.id)
+      const response = await fetch('/api/admin/videos/reorder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoIds }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to reorder')
+      }
+
+      const updated = await response.json()
+      setVideos(updated)
+
+      setSuccess('Video order updated')
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (error) {
+      console.error('Error reordering videos:', error)
+      setError('Failed to update video order')
+      await loadVideos()
+      throw error
+    }
+  }
+
   const handleAddBlog = () => {
     if (!newBlog.title || !newBlog.excerpt || !newBlog.content) {
       setError("Please fill all blog fields")
@@ -556,26 +621,64 @@ export default function AdminPage() {
     );
   }
 
-  const handleToggleUserPermission = async (userId: string, permission: string) => {
+  // Password verification for role changes
+  const [roleChangeDialog, setRoleChangeDialog] = useState({
+    isOpen: false,
+    userId: "",
+    permission: "",
+    userName: "",
+  })
+  const [roleChangePassword, setRoleChangePassword] = useState("")
+  const [roleChangeError, setRoleChangeError] = useState("")
+  const [roleChangeLoading, setRoleChangeLoading] = useState(false)
+
+  const promptRoleChange = (userId: string, permission: string, userName: string) => {
+    setRoleChangeDialog({ isOpen: true, userId, permission, userName })
+    setRoleChangePassword("")
+    setRoleChangeError("")
+  }
+
+  const closeRoleChangeDialog = () => {
+    setRoleChangeDialog({ isOpen: false, userId: "", permission: "", userName: "" })
+    setRoleChangePassword("")
+    setRoleChangeError("")
+  }
+
+  const handleConfirmRoleChange = async () => {
+    if (!roleChangePassword) {
+      setRoleChangeError("Please enter your password")
+      return
+    }
+
+    setRoleChangeLoading(true)
+    setRoleChangeError("")
+
     try {
-      const response = await fetch(`/api/admin/users/${userId}/permissions`, {
+      const response = await fetch(`/api/admin/users/${roleChangeDialog.userId}/permissions`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ permission }),
+        body: JSON.stringify({
+          permission: roleChangeDialog.permission,
+          adminPassword: roleChangePassword,
+        }),
       })
 
       if (response.ok) {
-        await loadUsers() // Reload the list
+        await loadUsers()
         setSuccess("User permissions updated")
         setTimeout(() => setSuccess(""), 3000)
+        closeRoleChangeDialog()
       } else {
-        setError("Failed to update user permissions")
+        const data = await response.json()
+        setRoleChangeError(data.error || "Failed to update user permissions")
       }
     } catch (error) {
       console.error('Error updating user permissions:', error)
-      setError("Network error occurred")
+      setRoleChangeError("Network error occurred")
+    } finally {
+      setRoleChangeLoading(false)
     }
   }
 
@@ -764,6 +867,50 @@ export default function AdminPage() {
             description={confirmationDialog.description}
           />
 
+          {/* Password Verification Dialog for Role Changes */}
+          <AlertDialog open={roleChangeDialog.isOpen} onOpenChange={(open) => { if (!open && !roleChangeLoading) closeRoleChangeDialog() }}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Verify Admin Password</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Enter your admin password to change the role for <strong>{roleChangeDialog.userName}</strong>.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <div className="py-4">
+                <Label htmlFor="role-change-password">Password</Label>
+                <Input
+                  id="role-change-password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={roleChangePassword}
+                  autoComplete="new-password"
+                  onChange={(e) => {
+                    setRoleChangePassword(e.target.value)
+                    setRoleChangeError("")
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleConfirmRoleChange()
+                  }}
+                  autoFocus
+                />
+                {roleChangeError && (
+                  <p className="text-sm text-destructive mt-2">{roleChangeError}</p>
+                )}
+              </div>
+              <AlertDialogFooter>
+                <Button variant="outline" onClick={closeRoleChangeDialog} disabled={roleChangeLoading}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleConfirmRoleChange}
+                  disabled={roleChangeLoading || !roleChangePassword}
+                >
+                  {roleChangeLoading ? 'Verifying...' : 'Confirm Change'}
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
           {/* Carousel Management */}
           <TabsContent value="carousel" className="space-y-6">
             <ImageUpload
@@ -879,44 +1026,27 @@ export default function AdminPage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Current Blog Posts</CardTitle>
-                <CardDescription>{blogPosts.length} blog posts</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {blogPosts.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-8">No blog posts yet</p>
-                  ) : (
-                    blogPosts.map((post) => (
-                      <div key={post.id} className="flex items-start justify-between p-4 border rounded-lg">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-semibold">{post.title}</h4>
-                            <span className="text-xs px-2 py-1 rounded bg-accent/10 text-accent capitalize">
-                              {post.category}
-                            </span>
-                          </div>
-                          <p className="text-sm text-muted-foreground">{post.excerpt}</p>
-                          <p className="text-xs text-muted-foreground mt-2">
-                            By {post.author} • {new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-                          </p>
-                        </div>
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          onClick={() => handleDeleteBlog(post.id)}
-                          className="ml-4"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <SortableContentList
+              items={blogPosts}
+              title="Current Blog Posts"
+              description={`${blogPosts.length} blog posts`}
+              onReorder={handleReorderBlogs}
+              onDelete={handleDeleteBlog}
+              renderContent={(post) => (
+                <>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="font-semibold">{post.title}</h4>
+                    <span className="text-xs px-2 py-1 rounded bg-accent/10 text-accent capitalize">
+                      {post.category}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{post.excerpt}</p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    By {post.author} • {new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                  </p>
+                </>
+              )}
+            />
           </TabsContent>
 
           {/* Video Management */}
@@ -996,47 +1126,30 @@ export default function AdminPage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Current Videos</CardTitle>
-                <CardDescription>{videos.length} videos in database</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {videos.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-8">No videos yet</p>
-                  ) : (
-                    videos.map((video) => (
-                      <div key={video.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-semibold">{video.title}</h4>
-                            <span className={`text-xs px-2 py-1 rounded ${video.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                              {video.isActive ? 'Active' : 'Inactive'}
-                            </span>
-                            <span className="text-xs px-2 py-1 rounded bg-accent/10 text-accent capitalize">
-                              {video.category}
-                            </span>
-                          </div>
-                          <p className="text-sm text-muted-foreground">{video.description}</p>
-                          <p className="text-xs text-muted-foreground mt-2">
-                            YouTube ID: {video.youtubeId} • Duration: {video.duration}
-                          </p>
-                        </div>
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          onClick={() => handleDeleteVideo(video.id)}
-                          className="ml-4"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <SortableContentList
+              items={videos}
+              title="Current Videos"
+              description={`${videos.length} videos in database`}
+              onReorder={handleReorderVideos}
+              onDelete={handleDeleteVideo}
+              renderContent={(video) => (
+                <>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="font-semibold">{video.title}</h4>
+                    <span className={`text-xs px-2 py-1 rounded ${video.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                      {video.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                    <span className="text-xs px-2 py-1 rounded bg-accent/10 text-accent capitalize">
+                      {video.category}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{video.description}</p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    YouTube ID: {video.youtubeId} • Duration: {video.duration}
+                  </p>
+                </>
+              )}
+            />
           </TabsContent>
 
           {/* User Management */}
@@ -1054,6 +1167,7 @@ export default function AdminPage() {
                     value={userSearchQuery}
                     onChange={(e) => setUserSearchQuery(e.target.value)}
                     className="pl-10"
+                    autoComplete="off"
                   />
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 </div>
@@ -1076,7 +1190,7 @@ export default function AdminPage() {
                           <Button
                             size="sm"
                             variant={u.permissions.accessKids ? "default" : "outline"}
-                            onClick={() => handleToggleUserPermission(u.id, "accessKids")}
+                            onClick={() => promptRoleChange(u.id, "accessKids", u.name)}
                             className={u.permissions.accessKids ? "bg-secondary" : ""}
                           >
                             Kids Access
@@ -1084,7 +1198,7 @@ export default function AdminPage() {
                           <Button
                             size="sm"
                             variant={u.permissions.accessAdult ? "default" : "outline"}
-                            onClick={() => handleToggleUserPermission(u.id, "accessAdult")}
+                            onClick={() => promptRoleChange(u.id, "accessAdult", u.name)}
                             className={u.permissions.accessAdult ? "bg-accent" : ""}
                           >
                             Adult Access
@@ -1092,7 +1206,7 @@ export default function AdminPage() {
                           <Button
                             size="sm"
                             variant={u.permissions.accessProfessional ? "default" : "outline"}
-                            onClick={() => handleToggleUserPermission(u.id, "accessProfessional")}
+                            onClick={() => promptRoleChange(u.id, "accessProfessional", u.name)}
                             className={u.permissions.accessProfessional ? "bg-primary" : ""}
                           >
                             Professional Access
@@ -1100,7 +1214,7 @@ export default function AdminPage() {
                           <Button
                             size="sm"
                             variant={u.permissions.isAdmin ? "default" : "outline"}
-                            onClick={() => handleToggleUserPermission(u.id, "isAdmin")}
+                            onClick={() => promptRoleChange(u.id, "isAdmin", u.name)}
                             className={u.permissions.isAdmin ? "bg-foreground text-background" : ""}
                           >
                             Admin

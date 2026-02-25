@@ -32,27 +32,34 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="antialiased relative min-h-screen">
-        {/* Suppress Next.js Fast Refresh logs in development to reduce console noise */}
-        {process.env.NODE_ENV === 'development' && (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                (function() {
-                  const originalLog = console.log;
-                  console.log = function(...args) {
-                    if (args.length > 0 && typeof args[0] === 'string' && args[0].includes('[Fast Refresh]')) return;
-                    originalLog.apply(console, args);
-                  };
-                  const originalDebug = console.debug;
-                  console.debug = function(...args) {
-                    if (args.length > 0 && typeof args[0] === 'string' && args[0].includes('[Fast Refresh]')) return;
-                    originalDebug.apply(console, args);
-                  };
-                })();
-              `,
-            }}
-          />
-        )}
+        {/* Suppress noisy console warnings/errors for a clean production console */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                var suppressed = [
+                  'preloaded using link preload but not used',
+                  'Failed to load resource',
+                  '[Fast Refresh]',
+                  'Download the React DevTools'
+                ];
+                function shouldSuppress(args) {
+                  if (args.length === 0) return false;
+                  var msg = typeof args[0] === 'string' ? args[0] : '';
+                  for (var i = 0; i < suppressed.length; i++) {
+                    if (msg.indexOf(suppressed[i]) !== -1) return true;
+                  }
+                  return false;
+                }
+                var ow = console.warn, oe = console.error, ol = console.log, od = console.debug;
+                console.warn = function() { if (!shouldSuppress(arguments)) ow.apply(console, arguments); };
+                console.error = function() { if (!shouldSuppress(arguments)) oe.apply(console, arguments); };
+                console.log = function() { if (!shouldSuppress(arguments)) ol.apply(console, arguments); };
+                console.debug = function() { if (!shouldSuppress(arguments)) od.apply(console, arguments); };
+              })();
+            `,
+          }}
+        />
         {/* Page Loader for transitions */}
         <Suspense fallback={null}>
           <PageLoader />

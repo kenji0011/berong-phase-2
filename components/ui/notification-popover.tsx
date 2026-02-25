@@ -50,7 +50,6 @@ export function NotificationPopover() {
         }
       } catch (err) {
         setError('Error loading notifications');
-        console.error('Error fetching notifications:', err);
       } finally {
         setLoading(false);
       }
@@ -82,10 +81,10 @@ export function NotificationPopover() {
           n.id === id ? { ...n, isRead } : n
         ));
       } else {
-        console.error('Failed to update notification status');
+        // Silently handle update failure
       }
     } catch (err) {
-      console.error('Error updating notification status:', err);
+      // Silently handle update error
     }
   };
 
@@ -100,10 +99,10 @@ export function NotificationPopover() {
       if (response.ok) {
         setNotifications(notifications.filter(n => n.id !== id));
       } else {
-        console.error('Failed to delete notification');
+        // Silently handle delete failure
       }
     } catch (err) {
-      console.error('Error deleting notification:', err);
+      // Silently handle delete error
     }
   };
 
@@ -118,7 +117,7 @@ export function NotificationPopover() {
       const unreadNotificationIds = notifications.filter(n => !n.isRead).map(n => n.id);
       await Promise.all(unreadNotificationIds.map(id => toggleReadStatus(id, true)));
     } catch (err) {
-      console.error('Error marking all notifications as read:', err);
+      // Silently handle mark-all-read error
       // Revert the UI changes if there was an error
       setNotifications(notifications.map(n => ({ ...n, isRead: false })));
     }

@@ -87,13 +87,6 @@ export function FeaturedCards() {
     return true;
   });
 
-  console.log('FeaturedCards debug:', {
-    userId: user?.id,
-    age: user?.age,
-    role: user?.role,
-    visibleCount: visibleCards.length
-  });
-
   return (
     <div className="max-w-7xl mx-auto px-4">
       {/* Mobile: Horizontal compact cards */}

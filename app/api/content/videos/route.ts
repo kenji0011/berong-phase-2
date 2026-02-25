@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const videos = await prisma.video.findMany({
       where: { isActive: true },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { order: 'asc' }
     })
 
     return NextResponse.json(videos)

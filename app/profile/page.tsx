@@ -489,15 +489,15 @@ export default function ProfilePage() {
                   </div>
                   {scores.preTestScore !== null ? (
                     <>
-                      <div className={`text-center p-6 rounded-lg ${getScoreBg(getScorePercentage(scores.preTestScore, scores.preTestMax))}`}>
-                        <div className={`text-4xl font-bold ${getScoreColor(getScorePercentage(scores.preTestScore, scores.preTestMax))}`}>
-                          {scores.preTestScore} / {scores.preTestMax}
+                      <div className={`text-center p-6 rounded-lg ${getScoreBg(getScorePercentage(scores.preTestScore, 15))}`}>
+                        <div className={`text-4xl font-bold ${getScoreColor(getScorePercentage(scores.preTestScore, 15))}`}>
+                          {scores.preTestScore} / 15
                         </div>
-                        <div className={`text-lg font-medium mt-1 ${getScoreColor(getScorePercentage(scores.preTestScore, scores.preTestMax))}`}>
-                          {getScorePercentage(scores.preTestScore, scores.preTestMax)}%
+                        <div className={`text-lg font-medium mt-1 ${getScoreColor(getScorePercentage(scores.preTestScore, 15))}`}>
+                          {getScorePercentage(scores.preTestScore, 15)}%
                         </div>
-                        <p className={`text-sm mt-2 font-medium ${getScoreColor(getScorePercentage(scores.preTestScore, scores.preTestMax))}`}>
-                          {getScoreLabel(getScorePercentage(scores.preTestScore, scores.preTestMax))}
+                        <p className={`text-sm mt-2 font-medium ${getScoreColor(getScorePercentage(scores.preTestScore, 15))}`}>
+                          {getScoreLabel(getScorePercentage(scores.preTestScore, 15))}
                         </p>
                       </div>
                       {scores.preTestCompletedAt && (
@@ -522,15 +522,15 @@ export default function ProfilePage() {
                   </div>
                   {scores.postTestScore !== null ? (
                     <>
-                      <div className={`text-center p-6 rounded-lg ${getScoreBg(getScorePercentage(scores.postTestScore, scores.postTestMax))}`}>
-                        <div className={`text-4xl font-bold ${getScoreColor(getScorePercentage(scores.postTestScore, scores.postTestMax))}`}>
-                          {scores.postTestScore} / {scores.postTestMax}
+                      <div className={`text-center p-6 rounded-lg ${getScoreBg(getScorePercentage(scores.postTestScore, 15))}`}>
+                        <div className={`text-4xl font-bold ${getScoreColor(getScorePercentage(scores.postTestScore, 15))}`}>
+                          {scores.postTestScore} / 15
                         </div>
-                        <div className={`text-lg font-medium mt-1 ${getScoreColor(getScorePercentage(scores.postTestScore, scores.postTestMax))}`}>
-                          {getScorePercentage(scores.postTestScore, scores.postTestMax)}%
+                        <div className={`text-lg font-medium mt-1 ${getScoreColor(getScorePercentage(scores.postTestScore, 15))}`}>
+                          {getScorePercentage(scores.postTestScore, 15)}%
                         </div>
-                        <p className={`text-sm mt-2 font-medium ${getScoreColor(getScorePercentage(scores.postTestScore, scores.postTestMax))}`}>
-                          {getScoreLabel(getScorePercentage(scores.postTestScore, scores.postTestMax))}
+                        <p className={`text-sm mt-2 font-medium ${getScoreColor(getScorePercentage(scores.postTestScore, 15))}`}>
+                          {getScoreLabel(getScorePercentage(scores.postTestScore, 15))}
                         </p>
                       </div>
                       {scores.postTestCompletedAt && (

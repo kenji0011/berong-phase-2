@@ -249,15 +249,17 @@ class FireSimulator:
         self.firewall_spread_factor = firewall_spread_factor
         self.material_type = material_type
         
-        # Adjust probabilities based on material type
+        # Same spread probabilities for all materials
         self.current_spread_probs = FIRE_SPREAD_PROBS.copy()
+        
+        # Wood material: fire advances MORE STEPS per tick (not higher probability)
+        # This keeps agents at the same visual speed while fire spreads faster
         if self.material_type == "wood":
-            print("[FIRE SIM] Using WOOD material settings (Faster Spread)", flush=True)
-            self.current_spread_probs[CELL_FREE] = 0.50  # Much faster spread in free space (was 0.25)
-            self.current_spread_probs[CELL_DOOR] = 0.85  # Doors burn faster (was 0.6)
-            self.current_spread_probs[CELL_WINDOW] = 0.95 # Windows almost immediate (was 0.8)
+            self.steps_per_tick = 2  # Fire takes 2 steps per frame
+            print("[FIRE SIM] Using WOOD material settings (2 fire steps per tick)", flush=True)
         else:
-            print("[FIRE SIM] Using CONCRETE material settings (Standard Spread)", flush=True)
+            self.steps_per_tick = 1  # Fire takes 1 step per frame
+            print("[FIRE SIM] Using CONCRETE material settings (1 fire step per tick)", flush=True)
 
         self.fire_map = np.zeros_like(self.base_grid, dtype=float)
         self.directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
@@ -299,6 +301,11 @@ class FireSimulator:
         new_fires = candidates & (rand_vals < prob_map)
 
         self.fire_map[new_fires] = 1
+
+    def tick(self):
+        """Advance fire spread by one tick (may be multiple steps for wood material)."""
+        for _ in range(self.steps_per_tick):
+            self.step()
 
     def reset(self, ignition_points=None):
         self.fire_map = np.zeros_like(self.base_grid, dtype=float)
@@ -516,7 +523,7 @@ class Person:
 # Gymnasium Environment for RL
 class EvacuationEnv(gym.Env):
     def __init__(self, grid, num_agents=5, max_steps=500, agent_start_positions=None, 
-                 fire_start_position=None, exits=None, max_agents=10):
+                 fire_start_position=None, exits=None, max_agents=10, material_type="concrete"):
         super(EvacuationEnv, self).__init__()
 
         self.base_grid = grid
@@ -535,7 +542,7 @@ class EvacuationEnv(gym.Env):
         unique, counts = np.unique(self.base_grid, return_counts=True)
         print(f"[DEBUG] Grid composition: {dict(zip(unique, counts))}", flush=True)
 
-        self.fire_sim = FireSimulator(self.base_grid)
+        self.fire_sim = FireSimulator(self.base_grid, material_type=material_type)
         self.agents = []
 
         self.action_space = spaces.Discrete(len(self.exits))
@@ -621,7 +628,7 @@ class EvacuationEnv(gym.Env):
 
     def step(self, action):
         self.current_step += 1
-        self.fire_sim.step()
+        self.fire_sim.tick()
 
         # Note: PPO action parameter is accepted for API compatibility but not used.
         # Agents use nearest-exit heuristic which performs better than the trained PPO policy.
@@ -811,7 +818,7 @@ def run_heuristic_simulation(grid, agent_positions, fire_position, exits=None,
     
     while step_count < max_steps:
         step_count += 1
-        fire_sim.step()
+        fire_sim.tick()
         
         
         # Unified agent processing loop
@@ -875,7 +882,7 @@ def run_heuristic_simulation(grid, agent_positions, fire_position, exits=None,
             burn_step = 0
             while burn_step < max_burn_steps:
                 prev_fire_count = np.sum(fire_sim.fire_map)
-                fire_sim.step()
+                fire_sim.tick()
                 new_fire_count = np.sum(fire_sim.fire_map)
                 
                 fire_coords = sample_fire_coords(fire_sim.fire_map, MAX_FIRE_COORDS_PER_FRAME)
@@ -903,7 +910,7 @@ def run_heuristic_simulation(grid, agent_positions, fire_position, exits=None,
             # Fixed number of extended steps
             print(f"[HEURISTIC] Running {extended_fire_steps} extended fire steps", flush=True)
             for _ in range(extended_fire_steps):
-                fire_sim.step()
+                fire_sim.tick()
                 fire_coords = sample_fire_coords(fire_sim.fire_map, MAX_FIRE_COORDS_PER_FRAME)
                 # Keep agents frozen
                 agents_data = []

@@ -222,6 +222,7 @@ def _run_simulation_inner(job_id: str, config: SimulationConfig, result_holder: 
             fire_start_position=fire_position_xy,
             exits=distributed_exits,
             max_agents=10,
+            material_type=config.material_type,
         )
 
         obs, _ = env.reset()
@@ -288,7 +289,7 @@ def _run_simulation_inner(job_id: str, config: SimulationConfig, result_holder: 
                 burn_step = 0
                 while burn_step < max_burn_steps:
                     prev_fire_count = np.sum(env.fire_sim.fire_map)
-                    env.fire_sim.step()
+                    env.fire_sim.tick()
                     new_fire_count = np.sum(env.fire_sim.fire_map)
 
                     if assembly_point_xy:
@@ -340,7 +341,7 @@ def _run_simulation_inner(job_id: str, config: SimulationConfig, result_holder: 
                     flush=True,
                 )
                 for _ in range(config.extended_fire_steps):
-                    env.fire_sim.step()
+                    env.fire_sim.tick()
                     if assembly_point_xy:
                         for agent in env.agents:
                             if agent.status == "escaped":

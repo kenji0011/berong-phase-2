@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/admin-auth'
+import bcrypt from 'bcryptjs'
 
 export async function PATCH(
   request: NextRequest,
@@ -29,8 +30,40 @@ export async function PATCH(
       )
     }
 
-    // For now, we'll implement a simple permission toggle system
-    // In a real implementation, you'd have a more sophisticated permissions system
+    // Require admin password verification for role changes
+    if (!body.adminPassword) {
+      return NextResponse.json(
+        { error: 'Admin password is required to change user roles.' },
+        { status: 400 }
+      )
+    }
+
+    // Get admin user from the auth cookie to verify password
+    const { cookies } = await import('next/headers')
+    const { verifyToken } = await import('@/lib/jwt')
+    const cookieStore = await cookies()
+    const userCookie = cookieStore.get('bfp_user')
+    const adminPayload = await verifyToken(userCookie!.value)
+
+    const adminUser = await prisma.user.findUnique({
+      where: { id: adminPayload!.id },
+      select: { password: true }
+    })
+
+    if (!adminUser) {
+      return NextResponse.json(
+        { error: 'Admin user not found' },
+        { status: 404 }
+      )
+    }
+
+    const isValidPassword = await bcrypt.compare(body.adminPassword, adminUser.password)
+    if (!isValidPassword) {
+      return NextResponse.json(
+        { error: 'Incorrect password. Role change denied.' },
+        { status: 403 }
+      )
+    }
 
     const user = await prisma.user.findUnique({
       where: { id: userId }
@@ -95,3 +128,4 @@ export async function PATCH(
     )
   }
 }
+
