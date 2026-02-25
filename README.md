@@ -1,102 +1,112 @@
-# BFP Evacuation Simulation Application
+# BFP Berong SafeScape: Intelligent Fire Safety & Evacuation Simulator
 
-This application provides a fire evacuation simulation tool with a web interface for creating and running evacuation scenarios.
+Berong SafeScape is an interactive e-learning and fire safety simulation platform developed for the Bureau of Fire Protection (BFP). It combines comprehensive educational modules tracking safe practices with an advanced AI-driven evacuation simulation engine to assess and teach fire safety effectively.
 
-## Quick Start
+## 🌟 Key Features
 
-The easiest way to start the application is by using one of the provided startup scripts:
+### 📚 Adaptive E-Learning System
+- **Role-based Tracks**: Distinct learning modules and experiences tailored for Kids, Adults, and Professionals/Admins.
+- **Assessments**: Pre-test and post-test assessments to gauge knowledge improvement before and after completing modules.
+- **Dynamic Certification**: Upon passing the final post-test, users earn a personalized SafeScape Hero Certificate, dynamically generated over an SVG template and exportable as a high-quality PDF.
+- **Content Management System (CMS)**: Admins can dynamically reorder and manage articles, blogs, and educational videos directly from the dashboard.
 
-### Windows
+### 🚒 Advanced 3D Fire Evacuation Simulation
+- **AI Floor Plan Processing**: Utilizes a deep learning **U-Net** model (`unet_floorplan_model.pth`) to segment and analyze uploaded 2D floor plans.
+- **Intelligent Pathfinding**: Implements the **A* Algorithm** to compute the fastest and safest evacuation routes dynamically.
+- **Fire Spread Modeling**: Uses **Cellular Automata** to realistically simulate the spread of fire and smoke throughout the building.
+- **Agent Behavior Modeling**: Employs **Finite State Machines (FSM)** and a Proximal Policy Optimization (**PPO**) Commander model to simulate realistic human behaviors, panic, and reactions during evacuation scenarios.
+
+### 🤖 AI Integration & Tools
+- **Fire Safety Chatbot**: An integrated AI assistant powered by the Google Gemini API to answer users' fire safety questions in real-time.
+- **Email Notifications**: Automated email delivery using Nodemailer for user sign-ups, alerts, and system notifications.
+
+## 🛠️ Technology Stack
+
+**Frontend (Web Application)**
+*   **Framework**: Next.js 15.2 (App Router) & React 19
+*   **Styling**: Tailwind CSS v4 & Tailwind Animate
+*   **Components**: Radix UI Primitives, Lucide React (Icons)
+*   **State & Forms**: React Hook Form, Zod (Validation), Zustand/Context API
+*   **Visualization**: Embla Carousel, Recharts, Fabric.js (Canvas drawing)
+*   **Utilities**: `html-to-image` and `jspdf` for Certificate generation
+
+**Backend (Simulation Engine)**
+*   **Framework**: Python 3.x with FastAPI & Uvicorn
+*   **AI/ML**: PyTorch (U-Net), Stable Baselines3 (PPO), OpenCV for image processing
+
+**Database & Infrastructure**
+*   **Database**: PostgreSQL
+*   **ORM**: Prisma ORM (v6)
+*   **Authentication**: Custom implementation using JWT/Jose and bcryptjs
+*   **Deployment**: Docker & Docker Compose Support
+
+---
+
+## 🚀 Quick Start Guide
+
+The easiest way to start both the Next.js frontend and the Python simulation backend simultaneously is using the provided `concurrently` script:
+
+### Prerequisites
+- Node.js & `pnpm` (Package Manager)
+- Python 3.9+ (with `venv` setup in `bfp-simulation-backend/.venv`)
+- PostgreSQL database running locally or remotely.
+
+### Installation & Setup
+
+1. **Install Dependencies**
+   ```bash
+   pnpm install
+   ```
+
+2. **Environment Variables**
+   Ensure your `.env` file is properly configured with your `DATABASE_URL`, JWT secrets, and `GEMINI_API_KEY`.
+
+3. **Database Setup**
+   Push the Prisma schema and seed the initial data (assessments, admin accounts, etc.):
+   ```bash
+   npx prisma db push
+   pnpm run seed:all
+   ```
+
+4. **Run the Application**
+   ```bash
+   pnpm run dev:full
+   ```
+   *This command spins up the Next.js frontend at `http://localhost:3000` and the FastAPI backend at `http://0.0.0.0:8001`.*
+
+## 🐳 Docker Deployment
+
+For production-ready containerized deployment, we provide a robust setup:
+
 ```bash
-# Double-click start-app.bat or run in command prompt:
-start-app.bat
-```
-
-### Linux/Mac
-```bash
-# Make the script executable and run it:
-chmod +x start-app.sh
-./start-app.sh
-```
-
-### Using npm (Alternative)
-```bash
-npm run dev:full
-```
-
-## Docker Deployment 🐳
-
-For production-ready containerized deployment:
-
-### Quick Start with Docker
-```bash
-# Development
-docker-compose up -d
+# Development (Hot-reloading)
+make dev          # Uses docker-compose.yml
 
 # Production
-docker-compose -f docker-compose.prod.yml up -d
+make prod         # Uses docker-compose.prod.yml
 
-# Production with SSL
-docker-compose -f docker-compose.ssl.yml up -d
+# Commands reference
+make logs         # View running logs
+make security     # Run automated security scans
 ```
+*Note: Ensure your `.env` is correctly mapped for Docker environments.*
 
-### Using Makefile (Recommended)
-```bash
-make dev          # Start development
-make prod         # Start production
-make prod-ssl     # Start with SSL
-make logs         # View logs
-make security     # Run security checks
-make help         # Show all commands
+---
+
+## 📂 Project Structure Overview
+
+```text
+bfp-berong-safescape/
+├── app/                        # Next.js App Router (Pages, API Routes, Layouts)
+│   ├── admin/                  # CMS & Admin Dashboard
+│   ├── api/                    # Next.js REST API endpoints
+│   ├── assessment/             # Pre/Post-Test evaluation pages
+│   ├── kids/                   # Kids learning track
+│   └── profile/                # User profile & certificate viewing
+├── bfp-simulation-backend/     # Python FastAPI Simulation Engine
+│   ├── models/                 # Pre-trained U-Net and PPO models
+│   └── simulation.py           # Core logic (A*, Cellular Automata, FSM)
+├── components/                 # Reusable React UI Components (Radix, Custom)
+├── prisma/                     # Database Schema and Seed Scripts
+└── public/                     # Static assets (SVGs, Images, Legacy HTML modules)
 ```
-
-### Docker Documentation
-- 📖 [Docker Review Summary](docs/DOCKER_REVIEW_SUMMARY.md) - Complete overview
-- 🔒 [Security Implementation](docs/DOCKER_SECURITY_IMPLEMENTATION.md) - Security details
-- 🚀 [Quick Reference](docs/DOCKER_QUICK_REFERENCE.md) - Commands & troubleshooting
-
-**Features:**
-- ✅ Multi-stage builds for optimal image size
-- ✅ Non-root users for security
-- ✅ Health checks for all services
-- ✅ Automated security scanning
-- ✅ Resource limits in production
-- ✅ Comprehensive logging
-
-## Manual Setup
-
-If you prefer to start the servers manually:
-
-### Frontend (Next.js)
-```bash
-npm run dev
-```
-The frontend will be available at http://localhost:3000
-
-### Backend (FastAPI)
-```bash
-cd bfp-simulation-backend
-python main.py
-```
-The backend API will be available at http://localhost:8000
-
-## Prerequisites
-
-- Node.js (for the frontend)
-- Python 3.x (for the backend)
-- npm or pnpm package manager
-
-## Features
-
-- Interactive floor plan simulation
-- Evacuation route planning
-- Real-time simulation visualization
-- Fire spread modeling
-- Agent-based evacuation behavior
-
-## Project Structure
-
-- `app/` - Next.js frontend pages and components
-- `bfp-simulation-backend/` - Python FastAPI backend for simulation processing
-- `components/` - React UI components
-- `public/` - Static assets

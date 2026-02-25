@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import Autoplay from "embla-carousel-autoplay"
 import Image from 'next/image';
 import { Maximize2 } from "lucide-react"
 import { ImageViewerModal } from "@/components/image-viewer-modal"
@@ -30,7 +31,15 @@ export function HeroCarouselClient({ images }: HeroCarouselClientProps) {
 
     return (
         <div className="relative w-full max-w-7xl mx-auto">
-            <Carousel className="w-full">
+            <Carousel
+                className="w-full"
+                plugins={[
+                    Autoplay({
+                        delay: 4000,
+                        stopOnInteraction: false,
+                    }),
+                ]}
+            >
                 <CarouselContent>
                     {images.map((image) => (
                         <CarouselItem key={image.id}>
