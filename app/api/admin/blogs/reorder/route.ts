@@ -17,20 +17,8 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        try {
-            await prisma.$transaction(
-                blogIds.map((id: string | number, index: number) =>
-                    prisma.blogPost.update({
-                        where: { id: Number(id) },
-                        data: { order: index }
-                    })
-                )
-            )
-        } catch (error: any) {
-            if (!(error?.code === 'P2022' && String(error?.meta?.column || '').includes('blog_posts.order'))) {
-                throw error
-            }
-        }
+        // Note: order column not available in production DB, reorder is a no-op
+        // Just return the blogs sorted by createdAt
 
         const updatedBlogs = await prisma.blogPost.findMany({
             where: { isPublished: true },

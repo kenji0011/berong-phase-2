@@ -17,20 +17,8 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        try {
-            await prisma.$transaction(
-                videoIds.map((id: string | number, index: number) =>
-                    prisma.video.update({
-                        where: { id: Number(id) },
-                        data: { order: index }
-                    })
-                )
-            )
-        } catch (error: any) {
-            if (!(error?.code === 'P2022' && String(error?.meta?.column || '').includes('videos.order'))) {
-                throw error
-            }
-        }
+        // Note: order column not available in production DB, reorder is a no-op
+        // Just return the videos sorted by createdAt
 
         const updatedVideos = await prisma.video.findMany({
             orderBy: { createdAt: 'desc' }

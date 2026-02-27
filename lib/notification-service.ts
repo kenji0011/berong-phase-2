@@ -7,7 +7,7 @@ interface CreateNotificationData {
   type: string;
   category: ContentCategory;
   userIds?: number[]; // Optional: if specific users, otherwise will be sent to all users with matching permissions
-  resourceId?: number;
+  resourceId?: number; // Kept for API compatibility but not stored (column doesn't exist in production DB)
 }
 
 export class NotificationService {
@@ -19,27 +19,15 @@ export class NotificationService {
       if (userIds && userIds.length > 0) {
         const notifications = await Promise.all(
           userIds.map(async (userId) => {
-            const notificationData: any = {
-              title,
-              message,
-              type,
-              category,
-              userId,
-            }
-
-            if (typeof resourceId === 'number') {
-              notificationData.resourceId = resourceId
-            }
-
-            try {
-              return await prisma.notification.create({ data: notificationData })
-            } catch (error: any) {
-              if (error?.code === 'P2022' && String(error?.meta?.column || '').includes('resourceId')) {
-                const { resourceId: _, ...withoutResourceId } = notificationData
-                return await prisma.notification.create({ data: withoutResourceId })
+            return await prisma.notification.create({
+              data: {
+                title,
+                message,
+                type,
+                category,
+                userId,
               }
-              throw error
-            }
+            })
           })
         );
         return { success: true, notifications };
@@ -100,27 +88,15 @@ export class NotificationService {
       // Create notifications for all matching users
       const notifications = await Promise.all(
         matchingUsers.map(async (user) => {
-          const notificationData: any = {
-            title,
-            message,
-            type,
-            category,
-            userId: user.id,
-          }
-
-          if (typeof resourceId === 'number') {
-            notificationData.resourceId = resourceId
-          }
-
-          try {
-            return await prisma.notification.create({ data: notificationData })
-          } catch (error: any) {
-            if (error?.code === 'P2022' && String(error?.meta?.column || '').includes('resourceId')) {
-              const { resourceId: _, ...withoutResourceId } = notificationData
-              return await prisma.notification.create({ data: withoutResourceId })
+          return await prisma.notification.create({
+            data: {
+              title,
+              message,
+              type,
+              category,
+              userId: user.id,
             }
-            throw error
-          }
+          })
         })
       );
 
@@ -138,37 +114,7 @@ export class NotificationService {
         orderBy: { createdAt: 'desc' },
       });
       return { success: true, notifications };
-    } catch (error: any) {
-      if (error?.code === 'P2022' && String(error?.meta?.column || '').includes('resourceId')) {
-        try {
-          const notifications = await prisma.$queryRaw<Array<{
-            id: number
-            userId: number
-            title: string
-            message: string
-            type: string
-            category: string
-            isRead: boolean
-            createdAt: Date
-          }>>`
-            SELECT id, "userId", title, message, type, category, "isRead", "createdAt"
-            FROM notifications
-            WHERE "userId" = ${userId}
-            ORDER BY "createdAt" DESC
-          `
-
-          return {
-            success: true,
-            notifications: notifications.map((notification) => ({
-              ...notification,
-              resourceId: null,
-            })),
-          }
-        } catch (fallbackError) {
-          console.error('Error fetching user notifications (fallback query):', fallbackError);
-          return { success: false, error: 'Failed to fetch notifications' };
-        }
-      }
+    } catch (error) {
       console.error('Error fetching user notifications:', error);
       return { success: false, error: 'Failed to fetch notifications' };
     }

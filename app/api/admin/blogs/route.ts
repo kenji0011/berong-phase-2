@@ -18,54 +18,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    let newBlog: {
-      id: number
-      title: string
-      excerpt: string
-      content: string
-      imageUrl: string | null
-      category: string
-      authorId: number
-      isPublished: boolean
-    }
-
-    try {
-      const created = await prisma.blogPost.create({
-        data: {
-          title: body.title,
-          excerpt: body.excerpt,
-          content: body.content,
-          imageUrl: body.imageUrl || null,
-          category: body.category,
-          authorId: body.authorId,
-          isPublished: true,
-        }
-      })
-      newBlog = created
-    } catch (error: any) {
-      if (error?.code === 'P2022' && String(error?.meta?.column || '').includes('blog_posts.order')) {
-        const rows = await prisma.$queryRaw<Array<{
-          id: number
-          title: string
-          excerpt: string
-          content: string
-          imageUrl: string | null
-          category: string
-          authorId: number
-          isPublished: boolean
-        }>>`
-          INSERT INTO blog_posts (title, excerpt, content, "imageUrl", category, "authorId", "isPublished", "createdAt", "updatedAt")
-          VALUES (${body.title}, ${body.excerpt}, ${body.content}, ${body.imageUrl || null}, ${body.category}, ${Number(body.authorId)}, true, NOW(), NOW())
-          RETURNING id, title, excerpt, content, "imageUrl", category, "authorId", "isPublished"
-        `
-        if (!rows.length) {
-          throw new Error('Failed to create blog post')
-        }
-        newBlog = rows[0]
-      } else {
-        throw error
+    const newBlog = await prisma.blogPost.create({
+      data: {
+        title: body.title,
+        excerpt: body.excerpt,
+        content: body.content,
+        imageUrl: body.imageUrl || null,
+        category: body.category,
+        authorId: body.authorId,
+        isPublished: true,
       }
-    }
+    })
 
     // Create notification for users with access to this category
     console.log(`[AdminBlog] Creating notification for blog: ${body.title}, category: ${body.category}, id: ${newBlog.id}`);
