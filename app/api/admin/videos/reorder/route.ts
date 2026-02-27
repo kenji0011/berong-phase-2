@@ -17,19 +17,23 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Update order in transaction - each video gets its index as the order
-        await prisma.$transaction(
-            videoIds.map((id: string | number, index: number) =>
-                prisma.video.update({
-                    where: { id: Number(id) },
-                    data: { order: index }
-                })
+        try {
+            await prisma.$transaction(
+                videoIds.map((id: string | number, index: number) =>
+                    prisma.video.update({
+                        where: { id: Number(id) },
+                        data: { order: index }
+                    })
+                )
             )
-        )
+        } catch (error: any) {
+            if (!(error?.code === 'P2022' && String(error?.meta?.column || '').includes('videos.order'))) {
+                throw error
+            }
+        }
 
-        // Return updated videos sorted by order
         const updatedVideos = await prisma.video.findMany({
-            orderBy: { order: 'asc' }
+            orderBy: { createdAt: 'desc' }
         })
 
         const transformedVideos = updatedVideos.map(video => ({

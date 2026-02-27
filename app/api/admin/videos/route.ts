@@ -43,9 +43,20 @@ export async function GET() {
     const auth = await requireAdmin()
     if (auth instanceof NextResponse) return auth
 
-    const videos = await prisma.video.findMany({
-      orderBy: { order: 'asc' }
-    })
+    let videos
+    try {
+      videos = await prisma.video.findMany({
+        orderBy: { order: 'asc' }
+      })
+    } catch (error: any) {
+      if (error?.code === 'P2022' && String(error?.meta?.column || '').includes('videos.order')) {
+        videos = await prisma.video.findMany({
+          orderBy: { createdAt: 'desc' }
+        })
+      } else {
+        throw error
+      }
+    }
 
     // Transform the response to match the expected format
     const transformedVideos = videos.map(video => ({
@@ -86,16 +97,41 @@ export async function POST(request: NextRequest) {
     // Extract YouTube ID from URL or use directly
     const youtubeId = extractYouTubeId(body.youtubeId)
 
-    const newVideo = await prisma.video.create({
-      data: {
-        title: body.title,
-        description: body.description || '',
-        youtubeId: youtubeId,
-        category: body.category,
-        duration: body.duration || '',
-        isActive: body.isActive ?? true,
+    let newVideo
+    try {
+      newVideo = await prisma.video.create({
+        data: {
+          title: body.title,
+          description: body.description || '',
+          youtubeId: youtubeId,
+          category: body.category,
+          duration: body.duration || '',
+          isActive: body.isActive ?? true,
+        }
+      })
+    } catch (error: any) {
+      if (error?.code === 'P2022' && String(error?.meta?.column || '').includes('videos.order')) {
+        const rows = await prisma.$queryRaw<Array<{
+          id: number
+          title: string
+          description: string
+          youtubeId: string
+          category: string
+          duration: string | null
+          isActive: boolean
+        }>>`
+          INSERT INTO videos (title, description, "youtubeId", category, duration, "isActive", "createdAt", "updatedAt")
+          VALUES (${body.title}, ${body.description || ''}, ${youtubeId}, ${body.category}, ${body.duration || ''}, ${body.isActive ?? true}, NOW(), NOW())
+          RETURNING id, title, description, "youtubeId", category, duration, "isActive"
+        `
+        if (!rows.length) {
+          throw new Error('Failed to create video')
+        }
+        newVideo = rows[0]
+      } else {
+        throw error
       }
-    })
+    }
 
     // Transform the response to match the expected format
     const transformedVideo = {

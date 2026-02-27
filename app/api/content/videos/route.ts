@@ -3,10 +3,22 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
-    const videos = await prisma.video.findMany({
-      where: { isActive: true },
-      orderBy: { order: 'asc' }
-    })
+    let videos
+    try {
+      videos = await prisma.video.findMany({
+        where: { isActive: true },
+        orderBy: { order: 'asc' }
+      })
+    } catch (error: any) {
+      if (error?.code === 'P2022' && String(error?.meta?.column || '').includes('videos.order')) {
+        videos = await prisma.video.findMany({
+          where: { isActive: true },
+          orderBy: { createdAt: 'desc' }
+        })
+      } else {
+        throw error
+      }
+    }
 
     return NextResponse.json(videos)
   } catch (error) {

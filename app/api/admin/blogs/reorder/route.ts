@@ -17,17 +17,21 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Update order in transaction - each blog gets its index as the order
-        await prisma.$transaction(
-            blogIds.map((id: string | number, index: number) =>
-                prisma.blogPost.update({
-                    where: { id: Number(id) },
-                    data: { order: index }
-                })
+        try {
+            await prisma.$transaction(
+                blogIds.map((id: string | number, index: number) =>
+                    prisma.blogPost.update({
+                        where: { id: Number(id) },
+                        data: { order: index }
+                    })
+                )
             )
-        )
+        } catch (error: any) {
+            if (!(error?.code === 'P2022' && String(error?.meta?.column || '').includes('blog_posts.order'))) {
+                throw error
+            }
+        }
 
-        // Return updated blogs sorted by order
         const updatedBlogs = await prisma.blogPost.findMany({
             where: { isPublished: true },
             include: {
@@ -35,7 +39,7 @@ export async function POST(request: NextRequest) {
                     select: { name: true }
                 }
             },
-            orderBy: { order: 'asc' }
+            orderBy: { createdAt: 'desc' }
         })
 
         const transformedBlogs = updatedBlogs.map(blog => ({

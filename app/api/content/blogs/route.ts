@@ -5,17 +5,36 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    const blogPosts = await prisma.blogPost.findMany({
-      where: { isPublished: true },
-      include: {
-        author: {
-          select: {
-            name: true
+    let blogPosts
+    try {
+      blogPosts = await prisma.blogPost.findMany({
+        where: { isPublished: true },
+        include: {
+          author: {
+            select: {
+              name: true
+            }
           }
-        }
-      },
-      orderBy: { order: 'asc' }
-    })
+        },
+        orderBy: { order: 'asc' }
+      })
+    } catch (error: any) {
+      if (error?.code === 'P2022' && String(error?.meta?.column || '').includes('blog_posts.order')) {
+        blogPosts = await prisma.blogPost.findMany({
+          where: { isPublished: true },
+          include: {
+            author: {
+              select: {
+                name: true
+              }
+            }
+          },
+          orderBy: { createdAt: 'desc' }
+        })
+      } else {
+        throw error
+      }
+    }
 
     // Transform the data to return author name as string instead of object
     const transformedBlogs = blogPosts.map(blog => ({
