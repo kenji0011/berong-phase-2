@@ -11,25 +11,30 @@ type CarouselImage = {
 };
 
 async function getCarouselImages(): Promise<CarouselImage[]> {
-  // Fetch data from the database using Prisma
-  const dbImages = await prisma.carouselImage.findMany({
-    where: {
-      isActive: true,
-    },
-    orderBy: {
-      order: 'asc',
-    },
-  });
+  try {
+    // Fetch data from the database using Prisma
+    const dbImages = await prisma.carouselImage.findMany({
+      where: {
+        isActive: true,
+      },
+      orderBy: {
+        order: 'asc',
+      },
+    });
 
-  // Map the database result to the CarouselImage type
-  return dbImages.map((img) => ({
-    id: img.id,
-    title: img.title,
-    altText: img.altText,
-    imageUrl: img.imageUrl,
-    order: img.order,
-    isActive: img.isActive,
-  }));
+    // Map the database result to the CarouselImage type
+    return dbImages.map((img) => ({
+      id: img.id,
+      title: img.title,
+      altText: img.altText,
+      imageUrl: img.imageUrl,
+      order: img.order,
+      isActive: img.isActive,
+    }));
+  } catch (error) {
+    console.error("Failed to fetch carousel images:", error);
+    return [];
+  }
 }
 
 export async function HeroCarousel() {

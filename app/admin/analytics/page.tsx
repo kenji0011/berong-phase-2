@@ -169,39 +169,50 @@ export default function AnalyticsDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={() => router.push("/admin")}>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        {/* Header */}
+        <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 pt-4 pb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-3">
+              <Button variant="ghost" size="icon" onClick={() => router.push("/admin")} className="mt-1 sm:mt-0 flex-shrink-0">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
-              <div>
-                <h1 className="text-2xl font-bold flex items-center gap-2">
-                  <BarChart3 className="h-6 w-6 text-orange-500" />
-                  Community Analytics Dashboard
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2 flex-wrap">
+                  <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-orange-500 flex-shrink-0" />
+                  <span>Community Analytics Dashboard</span>
                 </h1>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground truncate sm:whitespace-normal">
                   Fire Safety Risk Assessment Data - Santa Cruz, Laguna
                 </p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 ml-10 sm:ml-0">
               <Button
                 variant="outline"
+                size="sm"
+                className="flex-1 sm:flex-none"
                 onClick={() => fetchAllData(true)}
                 disabled={refreshing}
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
                 Refresh
               </Button>
-              <Button onClick={handleExport}>
+              <Button size="sm" onClick={handleExport} className="flex-1 sm:flex-none">
                 <Download className="h-4 w-4 mr-2" />
                 Export CSV
               </Button>
             </div>
           </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 pb-3">
+          <TabsList className="flex overflow-x-auto overflow-y-hidden justify-start sm:justify-center w-full max-w-full bg-slate-100 p-1">
+            <TabsTrigger value="overview" className="whitespace-nowrap">Overview</TabsTrigger>
+            <TabsTrigger value="barangay" className="whitespace-nowrap">By Barangay</TabsTrigger>
+            <TabsTrigger value="demographics" className="whitespace-nowrap">Demographics</TabsTrigger>
+            <TabsTrigger value="knowledge" className="whitespace-nowrap">Knowledge Gaps</TabsTrigger>
+          </TabsList>
         </div>
       </div>
 
@@ -213,15 +224,7 @@ export default function AnalyticsDashboard() {
           </Alert>
         )}
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="barangay">By Barangay</TabsTrigger>
-            <TabsTrigger value="demographics">Demographics</TabsTrigger>
-            <TabsTrigger value="knowledge">Knowledge Gaps</TabsTrigger>
-          </TabsList>
-
-          {/* Overview Tab */}
+        {/* Overview Tab */}
           <TabsContent value="overview">
             {summary && (
               <div className="space-y-6">
@@ -391,7 +394,7 @@ export default function AnalyticsDashboard() {
           {/* Barangay Tab */}
           <TabsContent value="barangay">
             <div className="space-y-6">
-              <Card>
+              <Card className="w-full overflow-hidden">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <MapPin className="h-5 w-5 text-orange-500" />
@@ -424,23 +427,23 @@ export default function AnalyticsDashboard() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="w-full overflow-hidden">
                 <CardHeader>
                   <CardTitle>Pre-Test vs Post-Test Scores by Barangay</CardTitle>
                   <CardDescription>
                     Average assessment scores comparison
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                <CardContent className="px-0 sm:px-6">
+                  <div className="overflow-x-auto w-full px-4 sm:px-0 pb-4">
+                    <table className="w-full text-sm min-w-[550px]">
                       <thead>
                         <tr className="border-b">
-                          <th className="text-left py-2 px-2">Barangay</th>
-                          <th className="text-center py-2 px-2">Users</th>
-                          <th className="text-center py-2 px-2">Avg Pre-Test</th>
-                          <th className="text-center py-2 px-2">Avg Post-Test</th>
-                          <th className="text-center py-2 px-2">Improvement</th>
+                          <th className="whitespace-nowrap text-left py-2 px-2">Barangay</th>
+                          <th className="whitespace-nowrap text-center py-2 px-2">Users</th>
+                          <th className="whitespace-nowrap text-center py-2 px-2">Avg Pre-Test</th>
+                          <th className="whitespace-nowrap text-center py-2 px-2">Avg Post-Test</th>
+                          <th className="whitespace-nowrap text-center py-2 px-2">Improvement</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -667,8 +670,8 @@ export default function AnalyticsDashboard() {
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
       </div>
+      </Tabs>
     </div>
   )
 }

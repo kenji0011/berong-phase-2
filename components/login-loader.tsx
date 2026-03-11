@@ -52,7 +52,7 @@ export function LoginLoader() {
                                     src="/berong-official-logo.jpg"
                                     alt="Berong - Signing In"
                                     fill
-                                    className="object-cover"
+                                    className="object-contain"
                                     priority
                                 />
                             </div>
