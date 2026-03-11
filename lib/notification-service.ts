@@ -1,11 +1,10 @@
 import { prisma } from './prisma';
-import type { UserRole, ContentCategory } from '@prisma/client';
 
 interface CreateNotificationData {
   title: string;
   message: string;
   type: string;
-  category: ContentCategory;
+  category: string;
   userIds?: number[]; // Optional: if specific users, otherwise will be sent to all users with matching permissions
   resourceId?: number; // Kept for API compatibility but not stored (column doesn't exist in production DB)
 }

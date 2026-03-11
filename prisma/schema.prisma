@@ -12,38 +12,41 @@ model User {
   email         String?        @unique
   password      String
   name          String
-  firstName     String   @default("")
-  lastName      String   @default("")
-  middleName    String?
+  firstName     String   @default("") @map("first_name")
+  lastName      String   @default("") @map("last_name")
+  middleName    String?  @map("middle_name")
   age           Int?
-  role          UserRole       @default(guest)
-  isActive      Boolean        @default(true)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  role          String         @default("guest")
+  isActive      Boolean        @default(true) @map("is_active")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
   
   // Enhanced Profile Fields (Analytics Module)
   barangay              String?
   school                String?
-  schoolOther           String?  // For "Other (specify)" option
+  schoolOther           String?  @map("school_other") // For "Other (specify)" option
   occupation            String?
-  occupationOther       String?  // For "Other (specify)" option
+  occupationOther       String?  @map("occupation_other") // For "Other (specify)" option
   gender                String?
-  gradeLevel            String?  // For kids/students
+  gradeLevel            String?  @map("grade_level") // For kids/students
   
   // Assessment Scores
-  preTestScore          Int?
-  postTestScore         Int?
-  preTestCompletedAt    DateTime?
-  postTestCompletedAt   DateTime?
+  preTestScore          Int?     @map("pre_test_score")
+  postTestScore         Int?     @map("post_test_score")
+  preTestCompletedAt    DateTime? @map("pre_test_completed_at")
+  postTestCompletedAt   DateTime? @map("post_test_completed_at")
   
   // Engagement Tracking
-  engagementPoints      Int      @default(0)
-  totalTimeSpentMinutes Int      @default(0)
-  lastActiveAt          DateTime @default(now())
+  engagementPoints      Int      @default(0) @map("engagement_points")
+  totalTimeSpentMinutes Int      @default(0) @map("total_time_spent_minutes")
+  lastActiveAt          DateTime @default(now()) @map("last_active_at")
   
   // Data Privacy & Profile Status
-  dataPrivacyConsent    Boolean  @default(false)
-  profileCompleted      Boolean  @default(false)
+  dataPrivacyConsent    Boolean  @default(false) @map("data_privacy_consent")
+  profileCompleted      Boolean  @default(false) @map("profile_completed")
+
+  // Laravel token field
+  rememberToken         String?  @map("remember_token")
   
   blogPosts             BlogPost[]
   progress              UserProgress[]
@@ -60,13 +63,13 @@ model User {
 
 model QuickQuestion {
   id           Int                   @id @default(autoincrement())
-  category     QuickQuestionCategory
-  questionText String
-  responseText String
+  category     String
+  questionText String                @map("question_text")
+  responseText String                @map("response_text")
   order        Int                   @default(0)
-  isActive     Boolean               @default(true)
-  createdAt    DateTime              @default(now())
-  updatedAt    DateTime              @updatedAt
+  isActive     Boolean               @default(true) @map("is_active")
+  createdAt    DateTime              @default(now()) @map("created_at")
+  updatedAt    DateTime              @updatedAt @map("updated_at")
 
   @@map("quick_questions")
 }
@@ -76,12 +79,12 @@ model BlogPost {
   title       String
   excerpt     String
   content     String
-  imageUrl    String?
-  category    ContentCategory
-  authorId    Int
-  isPublished Boolean         @default(true)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  imageUrl    String?         @map("image_url")
+  category    String
+  authorId    Int             @map("author_id")
+  isPublished Boolean         @default(true) @map("is_published")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
   author      User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   @@index([category])
@@ -93,12 +96,12 @@ model Video {
   id          Int             @id @default(autoincrement())
   title       String
   description String?
-  youtubeId   String
-  category    ContentCategory
+  youtubeId   String          @map("youtube_id")
+  category    String
   duration    String?
-  isActive    Boolean         @default(true)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  isActive    Boolean         @default(true) @map("is_active")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
 
   @@map("videos")
 }
@@ -107,11 +110,11 @@ model KidsModule {
   id          Int            @id @default(autoincrement())
   title       String
   description String?
-  dayNumber   Int            @unique
+  dayNumber   Int            @unique @map("day_number")
   content     String
-  isActive    Boolean        @default(true)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  isActive    Boolean        @default(true) @map("is_active")
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
   progress    UserProgress[]
 
   @@map("kids_modules")
@@ -119,13 +122,13 @@ model KidsModule {
 
 model UserProgress {
   id          Int        @id @default(autoincrement())
-  userId      Int
-  moduleId    Int
+  userId      Int        @map("user_id")
+  moduleId    Int        @map("module_id")
   completed   Boolean    @default(false)
   score       Int        @default(0)
-  completedAt DateTime?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  completedAt DateTime?  @map("completed_at")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
   module      KidsModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -135,87 +138,75 @@ model UserProgress {
 
 model QuizResult {
   id          Int      @id @default(autoincrement())
-  userId      Int
-  quizType    String
+  userId      Int      @map("user_id")
+  quizType    String   @map("quiz_type")
   score       Int      @default(0)
-  maxScore    Int      @default(0)
-  completedAt DateTime @default(now())
+  maxScore    Int      @default(0) @map("max_score")
+  completedAt DateTime @default(now()) @map("completed_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("quiz_results")
 }
 
-enum UserRole {
-  guest
-  kid
-  adult
-  professional
-  admin
-}
-
-enum ContentCategory {
-  kids
-  adult
-  professional
-}
-
-enum QuickQuestionCategory {
-  emergency
-  prevention
-  equipment
-  general
-}
+// Enum values stored as varchar strings in the database (Laravel convention)
+// UserRole: "guest", "kid", "adult", "professional", "admin"
+// ContentCategory: "kids", "adult", "professional"
+// QuickQuestionCategory: "emergency", "prevention", "equipment", "general"
 
 model Notification {
   id          Int      @id @default(autoincrement())
-  userId      Int      // User who receives the notification
+  userId      Int      @map("user_id") // User who receives the notification
   title       String
   message     String
   type        String   // 'blog', 'video', 'system', etc.
   category    String   // 'adult', 'professional', 'kids'
-  isRead      Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  isRead      Boolean  @default(false) @map("is_read")
+  createdAt   DateTime @default(now()) @map("created_at")
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("notifications")
+  @@map("notifications_custom")
 }
 
 model FireCodeSection {
   id            Int     @id @default(autoincrement())
   title         String
-  sectionNum    String
+  sectionNum    String  @map("section_num")
   content       String
-  parentSectionId Int?
+  parentSectionId Int?  @map("parent_section_id")
   order         Int
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
   parentSection FireCodeSection? @relation(fields: [parentSectionId], references: [id], onDelete: Cascade, name: "ParentSubSection")
   subSections   FireCodeSection[] @relation(name: "ParentSubSection")
+
+  @@map("fire_code_sections")
 }
 
 model CarouselImage {
   id        Int      @id @default(autoincrement())
   title     String
-  altText   String?
-  imageUrl  String
+  altText   String?  @map("alt_text")
+  imageUrl  String   @map("image_url")
   order     Int      @default(0)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("carousel_images")
 }
 
 model SafeScapeProgress {
   id          Int       @id @default(autoincrement())
-  userId      Int
-  moduleNum   Int       // 1-5 for the 5 SafeScape modules
-  sectionData String    // JSON string storing section completion status
+  userId      Int       @map("user_id")
+  moduleNum   Int       @map("module_num") // 1-5 for the 5 SafeScape modules
+  sectionData String    @map("section_data") // JSON string storing section completion status
   completed   Boolean   @default(false)
-  completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  completedAt DateTime? @map("completed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, moduleNum])
@@ -230,16 +221,16 @@ model AssessmentQuestion {
   id              Int            @id @default(autoincrement())
   question        String
   options         Json           // Array of 4 options: string[]
-  correctAnswer   Int            // Index of correct answer (0-3)
+  correctAnswer   Int            @map("correct_answer") // Index of correct answer (0-3)
   explanation     String
   category        String         // From ASSESSMENT_CATEGORIES
   difficulty      String         @default("Medium") // Easy, Medium, Hard
-  isActive        Boolean        @default(true)
-  forRoles        Json           // ["kid", "adult", "professional"] - Using Json for SQLite compatibility
+  isActive        Boolean        @default(true) @map("is_active")
+  forRoles        Json           @map("for_roles") // ["kid", "adult", "professional"]
   type            String         @default("preTest") // "preTest", "postTest", "quiz"
   order           Int            @default(0)
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
   userAnswers     UserAnswer[]
 
   @@map("assessment_questions")
@@ -247,12 +238,14 @@ model AssessmentQuestion {
 
 model UserAnswer {
   id             Int                 @id @default(autoincrement())
-  userId         Int
-  questionId     Int
-  selectedAnswer Int                 // Index of selected answer (0-3)
-  isCorrect      Boolean
-  testType       String              // "preTest" or "postTest"
-  answeredAt     DateTime            @default(now())
+  userId         Int                 @map("user_id")
+  questionId     Int                 @map("question_id")
+  selectedAnswer Int                 @map("selected_answer") // Index of selected answer (0-3)
+  isCorrect      Boolean             @map("is_correct")
+  testType       String              @map("test_type") // "preTest" or "postTest"
+  answeredAt     DateTime            @default(now()) @map("answered_at")
+  createdAt      DateTime            @default(now()) @map("created_at")
+  updatedAt      DateTime            @updatedAt @map("updated_at")
   user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   question       AssessmentQuestion  @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
@@ -263,11 +256,13 @@ model UserAnswer {
 
 model EngagementLog {
   id          Int      @id @default(autoincrement())
-  userId      Int
-  eventType   String   // "quiz", "game", "video", "module", "login", "preTest", "postTest"
-  eventData   Json?    // Additional data: { quizType, score, duration, etc }
+  userId      Int      @map("user_id")
+  eventType   String   @map("event_type") // "quiz", "game", "video", "module", "login", "preTest", "postTest"
+  eventData   Json?    @map("event_data") // Additional data: { quizType, score, duration, etc }
   points      Int      @default(0)
-  loggedAt    DateTime @default(now())
+  loggedAt    DateTime @default(now()) @map("logged_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, loggedAt])
@@ -276,11 +271,11 @@ model EngagementLog {
 
 model AnalyticsCache {
   id          Int      @id @default(autoincrement())
-  cacheKey    String   @unique
-  cacheData   Json
-  expiresAt   DateTime
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  cacheKey    String   @unique @map("cache_key")
+  cacheData   Json     @map("cache_data")
+  expiresAt   DateTime @map("expires_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@index([cacheKey, expiresAt])
   @@map("analytics_cache")
@@ -291,33 +286,33 @@ model FloorPlan {
   id              Int         @id @default(autoincrement())
   name            String
   description     String?
-  gridData        Json        // The 256x256 grid as JSON array
+  gridData        Json        @map("grid_data") // The 256x256 grid as JSON array
   thumbnail       String?     // Base64 thumbnail image
-  originalImage   String?     // Base64 original floor plan image
+  originalImage   String?     @map("original_image") // Base64 original floor plan image
   
   // Ownership & Visibility
-  userId          Int
-  uploaderName    String      // Denormalized for display
-  isPublic        Boolean     @default(false)
+  userId          Int         @map("user_id")
+  uploaderName    String      @map("uploader_name") // Denormalized for display
+  isPublic        Boolean     @default(false) @map("is_public")
   
   // Clone tracking (like git)
-  clonedFromId    Int?        // ID of parent floor plan if cloned
+  clonedFromId    Int?        @map("cloned_from_id") // ID of parent floor plan if cloned
   clonedFrom      FloorPlan?  @relation("FloorPlanClones", fields: [clonedFromId], references: [id])
   clones          FloorPlan[] @relation("FloorPlanClones")
   
   // Metadata
-  gridWidth       Int         @default(256)
-  gridHeight      Int         @default(256)
-  exitCount       Int         @default(0)
+  gridWidth       Int         @default(256) @map("grid_width")
+  gridHeight      Int         @default(256) @map("grid_height")
+  exitCount       Int         @default(0) @map("exit_count")
   
   // Processing info
-  processingMethod String     @default("unet") // "unet", "gemini", "manual"
+  processingMethod String     @default("unet") @map("processing_method") // "unet", "gemini", "manual"
   threshold        Float?     // U-Net threshold used
-  invertMask       Boolean?   // Whether mask was inverted
+  invertMask       Boolean?   @map("invert_mask") // Whether mask was inverted
   
   // Timestamps
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
   
   // Relations
   user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -334,11 +329,11 @@ model SimulationJob {
   status        String   @default("queued")  // queued, processing, complete, failed
   result        Json?
   error         String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
   
   // Link to user who started the simulation (optional)
-  userId        Int?
+  userId        Int?     @map("user_id")
   user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   
   // Store configuration for debugging
