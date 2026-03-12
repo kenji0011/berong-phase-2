@@ -567,7 +567,7 @@ export function FabricFloorPlanBuilder({ onExport, processing = false }: FabricF
     return (
         <Card>
             <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <CardTitle className="flex items-center gap-2">
                             <Grid3X3 className="h-5 w-5" />
@@ -577,7 +577,7 @@ export function FabricFloorPlanBuilder({ onExport, processing = false }: FabricF
                             Click to place walls and doors. Drag to move. Delete with trash icon.
                         </CardDescription>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                         <Badge variant="secondary">{objectCount.walls} Walls</Badge>
                         <Badge variant="secondary">{objectCount.doors} Doors</Badge>
                         <Badge variant="secondary">{objectCount.windows} Windows</Badge>
@@ -586,9 +586,9 @@ export function FabricFloorPlanBuilder({ onExport, processing = false }: FabricF
             </CardHeader>
             <CardContent className="space-y-4">
                 {/* Toolbar */}
-                <div className="flex flex-wrap items-center gap-2 p-2 bg-muted rounded-lg">
+                <div className="flex flex-wrap items-center gap-y-3 gap-x-2 p-3 bg-muted rounded-lg">
                     {/* Tool buttons */}
-                    <div className="flex gap-1 border-r pr-2 mr-2">
+                    <div className="flex flex-wrap gap-1 border-r border-gray-300 pr-2 pb-1 sm:pb-0">
                         {tools.map(tool => (
                             <Button
                                 key={tool.id}
@@ -596,67 +596,73 @@ export function FabricFloorPlanBuilder({ onExport, processing = false }: FabricF
                                 size="sm"
                                 onClick={() => setActiveTool(tool.id)}
                                 title={tool.label}
+                                className="px-2 sm:px-3 h-8"
                             >
                                 <tool.icon className="h-4 w-4" />
-                                <span className="ml-1 hidden sm:inline">{tool.label}</span>
+                                <span className="ml-1 hidden sm:inline text-xs">{tool.label}</span>
                             </Button>
                         ))}
                     </div>
 
                     {/* Wall thickness slider */}
                     {activeTool === "wall" && (
-                        <div className="flex items-center gap-2 border-r pr-2 mr-2">
-                            <span className="text-xs text-muted-foreground">Thickness:</span>
+                        <div className="flex items-center gap-2 border-r border-gray-300 pr-2">
+                            <span className="text-xs text-muted-foreground hidden sm:inline">Thickness:</span>
+                            <span className="text-xs text-muted-foreground sm:hidden">Thick:</span>
                             <Slider
                                 value={[wallThickness]}
                                 onValueChange={([v]) => setWallThickness(v)}
                                 min={4}
                                 max={24}
                                 step={2}
-                                className="w-20"
+                                className="w-16 sm:w-20"
                             />
                             <span className="text-xs w-6">{wallThickness}px</span>
                         </div>
                     )}
 
-                    {/* Grid toggle */}
-                    <Button
-                        variant={showGrid ? "secondary" : "ghost"}
-                        size="sm"
-                        onClick={() => setShowGrid(!showGrid)}
-                        title="Toggle Grid"
-                    >
-                        <Grid3X3 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex flex-nowrap items-center gap-1">
+                        {/* Grid toggle */}
+                        <Button
+                            variant={showGrid ? "secondary" : "ghost"}
+                            size="sm"
+                            className="h-8 px-2"
+                            onClick={() => setShowGrid(!showGrid)}
+                            title="Toggle Grid"
+                        >
+                            <Grid3X3 className="h-4 w-4" />
+                        </Button>
 
-                    {/* Delete & Clear */}
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={deleteSelected}
-                        title="Delete Selected"
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={clearAll}
-                        title="Clear All"
-                    >
-                        <RotateCcw className="h-4 w-4" />
-                    </Button>
+                        {/* Delete & Clear */}
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2"
+                            onClick={deleteSelected}
+                            title="Delete Selected"
+                        >
+                            <Trash2 className="h-4 w-4 text-red-500 hover:text-red-700" />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2 border-r border-gray-300 rounded-none rounded-r-md mr-1 pr-3"
+                            onClick={clearAll}
+                            title="Clear All"
+                        >
+                            <RotateCcw className="h-4 w-4" />
+                        </Button>
 
-                    {/* Save/Load separator and buttons */}
-                    <div className="border-l pl-2 ml-2 flex gap-1">
+                        {/* Save/Load buttons */}
                         <Button
                             variant={showSaveLoad ? "secondary" : "ghost"}
                             size="sm"
+                            className="h-8 px-2"
                             onClick={() => setShowSaveLoad(!showSaveLoad)}
                             title="Save/Load Plans"
                         >
                             <FolderOpen className="h-4 w-4" />
-                            <span className="ml-1 hidden sm:inline">Plans</span>
+                            <span className="ml-1 hidden sm:inline text-xs">Plans</span>
                         </Button>
                     </div>
                 </div>
@@ -715,12 +721,12 @@ export function FabricFloorPlanBuilder({ onExport, processing = false }: FabricF
                 )}
 
                 {/* Canvas Container */}
-                <div className="flex justify-center">
+                <div className="flex justify-center w-full overflow-hidden">
                     <div
-                        className="border rounded-lg overflow-hidden shadow-sm"
-                        style={{ width: CANVAS_SIZE, height: CANVAS_SIZE }}
+                        className="border border-gray-300 rounded-lg overflow-hidden shadow-inner bg-white touch-none"
+                        style={{ width: CANVAS_SIZE, height: CANVAS_SIZE, maxWidth: '100%', aspectRatio: '1/1' }}
                     >
-                        <canvas ref={canvasRef} />
+                        <canvas ref={canvasRef} className="max-w-full h-auto" />
                     </div>
                 </div>
 

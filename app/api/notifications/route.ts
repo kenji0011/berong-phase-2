@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { NotificationService } from '@/lib/notification-service';
 import { prisma } from '@/lib/prisma';
-import { ContentCategory } from '@prisma/client';
+
 import { requireAuth } from '@/lib/auth-guard';
 
 export async function GET(request: Request) {
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
       title,
       message,
       type,
-      category: category as ContentCategory,
+      category: category,
       userIds
     });
 

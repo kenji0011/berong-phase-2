@@ -119,7 +119,7 @@ export function Navigation() {
 
               {/* Icon Buttons with hover animations */}
               {isAuthenticated ? (
-                <div className="flex gap-2">
+                <div className="flex gap-1 sm:gap-2">
                   <div className="relative group">
                     {/* <Link href="/about">
                       <Button
@@ -192,14 +192,14 @@ export function Navigation() {
                 </div>
               )}
 
-              {/* Mobile Menu Button - More prominent */}
+              {/* Mobile Menu Button - Solid background for visibility */}
               <Button
                 variant="outline"
                 size="icon"
-                className="lg:hidden text-white border-white/50 hover:bg-white hover:text-red-700 h-10 w-10"
+                className="lg:hidden bg-white text-red-700 border-white hover:bg-yellow-400 hover:text-red-800 hover:border-yellow-400 h-9 w-9 sm:h-10 sm:w-10 shadow-md"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
-                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </Button>
             </div>
           </div>

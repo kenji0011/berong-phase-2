@@ -194,6 +194,8 @@ export function RegistrationWizard() {
         } else if (!/^[a-zA-Z0-9_]+$/.test(data.username)) {
           errors.username = "Username can only contain letters, numbers, and underscores"
         }
+        if (!data.email.trim()) errors.email = "Email is required"
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errors.email = "Please enter a valid email address"
         if (!data.password) errors.password = "Password is required"
         else if (data.password.length < 8) errors.password = "Password must be at least 8 characters"
         if (data.password !== data.confirmPassword) errors.confirmPassword = "Passwords do not match"
@@ -668,11 +670,11 @@ export function RegistrationWizard() {
             </div>
 
             <div>
-              <Label htmlFor="email">Email (Optional)</Label>
+              <Label htmlFor="email">Email *</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="Enter your email (optional)"
+                placeholder="Enter your email"
                 value={data.email}
                 onChange={(e) => updateField("email", e.target.value)}
                 className={validationErrors.email ? "border-red-500" : ""}

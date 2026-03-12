@@ -60,8 +60,9 @@ Always format your responses using markdown for better readability:
             { status: 200, headers: { 'Content-Type': 'application/json' } }
         );
 
-    } catch (error) {
-        console.error('[Chatbot API] Error:', error);
+    } catch (error: any) {
+        console.error('[Chatbot API] Error:', error?.message || error);
+        console.error('[Chatbot API] Full error:', JSON.stringify(error, null, 2));
 
         return new Response(
             JSON.stringify({

@@ -270,7 +270,7 @@ export function Chatbot() {
                 initial={{ opacity: 0, scale: 0.5, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ delay: 1.5, type: "spring", stiffness: 200 }}
-                className="absolute bottom-full mb-3 right-0 bg-white text-gray-900 text-xs md:text-sm font-bold px-4 py-2 rounded-2xl rounded-br-none shadow-xl border border-gray-100 whitespace-nowrap z-50 pointer-events-none"
+                className="absolute bottom-full mb-3 right-0 bg-white text-gray-900 text-[10px] sm:text-xs md:text-sm font-bold px-3 py-1.5 sm:px-4 sm:py-2 rounded-2xl rounded-br-none shadow-xl border border-gray-100 whitespace-nowrap z-50 pointer-events-none"
               >
                 Let&apos;s learn about fire safety! 🚒
                 <div className="absolute -bottom-1.5 right-6 w-3 h-3 bg-white border-b border-r border-gray-100 transform rotate-45"></div>
@@ -281,7 +281,7 @@ export function Chatbot() {
                 alt="Berong - BFP Assistant"
                 width={180}
                 height={180}
-                className="chatbot-berong-image drop-shadow-2xl select-none w-32 md:w-36 lg:w-40 h-auto transition-all duration-300"
+                className="chatbot-berong-image drop-shadow-2xl select-none w-20 sm:w-28 md:w-36 lg:w-40 h-auto transition-all duration-300"
                 draggable={false}
                 priority
               />
@@ -318,10 +318,10 @@ export function Chatbot() {
               damping: 30,
               mass: 0.8
             }}
-            className="chatbot-window-container fixed bottom-24 right-6 z-50"
+            className="chatbot-window-container fixed bottom-20 sm:bottom-24 right-3 sm:right-6 z-50"
             style={{ transformOrigin: 'bottom right' }}
           >
-            <Card className="chatbot-window w-[480px] max-w-[90vw] h-[70vh] min-h-[450px] max-h-[620px] flex flex-col shadow-2xl border-secondary p-0 gap-0 overflow-hidden">
+            <Card className="chatbot-window w-[480px] max-w-[92vw] h-[65vh] sm:h-[70vh] min-h-[400px] max-h-[620px] flex flex-col shadow-2xl border-secondary p-0 gap-0 overflow-hidden">
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
                 <div className="flex items-center gap-2">

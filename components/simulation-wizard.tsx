@@ -437,18 +437,18 @@ export function SimulationWizard() {
           </CardHeader>
           <CardContent>
             <Tabs value={inputMode} onValueChange={(v) => setInputMode(v as 'upload' | 'plans' | 'draw')}>
-              <TabsList className="grid w-full grid-cols-3 mb-4">
-                <TabsTrigger value="upload" className="flex items-center gap-2">
+              <TabsList className="flex flex-col sm:grid sm:grid-cols-3 w-full h-auto gap-2 mb-6 p-1 bg-transparent sm:bg-muted">
+                <TabsTrigger value="upload" className="w-full flex items-center justify-center gap-2 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm border sm:border-none">
                   <Upload className="h-4 w-4" />
-                  Upload Image
+                  <span className="text-sm">Upload Image</span>
                 </TabsTrigger>
-                <TabsTrigger value="plans" className="flex items-center gap-2">
+                <TabsTrigger value="plans" className="w-full flex items-center justify-center gap-2 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm border sm:border-none">
                   <FolderOpen className="h-4 w-4" />
-                  Sample Plans
+                  <span className="text-sm">Sample Plans</span>
                 </TabsTrigger>
-                <TabsTrigger value="draw" className="flex items-center gap-2">
+                <TabsTrigger value="draw" className="w-full flex items-center justify-center gap-2 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm border sm:border-none">
                   <Pencil className="h-4 w-4" />
-                  Draw Floor Plan
+                  <span className="text-sm">Draw Floor Plan</span>
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="upload" className="mt-0">

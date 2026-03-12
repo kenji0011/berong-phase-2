@@ -1,4 +1,4 @@
-import { UserRole } from '@prisma/client';
+// UserRole values: "guest", "kid", "adult", "professional", "admin"
 import { prisma } from './prisma';
 import bcrypt from 'bcryptjs';
 
@@ -59,7 +59,7 @@ export async function registerUser(
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Determine role based on age
-    const role = age < 18 ? UserRole.kid : UserRole.adult;
+    const role = age < 18 ? 'kid' : 'adult';
 
     // Combine name for backward compatibility
     const middleInitial = enhancedFields?.middleName ? ` ${enhancedFields.middleName.charAt(0)}.` : '';
@@ -192,30 +192,30 @@ export async function loginUser(identifier: string, password: string) {
 }
 
 // Determine permissions based on role
-function determinePermissions(role: UserRole) {
+function determinePermissions(role: string) {
   switch (role) {
-    case UserRole.admin:
+    case 'admin':
       return {
         accessKids: true,
         accessAdult: true,
         accessProfessional: true,
         isAdmin: true,
       };
-    case UserRole.professional:
+    case 'professional':
       return {
         accessKids: true,
         accessAdult: true,
         accessProfessional: true,
         isAdmin: false,
       };
-    case UserRole.adult:
+    case 'adult':
       return {
         accessKids: false,
         accessAdult: true,
         accessProfessional: false,
         isAdmin: false,
       };
-    case UserRole.kid:
+    case 'kid':
       return {
         accessKids: true,
         accessAdult: false,
